@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Бронирование коттеджа</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🏡 Уютный коттедж</h1>
+            <p class="subtitle">Ваш идеальный отдых</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab active" data-tab="home">🏠 Главная</button>
+            <button class="tab" data-tab="booking">📅 Бронирование</button>
+            <button class="tab" data-tab="reviews">⭐ Отзывы</button>
+            <button class="tab" data-tab="my-bookings">📋 Мои бронирования</button>
+        </nav>
+
+        <!-- Home Tab -->
+        <div class="tab-content active" id="home">
+            <div class="cottage-info">
+                <div class="info-card">
+                    <h2>О доме</h2>
+                    <div id="cottage-details">
+                        <p>Загрузка информации...</p>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h2>Удобства</h2>
+                    <div id="amenities-list"></div>
+                </div>
+
+                <div class="info-card">
+                    <h2>Галерея</h2>
+                    <div class="gallery">
+                        <div class="gallery-item">🖼️ Фото 1</div>
+                        <div class="gallery-item">🖼️ Фото 2</div>
+                        <div class="gallery-item">🖼️ Фото 3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Tab -->
+        <div class="tab-content" id="booking">
+            <div class="booking-form">
+                <h2>Забронировать дом</h2>
+                
+                <div class="form-group">
+                    <label>Дата заезда</label>
+                    <input type="date" id="check-in" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Дата выезда</label>
+                    <input type="date" id="check-out" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Количество гостей</label>
+                    <input type="number" id="guests" min="1" max="10" value="2" required>
+                </div>
+                
+                <div class="availability-calendar">
+                    <h3>Календарь доступности</h3>
+                    <div id="calendar"></div>
+                </div>
+                
+                <button class="btn btn-primary" id="submit-booking">Забронировать</button>
+                <div id="booking-message"></div>
+            </div>
+        </div>
+
+        <!-- Reviews Tab -->
+        <div class="tab-content" id="reviews">
+            <div class="reviews-section">
+                <div class="reviews-stats" id="reviews-stats">
+                    <h2>Отзывы</h2>
+                    <div class="stats-content">Загрузка...</div>
+                </div>
+                
+                <div class="add-review">
+                    <h3>Оставить отзыв</h3>
+                    <div class="rating-input">
+                        <label>Оценка:</label>
+                        <div class="stars">
+                            <span class="star" data-rating="1">⭐</span>
+                            <span class="star" data-rating="2">⭐</span>
+                            <span class="star" data-rating="3">⭐</span>
+                            <span class="star" data-rating="4">⭐</span>
+                            <span class="star" data-rating="5">⭐</span>
+                        </div>
+                        <span id="selected-rating">0</span>
+                    </div>
+                    <textarea id="review-comment" placeholder="Ваш отзыв (необязательно)"></textarea>
+                    <button class="btn btn-primary" id="submit-review">Отправить отзыв</button>
+                </div>
+                
+                <div class="reviews-list" id="reviews-list">
+                    <p>Загрузка отзывов...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- My Bookings Tab -->
+        <div class="tab-content" id="my-bookings">
+            <div class="my-bookings-section">
+                <h2>Мои бронирования</h2>
+                <div id="my-bookings-list">
+                    <p>Загрузка...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
