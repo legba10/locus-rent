@@ -2,8 +2,6 @@
 
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-
-export const dynamic = 'force-dynamic'
 import Header from '@/components/Header'
 import ListingCard from '@/components/ListingCard'
 import { ListingCardSkeleton } from '@/components/Skeleton'
@@ -12,11 +10,14 @@ import { Home as HomeIcon } from 'lucide-react'
 import { listingsAPI } from '@/lib/api'
 import { toast } from '@/components/Toast'
 import Breadcrumbs from '@/components/Breadcrumbs'
+import { Loader2 } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 
 // Lazy load MapView
 const MapView = lazy(() => import('@/components/MapView'))
 
-export default function SearchPage() {
+function SearchContent() {
   const searchParams = useSearchParams()
   const [viewMode, setViewMode] = useState<'map' | 'list'>('list')
   const [listings, setListings] = useState<any[]>([])
@@ -63,27 +64,35 @@ export default function SearchPage() {
       <Header />
       
       <main className="container mx-auto px-4 py-8">
-        <Breadcrumbs
-          items={[
-            { label: 'Главная', href: '/' },
-            { label: city ? `Поиск: ${city}` : 'Поиск' }
-          ]}
-        />
+        <div className="max-w-7xl mx-auto">
+          <Breadcrumbs 
+            items={[
+              { label: 'Главная', href: '/' },
+              { label: 'Поиск', href: '/search' },
+              ...(city ? [{ label: city }] : [])
+            ]} 
+          />
 
-        <div className="flex justify-between items-center mb-8 mt-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {city ? `Результаты поиска: ${city}` : 'Результаты поиска'}
-            </h1>
-            <p className="text-gray-600">
-              {loading ? 'Загрузка...' : `${listings.length} объявлений найдено`}
-            </p>
-          </div>
-          {listings.length > 0 && (
-            <div className="flex gap-2 bg-gray-100 rounded-lg p-1">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {city ? `Жильё в ${city}` : 'Поиск жилья'}
+              </h1>
+              {city && (
+                <p className="text-gray-600">
+                  {listings.length > 0 
+                    ? `Найдено ${listings.length} ${listings.length === 1 ? 'вариант' : listings.length < 5 ? 'варианта' : 'вариантов'}`
+                    : 'Варианты не найдены'
+                  }
+                </p>
+              )}
+            </div>
+
+            {/* View mode toggle */}
+            <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-4 py-2 rounded-md transition-all font-medium ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   viewMode === 'list'
                     ? 'bg-white text-primary shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
@@ -93,7 +102,7 @@ export default function SearchPage() {
               </button>
               <button
                 onClick={() => setViewMode('map')}
-                className={`px-4 py-2 rounded-md transition-all font-medium ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   viewMode === 'map'
                     ? 'bg-white text-primary shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
@@ -102,42 +111,54 @@ export default function SearchPage() {
                 Карта
               </button>
             </div>
+          </div>
+
+          {/* Content */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <ListingCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : viewMode === 'map' ? (
+            <Suspense fallback={<div className="h-[600px] flex items-center justify-center bg-gray-50 rounded-2xl">Загрузка карты...</div>}>
+              <MapView listings={listings} />
+            </Suspense>
+          ) : (
+            <>
+              {listings.length === 0 ? (
+                <EmptyState
+                  icon={HomeIcon}
+                  title="Ничего не найдено"
+                  description="Попробуйте изменить параметры поиска или использовать умный подбор"
+                  action={{
+                    label: 'Умный подбор',
+                    href: '/smart-search'
+                  }}
+                />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+                  {listings.map((listing: any) => (
+                    <ListingCard key={listing.id} listing={listing} />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
-
-        {/* Content */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <ListingCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : viewMode === 'map' ? (
-          <Suspense fallback={<div className="h-[600px] flex items-center justify-center bg-gray-50 rounded-2xl">Загрузка карты...</div>}>
-            <MapView listings={listings} />
-          </Suspense>
-        ) : (
-          <>
-            {listings.length === 0 ? (
-              <EmptyState
-                icon={HomeIcon}
-                title="Ничего не найдено"
-                description="Попробуйте изменить параметры поиска или использовать умный подбор"
-                action={{
-                  label: 'Умный подбор',
-                  href: '/smart-search'
-                }}
-              />
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-                {listings.map((listing: any) => (
-                  <ListingCard key={listing.id} listing={listing} />
-                ))}
-              </div>
-            )}
-          </>
-        )}
       </main>
     </div>
+  )
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    }>
+      <SearchContent />
+    </Suspense>
   )
 }
