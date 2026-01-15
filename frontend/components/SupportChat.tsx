@@ -98,7 +98,7 @@ export default function SupportChat() {
       >
         <MessageCircle className="w-6 h-6" />
         {messages.length > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center font-medium">
             {messages.length}
           </span>
         )}
@@ -107,11 +107,19 @@ export default function SupportChat() {
   }
 
   return (
-    <div
-      className={`fixed bottom-6 right-6 w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 flex flex-col transition-all ${
-        isMinimized ? 'h-16' : 'h-[600px]'
-      }`}
-    >
+    <>
+      {/* Overlay для мобильных */}
+      {!isMinimized && (
+        <div
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
+          onClick={handleMinimize}
+        />
+      )}
+      <div
+        className={`fixed md:bottom-6 md:right-6 md:w-96 md:max-w-[calc(100vw-3rem)] bottom-0 left-0 right-0 w-full max-w-none bg-white rounded-t-2xl md:rounded-2xl shadow-2xl border border-gray-100 z-50 flex flex-col transition-all ${
+          isMinimized ? 'h-16' : 'h-[85vh] md:h-[600px] md:max-h-[calc(100vh-3rem)]'
+        }`}
+      >
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-2xl flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -261,5 +269,6 @@ export default function SupportChat() {
         </>
       )}
     </div>
+    </>
   )
 }

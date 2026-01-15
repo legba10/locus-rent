@@ -8,4 +8,10 @@
   --locus-blue-light: #6FA8FF;
 }
 
+/* Fix text overflow */
+* {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
 /* ... existing styles ... */

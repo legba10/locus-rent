@@ -20,92 +20,45 @@ export default function Logo({ className = '', size = 'md', showText = true }: L
       {/* LOCUS Logo: Map marker pin with integrated human figure and house silhouette */}
       <div className={`relative ${currentSize.icon} flex items-center justify-center`}>
         <svg
-          viewBox="0 0 64 80"
+          viewBox="0 0 64 64"
           className="w-full h-full drop-shadow-sm"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
             <linearGradient id="locusGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#0A3D91" />
-              <stop offset="50%" stopColor="#1E5ED8" />
-              <stop offset="100%" stopColor="#6FA8FF" />
+              <stop offset="0%" stopColor="var(--locus-blue-light)" />
+              <stop offset="50%" stopColor="var(--locus-blue-main)" />
+              <stop offset="100%" stopColor="var(--locus-blue-dark)" />
             </linearGradient>
           </defs>
           
           {/* Map marker pin shape (teardrop with smooth bottom point) */}
           <path
-            d="M32 8 C24 8, 18 14, 18 22 C18 30, 32 72, 32 72 C32 72, 46 30, 46 22 C46 14, 40 8, 32 8 Z"
+            d="M32 8C24 8 18 14 18 22C18 30 32 56 32 56C32 56 46 30 46 22C46 14 40 8 32 8Z"
             fill="url(#locusGradient)"
           />
           
-          {/* House silhouette integrated into pin (centered, below human) */}
-          <g transform="translate(32, 35)">
-            {/* Roof with clear angle */}
-            <path
-              d="M-9 -7 L0 -14 L9 -7 Z"
-              fill="white"
-              fillOpacity="0.95"
-            />
-            {/* House body */}
-            <rect
-              x="-9"
-              y="-7"
-              width="18"
-              height="14"
-              fill="white"
-              fillOpacity="0.95"
-            />
+          {/* Inner House and Human Figure (Negative Space) */}
+          <g id="inner-elements">
+            {/* House Roof */}
+            <path d="M32 20L26 26H38L32 20Z" fill="white" />
+            {/* House Body */}
+            <rect x="26" y="26" width="12" height="10" fill="white" />
             {/* Windows (2x2 grid, perfectly aligned and evenly spaced) */}
-            <rect
-              x="-6.5"
-              y="-4.5"
-              width="3.5"
-              height="3.5"
-              fill="#1E5ED8"
-              fillOpacity="0.5"
-            />
-            <rect
-              x="3"
-              y="-4.5"
-              width="3.5"
-              height="3.5"
-              fill="#1E5ED8"
-              fillOpacity="0.5"
-            />
-            <rect
-              x="-6.5"
-              y="1"
-              width="3.5"
-              height="3.5"
-              fill="#1E5ED8"
-              fillOpacity="0.5"
-            />
-            <rect
-              x="3"
-              y="1"
-              width="3.5"
-              height="3.5"
-              fill="#1E5ED8"
-              fillOpacity="0.5"
-            />
-          </g>
-          
-          {/* Human figure (abstract, minimal, flowing curved shapes, calm confident posture) */}
-          <g transform="translate(32, 18)">
-            {/* Head (simple circle) */}
-            <circle
-              cx="0"
-              cy="-10"
-              r="3.5"
-              fill="white"
-              fillOpacity="0.95"
-            />
-            {/* Body (flowing curved shape, no detailed limbs) */}
+            <rect x="27.5" y="27.5" width="3" height="3" fill="#E0E7FF" />
+            <rect x="33.5" y="27.5" width="3" height="3" fill="#E0E7FF" />
+            <rect x="27.5" y="31.5" width="3" height="3" fill="#E0E7FF" />
+            <rect x="33.5" y="31.5" width="3" height="3" fill="#E0E7FF" />
+            
+            {/* Stylized Human Figure (abstract, curved) */}
             <path
-              d="M-2.5 -6.5 Q0 -3, 2.5 -6.5 Q2.5 0, 0 3 Q-2.5 0, -2.5 -6.5 Z"
-              fill="white"
-              fillOpacity="0.95"
+              d="M32 23.5C30.5 23.5 29.5 24.5 29.5 26C29.5 27.5 30.5 28.5 32 28.5C33.5 28.5 34.5 27.5 34.5 26C34.5 24.5 33.5 23.5 32 23.5Z"
+              fill="#60A5FA"
+            />
+            <path
+              d="M32 28.5C29.5 28.5 27.5 30.5 27.5 33V35C27.5 36.5 29 37.5 30.5 37.5H33.5C35 37.5 36.5 36.5 36.5 35V33C36.5 30.5 34.5 28.5 32 28.5Z"
+              fill="#60A5FA"
             />
           </g>
           
@@ -120,7 +73,7 @@ export default function Logo({ className = '', size = 'md', showText = true }: L
         </svg>
       </div>
       {showText && (
-        <span className={`font-semibold ${currentSize.text} tracking-wide`} style={{ color: '#1E5ED8' }}>
+        <span className={`font-bold ${currentSize.text} tracking-tight`} style={{ color: 'var(--locus-blue-dark)' }}>
           LOCUS
         </span>
       )}

@@ -124,8 +124,33 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Кратко о процессе */}
+        {/* Популярные города */}
         <section className="py-16 px-4 bg-white">
+          <div className="container mx-auto max-w-6xl">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+              Популярные города
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {[
+                'Москва', 'Санкт-Петербург', 'Сочи', 'Казань', 'Екатеринбург', 'Краснодар',
+                'Новосибирск', 'Нижний Новгород', 'Ростов-на-Дону', 'Уфа', 'Воронеж', 'Красноярск',
+              ].map((city) => (
+                <button
+                  key={city}
+                  onClick={() => {
+                    router.push(`/search?city=${encodeURIComponent(city)}`)
+                  }}
+                  className="px-4 py-3 bg-gray-50 hover:bg-primary hover:text-white rounded-xl transition-all text-center font-medium text-gray-700 hover:shadow-md"
+                >
+                  {city}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Кратко о процессе */}
+        <section className="py-16 px-4 bg-gray-50">
           <div className="container mx-auto max-w-5xl">
             <h2 className="text-2xl font-semibold text-gray-900 mb-8 text-center">
               Как это работает
@@ -136,7 +161,7 @@ export default function Home() {
                 { icon: Calendar, title: 'Сравните варианты', desc: 'Посмотрите подходящие варианты, сравните цены и удобства.' },
                 { icon: CheckCircle2, title: 'Забронируйте', desc: 'Забронируйте понравившийся вариант и получите подтверждение.' },
               ].map((step, i) => (
-                <div key={i} className="flex items-start gap-4 bg-gray-50 rounded-2xl p-5">
+                <div key={i} className="flex items-start gap-4 bg-white rounded-2xl p-5 shadow-sm">
                   <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
                     <step.icon className="w-5 h-5 text-blue-600" />
                   </div>
@@ -146,6 +171,82 @@ export default function Home() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Блок доверия */}
+        <section className="py-16 px-4 bg-white">
+          <div className="container mx-auto max-w-6xl">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+              Почему выбирают LOCUS
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { icon: Shield, title: 'Безопасность', desc: 'Все платежи защищены. Ваши данные в безопасности.' },
+                { icon: Zap, title: 'Экономия', desc: 'Комиссия 7% — в 2 раза ниже конкурентов. Экономьте на каждом бронировании.' },
+                { icon: Heart, title: 'Поддержка', desc: 'Круглосуточная поддержка. Мы всегда готовы помочь.' },
+              ].map((item, i) => (
+                <div key={i} className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-6 text-center border border-blue-100">
+                  <item.icon className="w-12 h-12 mx-auto mb-4 text-primary" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{item.title}</h3>
+                  <p className="text-gray-600">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Блок сравнения с конкурентами */}
+        <section className="py-16 px-4 bg-gray-50">
+          <div className="container mx-auto max-w-6xl">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+              Сравнение с конкурентами
+            </h2>
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Платформа</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Комиссия</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Размещение</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    <tr className="bg-blue-50">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-primary">LOCUS</span>
+                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Выгоднее</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center font-semibold text-primary">7%</td>
+                      <td className="px-6 py-4 text-center">1 бесплатно + 79₽</td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 text-gray-700">Суточно.ру</td>
+                      <td className="px-6 py-4 text-center text-gray-600">15–20%</td>
+                      <td className="px-6 py-4 text-center text-gray-600">Бесплатно</td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 text-gray-700">Авито</td>
+                      <td className="px-6 py-4 text-center text-gray-600">15–25%</td>
+                      <td className="px-6 py-4 text-center text-gray-600">Платно</td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 text-gray-700">Циан</td>
+                      <td className="px-6 py-4 text-center text-gray-600">До 20%</td>
+                      <td className="px-6 py-4 text-center text-gray-600">Платно</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="bg-blue-50 px-6 py-4 border-t border-blue-100">
+                <p className="text-center text-gray-700 font-medium">
+                  💰 С LOCUS вы экономите до <span className="text-primary font-bold">50% комиссии</span> на каждом бронировании
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -160,11 +261,12 @@ export default function Home() {
                     Сдаёте жильё?
                   </h2>
                   <p className="text-xl mb-8 text-blue-50 leading-relaxed">
-                    Размещайте объявления бесплатно. Получайте бронирования от гостей, которые вам подходят.
+                    Первое объявление — бесплатно. Каждое следующее — 79 ₽. Комиссия всего 7% с бронирования.
                   </p>
                   <ul className="space-y-4 mb-8">
                     {[
-                      'Размещение объявлений — бесплатно',
+                      '1 объявление — бесплатно, далее 79 ₽',
+                      'Комиссия 7% — в 2 раза ниже конкурентов',
                       'Управляйте календарём в несколько кликов',
                       'Подтверждайте бронирования быстро',
                       'Смотрите статистику по вашим объявлениям',
@@ -192,7 +294,7 @@ export default function Home() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { icon: TrendingUp, value: '0%', label: 'Комиссия' },
+                    { icon: TrendingUp, value: '7%', label: 'Комиссия' },
                     { icon: Users, value: '24/7', label: 'Поддержка' },
                     { icon: Star, value: '100%', label: 'Контроль' },
                     { icon: Calendar, value: 'Быстро', label: 'Бронирования' },
