@@ -48,8 +48,9 @@ export default function Home() {
     try {
       setLoading(true)
       const response = await listingsAPI.getAll({ limit: 12 })
-      setListings(response.data || [])
-      if (response.data?.length === 0) {
+      const listings = response.data?.data || []
+      setListings(listings)
+      if (listings.length === 0) {
         toast('Пока нет доступных объявлений', 'info')
       }
     } catch (error) {

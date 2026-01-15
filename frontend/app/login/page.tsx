@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+
+export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import Logo from '@/components/Logo'
@@ -10,6 +12,7 @@ import { useAuthStore } from '@/lib/store'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import { toast } from '@/components/Toast'
 import TelegramLogin from '@/components/TelegramLogin'
+import { LoginPayload } from '@/lib/types/auth'
 
 export default function LoginPage() {
   const [loginMethod, setLoginMethod] = useState<'email' | 'phone'>('email')
@@ -28,7 +31,7 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const loginData = loginMethod === 'email' 
+      const loginData: LoginPayload = loginMethod === 'email' 
         ? { email, password }
         : { phone, password }
 

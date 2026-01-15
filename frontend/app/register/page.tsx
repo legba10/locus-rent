@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+
+export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import Header from '@/components/Header'
 import Logo from '@/components/Logo'
@@ -10,6 +12,7 @@ import { useAuthStore } from '@/lib/store'
 import { AlertCircle, Loader2, CheckCircle2 } from 'lucide-react'
 import { toast } from '@/components/Toast'
 import TelegramLogin from '@/components/TelegramLogin'
+import { RegisterPayload } from '@/lib/types/auth'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -78,7 +81,7 @@ export default function RegisterPage() {
         }
       }
 
-      const registerData: any = {
+      const registerData: RegisterPayload = {
         firstName: formData.firstName,
         password: formData.password,
       }

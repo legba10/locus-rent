@@ -9,6 +9,7 @@ import { ArrowLeft, Loader2, MapPin, Upload, X } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from '@/components/Toast'
 import Breadcrumbs from '@/components/Breadcrumbs'
+import { ListingType, Listing } from '@/lib/types/listing'
 
 export default function NewListingPage() {
   const router = useRouter()
@@ -54,8 +55,9 @@ export default function NewListingPage() {
     setLoading(true)
 
     try {
-      const listingData = {
+      const listingData: Partial<Listing> & { type: ListingType } = {
         ...formData,
+        type: formData.type as ListingType,
         pricePerNight: parseFloat(formData.pricePerNight),
         maxGuests: parseInt(formData.maxGuests),
         bedrooms: formData.bedrooms ? parseInt(formData.bedrooms) : undefined,

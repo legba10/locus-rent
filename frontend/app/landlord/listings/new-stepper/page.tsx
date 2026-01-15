@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { toast } from '@/components/Toast'
 import { useAuthStore } from '@/lib/store'
 import Breadcrumbs from '@/components/Breadcrumbs'
+import { ListingType, Listing } from '@/lib/types/listing'
 
 const STEPS = [
   { id: 1, title: 'Основная информация', icon: FileText },
@@ -259,17 +260,43 @@ export default function NewListingStepperPage() {
 
     setLoading(true)
     try {
+      // Валидация обязательных числовых полей
+      const pricePerNight = parseFloat(formData.pricePerNight)
+      const maxGuests = parseInt(formData.maxGuests)
+      
+      if (isNaN(pricePerNight) || pricePerNight <= 0) {
+        toast('Укажите корректную цену за ночь', 'error')
+        setCurrentStep(3)
+        setLoading(false)
+        return
+      }
+      
+      if (isNaN(maxGuests) || maxGuests < 1) {
+        toast('Укажите корректное количество гостей', 'error')
+        setCurrentStep(3)
+        setLoading(false)
+        return
+      }
+
       // Очищаем пустые строки и преобразуем в правильные типы
-      const listingData: any = {
+      const listingData: Partial<Listing> & { type: ListingType; status: 'draft' | 'active' } = {
         title: formData.title.trim(),
         description: formData.description.trim(),
-        type: formData.type,
+        type: formData.type as ListingType,
         city: formData.city.trim(),
         address: formData.address.trim(),
-        pricePerNight: parseFloat(formData.pricePerNight),
-        maxGuests: parseInt(formData.maxGuests),
-        images: images.length > 0 ? images : undefined,
+        pricePerNight: pricePerNight,
+        maxGuests: maxGuests,
         status: saveAsDraft ? 'draft' : 'active',
+      }
+
+      // Изображения - для черновика можно без фото, для публикации обязательно
+      if (images.length > 0) {
+        listingData.images = images
+      } else if (saveAsDraft) {
+        // Для черновика можно отправить пустой массив или не отправлять вообще
+        // Бэкенд должен принимать пустой массив для черновиков
+        listingData.images = []
       }
 
       // Опциональные поля - только если заполнены
@@ -297,19 +324,43 @@ export default function NewListingStepperPage() {
         listingData.amenities = formData.amenities
       }
 
-      await listingsAPI.create(listingData)
+      console.log('Sending listing data:', JSON.stringify(listingData, null, 2))
+      
+      const response = await listingsAPI.create(listingData)
+      console.log('Listing created successfully:', response.data)
+      
       toast(saveAsDraft ? 'Черновик сохранён' : 'Объявление опубликовано', 'success')
 
       // Очищаем черновик
       if (typeof window !== 'undefined') {
         localStorage.removeItem(DRAFT_STORAGE_KEY)
       }
-      router.push('/landlord')
+      
+      // Небольшая задержка перед редиректом для показа toast
+      setTimeout(() => {
+        router.push('/landlord')
+      }, 500)
     } catch (err: any) {
       console.error('Listing creation error:', err)
-      const errorMessage = err.response?.data?.message || 
-        err.response?.data?.error || 
-        'Ошибка создания объявления. Проверьте данные и попробуйте снова.'
+      console.error('Error response:', err.response?.data)
+      console.error('Error status:', err.response?.status)
+      
+      let errorMessage = 'Ошибка создания объявления. Проверьте данные и попробуйте снова.'
+      
+      if (err.response?.data) {
+        if (err.response.data.message) {
+          errorMessage = err.response.data.message
+        } else if (err.response.data.error) {
+          errorMessage = Array.isArray(err.response.data.error) 
+            ? err.response.data.error.join(', ')
+            : err.response.data.error
+        } else if (Array.isArray(err.response.data)) {
+          errorMessage = err.response.data.map((e: any) => e.message || e).join(', ')
+        }
+      } else if (err.message) {
+        errorMessage = err.message
+      }
+      
       toast(errorMessage, 'error')
       setErrors({ submit: errorMessage })
     } finally {
@@ -918,12 +969,39 @@ export default function NewListingStepperPage() {
                       </div>
                     )}
                     <div className="mt-4 pt-4 border-t border-orange-100">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 mb-3">
                         <Camera className="w-4 h-4 text-gray-400" />
                         <p className="text-sm text-gray-700">
                           Фотографий: <span className="font-semibold">{images.length}</span>
                         </p>
                       </div>
+                      {images.length > 0 ? (
+                        <div className="grid grid-cols-3 gap-2 mt-3">
+                          {images.slice(0, 6).map((img, index) => (
+                            <div
+                              key={index}
+                              className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group"
+                            >
+                              <img 
+                                src={img} 
+                                alt={`Фото ${index + 1}`} 
+                                className="w-full h-full object-cover"
+                              />
+                              {index === 5 && images.length > 6 && (
+                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                  <span className="text-white text-xs font-medium">
+                                    +{images.length - 6}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 mt-2">
+                          Фотографии не добавлены
+                        </p>
+                      )}
                       {!saveAsDraft && images.length === 0 && (
                         <p className="mt-2 text-xs text-red-600">
                           Для публикации нужно добавить хотя бы одну фотографию

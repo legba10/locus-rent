@@ -1,4 +1,9 @@
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
+import { LoginPayload, RegisterPayload } from './types/auth'
+import { AuthResponse } from './types/api'
+import { User } from './types/user'
+import { Listing } from './types/listing'
+import { SmartSearchResults } from './types/recommendation'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
 
@@ -63,9 +68,12 @@ export default api
 
 // API методы
 export const authAPI = {
-  register: (data: any) => api.post('/auth/register', data),
-  login: (data: any) => api.post('/auth/login', data),
-  loginWithTelegram: (data: any) => api.post('/auth/telegram', data),
+  register: (data: RegisterPayload): Promise<AxiosResponse<AuthResponse>> => 
+    api.post<AuthResponse>('/auth/register', data),
+  login: (data: LoginPayload): Promise<AxiosResponse<AuthResponse>> => 
+    api.post<AuthResponse>('/auth/login', data),
+  loginWithTelegram: (data: { id: string; firstName?: string; lastName?: string; username?: string; photoUrl?: string; authDate: number; hash: string }): Promise<AxiosResponse<AuthResponse>> => 
+    api.post<AuthResponse>('/auth/telegram', data),
   sendCode: (type: 'email' | 'phone', identifier: string) => 
     api.post('/auth/send-code', { type, identifier }),
   verifyCode: (identifier: string, code: string, type: 'email' | 'phone') =>
@@ -75,13 +83,20 @@ export const authAPI = {
 }
 
 export const listingsAPI = {
-  getAll: (params?: any) => api.get('/listings', { params }),
-  getOne: (id: string) => api.get(`/listings/${id}`),
-  create: (data: any) => api.post('/listings', data),
-  update: (id: string, data: any) => api.patch(`/listings/${id}`, data),
-  delete: (id: string) => api.delete(`/listings/${id}`),
-  duplicate: (id: string) => api.post(`/listings/${id}/duplicate`),
-  getMy: () => api.get('/listings/my'),
+  getAll: (params?: Record<string, any>): Promise<AxiosResponse<{ data: Listing[] }>> => 
+    api.get<{ data: Listing[] }>('/listings', { params }),
+  getOne: (id: string): Promise<AxiosResponse<{ data: Listing }>> => 
+    api.get<{ data: Listing }>(`/listings/${id}`),
+  create: (data: Partial<Listing>): Promise<AxiosResponse<{ data: Listing }>> => 
+    api.post<{ data: Listing }>('/listings', data),
+  update: (id: string, data: Partial<Listing>): Promise<AxiosResponse<{ data: Listing }>> => 
+    api.patch<{ data: Listing }>(`/listings/${id}`, data),
+  delete: (id: string): Promise<AxiosResponse<void>> => 
+    api.delete<void>(`/listings/${id}`),
+  duplicate: (id: string): Promise<AxiosResponse<{ data: Listing }>> => 
+    api.post<{ data: Listing }>(`/listings/${id}/duplicate`),
+  getMy: (): Promise<AxiosResponse<{ data: Listing[] }>> => 
+    api.get<{ data: Listing[] }>('/listings/my'),
 }
 
 export const bookingsAPI = {
@@ -100,18 +115,25 @@ export const reviewsAPI = {
 }
 
 export const usersAPI = {
-  getMe: () => api.get('/users/me'),
-  update: (id: string, data: any) => api.patch(`/users/${id}`, data),
+  getMe: (): Promise<AxiosResponse<User>> => 
+    api.get<User>('/users/me'),
+  update: (id: string, data: Partial<User>): Promise<AxiosResponse<User>> => 
+    api.patch<User>(`/users/${id}`, data),
 }
 
 export const recommendationAPI = {
-  smartSearch: (data: any) => api.post('/recommendation/smart-search', data),
-  getRecommendations: (params?: any) => api.get('/recommendation/listings', { params }),
-  getSearchHistory: () => api.get('/recommendation/search-history'),
-  getPreferences: () => api.get('/recommendation/preferences'),
-  savePreferences: (preferences: any) => api.post('/recommendation/preferences', { preferences }),
-  markFeedback: (id: string, feedback: 'liked' | 'disliked') =>
-    api.post(`/recommendation/recommendations/${id}/feedback`, { feedback }),
+  smartSearch: (data: Record<string, any>): Promise<AxiosResponse<{ data: SmartSearchResults }>> => 
+    api.post<{ data: SmartSearchResults }>('/recommendation/smart-search', data),
+  getRecommendations: (params?: Record<string, any>): Promise<AxiosResponse<{ data: Listing[] }>> => 
+    api.get<{ data: Listing[] }>('/recommendation/listings', { params }),
+  getSearchHistory: (): Promise<AxiosResponse<{ data: any[] }>> => 
+    api.get<{ data: any[] }>('/recommendation/search-history'),
+  getPreferences: (): Promise<AxiosResponse<{ data: any }>> => 
+    api.get<{ data: any }>('/recommendation/preferences'),
+  savePreferences: (preferences: Record<string, any>): Promise<AxiosResponse<{ data: any }>> => 
+    api.post<{ data: any }>('/recommendation/preferences', { preferences }),
+  markFeedback: (id: string, feedback: 'liked' | 'disliked'): Promise<AxiosResponse<void>> =>
+    api.post<void>(`/recommendation/recommendations/${id}/feedback`, { feedback }),
 }
 
 export const citiesAPI = {

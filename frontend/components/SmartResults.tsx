@@ -2,21 +2,11 @@
 
 import { CheckCircle, MapPin, Star, Info } from 'lucide-react'
 import Link from 'next/link'
+import { RecommendationItem } from '@/lib/types/recommendation'
 
 interface SmartResultsProps {
-  bestMatch: {
-    listing: any
-    score: number
-    explanation: {
-      primaryReason: string
-      factors: Array<{
-        name: string
-        score: number
-        description: string
-      }>
-    }
-  } | null
-  alternatives: any[]
+  bestMatch: RecommendationItem | null
+  alternatives: RecommendationItem[]
 }
 
 export default function SmartResults({ bestMatch, alternatives }: SmartResultsProps) {
@@ -91,14 +81,18 @@ export default function SmartResults({ bestMatch, alternatives }: SmartResultsPr
             <div className="flex items-start gap-2 mb-3">
               <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium mb-2">{bestMatch.explanation.primaryReason}</p>
-                <div className="space-y-1">
-                  {bestMatch.explanation.factors.map((factor, idx) => (
-                    <div key={idx} className="text-sm text-text-secondary">
-                      <span className="font-medium">{factor.name}:</span> {factor.description}
+                {bestMatch.explanation && (
+                  <>
+                    <p className="font-medium mb-2">{bestMatch.explanation.primaryReason}</p>
+                    <div className="space-y-1">
+                      {bestMatch.explanation.factors.map((factor, idx) => (
+                        <div key={idx} className="text-sm text-text-secondary">
+                          <span className="font-medium">{factor.name}:</span> {factor.description}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -131,42 +125,45 @@ export default function SmartResults({ bestMatch, alternatives }: SmartResultsPr
         <div className="mt-8">
           <h3 className="text-xl font-bold mb-4">Альтернативные варианты</h3>
           <div className="space-y-4">
-            {alternatives.map((altListing) => (
-              <div
-                key={altListing.id}
-                className="bg-white rounded-xl shadow-soft overflow-hidden"
-              >
-                <div className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-2">{altListing.title}</h3>
-                      <div className="flex items-center gap-2 text-text-secondary mb-2">
-                        <MapPin className="w-4 h-4" />
-                        <span>{altListing.address}</span>
-                      </div>
-                      {altListing.rating && (
-                        <div className="flex items-center gap-2">
-                          <Star className="w-4 h-4 fill-warning text-warning" />
-                          <span className="font-medium">{Number(altListing.rating).toFixed(1)}</span>
+            {alternatives.map((altItem) => {
+              const altListing = altItem.listing
+              return (
+                <div
+                  key={altListing.id}
+                  className="bg-white rounded-xl shadow-soft overflow-hidden"
+                >
+                  <div className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold mb-2">{altListing.title}</h3>
+                        <div className="flex items-center gap-2 text-text-secondary mb-2">
+                          <MapPin className="w-4 h-4" />
+                          <span>{altListing.address}</span>
                         </div>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xl font-bold text-primary">
-                        {altListing.pricePerNight} ₽
+                        {altListing.rating && (
+                          <div className="flex items-center gap-2">
+                            <Star className="w-4 h-4 fill-warning text-warning" />
+                            <span className="font-medium">{Number(altListing.rating).toFixed(1)}</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="text-sm text-text-secondary">за ночь</div>
+                      <div className="text-right">
+                        <div className="text-xl font-bold text-primary">
+                          {altListing.pricePerNight} ₽
+                        </div>
+                        <div className="text-sm text-text-secondary">за ночь</div>
+                      </div>
                     </div>
+                    <Link
+                      href={`/listings/${altListing.id}`}
+                      className="block w-full bg-primary text-white text-center py-3 rounded-lg hover:bg-primary-dark transition-colors font-medium"
+                    >
+                      Подробнее
+                    </Link>
                   </div>
-                  <Link
-                    href={`/listings/${altListing.id}`}
-                    className="block w-full bg-primary text-white text-center py-3 rounded-lg hover:bg-primary-dark transition-colors font-medium"
-                  >
-                    Подробнее
-                  </Link>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}

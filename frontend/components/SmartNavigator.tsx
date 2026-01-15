@@ -14,19 +14,32 @@ type PriorityLevel = 'high' | 'medium' | 'low'
 export default function SmartNavigator({ onResults }: SmartNavigatorProps) {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    tripPurpose: 'leisure' as 'work' | 'leisure' | 'urgent',
+  const [formData, setFormData] = useState<{
+    tripPurpose: 'work' | 'leisure' | 'urgent'
+    checkIn: string
+    checkOut: string
+    budget: { min?: number; max?: number }
+    priorities: {
+      quiet: PriorityLevel
+      center: PriorityLevel
+      comfort: PriorityLevel
+      price: PriorityLevel
+    }
+    city: string
+    coordinates?: { lat: number; lng: number; radius?: number }
+  }>({
+    tripPurpose: 'leisure',
     checkIn: '',
     checkOut: '',
     budget: { min: undefined, max: undefined },
     priorities: {
-      quiet: 'medium' as PriorityLevel,
-      center: 'medium' as PriorityLevel,
-      comfort: 'medium' as PriorityLevel,
-      price: 'medium' as PriorityLevel,
+      quiet: 'medium',
+      center: 'medium',
+      comfort: 'medium',
+      price: 'medium',
     },
     city: '',
-    coordinates: undefined as { lat: number; lng: number; radius?: number } | undefined,
+    coordinates: undefined,
   })
   const [citySuggestions, setCitySuggestions] = useState<any[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -272,12 +285,13 @@ export default function SmartNavigator({ onResults }: SmartNavigatorProps) {
                 type="number"
                 placeholder="1000"
                 value={formData.budget.min || ''}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const value = parseInt(e.target.value)
                   setFormData({
                     ...formData,
-                    budget: { ...formData.budget, min: parseInt(e.target.value) || undefined },
+                    budget: { ...formData.budget, min: isNaN(value) ? undefined : value },
                   })
-                }
+                }}
                 className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
@@ -287,12 +301,13 @@ export default function SmartNavigator({ onResults }: SmartNavigatorProps) {
                 type="number"
                 placeholder="5000"
                 value={formData.budget.max || ''}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const value = parseInt(e.target.value)
                   setFormData({
                     ...formData,
-                    budget: { ...formData.budget, max: parseInt(e.target.value) || undefined },
+                    budget: { ...formData.budget, max: isNaN(value) ? undefined : value },
                   })
-                }
+                }}
                 className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>

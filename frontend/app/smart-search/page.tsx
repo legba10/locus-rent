@@ -7,10 +7,12 @@ import SmartResults from '@/components/SmartResults'
 import SmartMapView from '@/components/SmartMapView'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import { RotateCcw } from 'lucide-react'
+import { SmartSearchResults, RecommendationItem } from '@/lib/types/recommendation'
+import { Listing } from '@/lib/types/listing'
 
 export default function SmartSearchPage() {
-  const [results, setResults] = useState(null)
-  const [selectedListing, setSelectedListing] = useState(null)
+  const [results, setResults] = useState<SmartSearchResults | null>(null)
+  const [selectedListing, setSelectedListing] = useState<RecommendationItem | null>(null)
 
   return (
     <div className="min-h-screen bg-white">
@@ -44,13 +46,13 @@ export default function SmartSearchPage() {
                 <SmartMapView
                   bestMatch={results.bestMatch}
                   alternatives={results.alternatives || []}
-                  onListingSelect={setSelectedListing}
+                  onListingSelect={(item) => setSelectedListing(item as RecommendationItem)}
                 />
               )}
 
               {/* Результаты */}
               <SmartResults 
-                bestMatch={results.bestMatch}
+                bestMatch={results.bestMatch ?? null}
                 alternatives={results.alternatives || []}
               />
             </div>

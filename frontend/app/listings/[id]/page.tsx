@@ -42,7 +42,7 @@ export default function ListingDetailPage() {
     try {
       setLoading(true)
       const response = await listingsAPI.getOne(params.id as string)
-      setListing(response.data)
+      setListing(response.data?.data || null)
     } catch (error) {
       console.error('Error loading listing:', error)
       setError('Объявление не найдено')

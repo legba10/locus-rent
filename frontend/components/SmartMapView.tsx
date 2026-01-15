@@ -3,13 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import { RecommendationItem } from '@/lib/types/recommendation'
 
 interface SmartMapViewProps {
-  bestMatch: {
-    listing: any
-    score: number
-  } | null
-  alternatives: any[]
+  bestMatch: RecommendationItem | null
+  alternatives: RecommendationItem[]
   onListingSelect?: (listing: any) => void
 }
 
@@ -30,7 +28,7 @@ export default function SmartMapView({ bestMatch, alternatives, onListingSelect 
 
     mapboxgl.accessToken = mapboxToken
 
-    const centerListing = bestMatch?.listing || alternatives[0]
+    const centerListing = bestMatch?.listing || alternatives[0]?.listing
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/light-v11',
@@ -66,7 +64,8 @@ export default function SmartMapView({ bestMatch, alternatives, onListingSelect 
     }
 
     // Альтернативы
-    alternatives.forEach((listing, index) => {
+    alternatives.forEach((item, index) => {
+      const listing = item.listing
       if (listing.latitude && listing.longitude) {
         addMarker(listing, false, 0.5, index + 1)
       }

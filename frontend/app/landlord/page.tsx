@@ -40,12 +40,14 @@ export default function LandlordPage() {
       setLoading(true)
       if (activeTab === 'listings') {
         const response = await listingsAPI.getMy()
-        setListings(response.data || [])
-        setStats(prev => ({ ...prev, listings: response.data?.length || 0 }))
+        const listings = response.data?.data || []
+        setListings(listings)
+        setStats(prev => ({ ...prev, listings: listings.length }))
       } else if (activeTab === 'bookings') {
         const response = await bookingsAPI.getAll()
-        setBookings(response.data || [])
-        setStats(prev => ({ ...prev, bookings: response.data?.length || 0 }))
+        const bookings = response.data?.data || []
+        setBookings(bookings)
+        setStats(prev => ({ ...prev, bookings: bookings.length }))
       }
     } catch (error) {
       console.error('Error loading data:', error)

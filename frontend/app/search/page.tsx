@@ -2,6 +2,8 @@
 
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
+
+export const dynamic = 'force-dynamic'
 import Header from '@/components/Header'
 import ListingCard from '@/components/ListingCard'
 import { ListingCardSkeleton } from '@/components/Skeleton'
@@ -40,9 +42,10 @@ export default function SearchPage() {
       if (guests) params.guests = parseInt(guests)
 
       const response = await listingsAPI.getAll(params)
-      setListings(response.data || [])
+      const listings = response.data?.data || []
+      setListings(listings)
       
-      if (response.data?.length === 0) {
+      if (listings.length === 0) {
         toast('По вашему запросу ничего не найдено', 'info')
       }
     } catch (error) {

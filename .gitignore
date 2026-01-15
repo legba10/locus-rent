@@ -49,3 +49,9 @@ next-env.d.ts
 # Logs
 logs/
 *.log
+
+node_modules
+.env
+.env.local
+.env.production
+.next

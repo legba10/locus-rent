@@ -3,17 +3,18 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
-import { User, Calendar, Heart, MessageSquare, Bell, Settings, History, Sparkles } from 'lucide-react'
-import api, { recommendationAPI } from '@/lib/api'
+import { User as UserIcon, Calendar, Heart, MessageSquare, Bell, Settings, History, Sparkles } from 'lucide-react'
+import { usersAPI, recommendationAPI } from '@/lib/api'
 import { useAuthStore } from '@/lib/store'
+import { User } from '@/lib/types/user'
 
 export default function ProfilePage() {
   const router = useRouter()
   const { isAuthenticated, initialized } = useAuthStore()
   const [activeTab, setActiveTab] = useState('profile')
-  const [user, setUser] = useState(null)
-  const [searchHistory, setSearchHistory] = useState([])
-  const [preferences, setPreferences] = useState(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [searchHistory, setSearchHistory] = useState<any[]>([])
+  const [preferences, setPreferences] = useState<any | null>(null)
 
   // Защита маршрута: редирект неавторизованных пользователей
   useEffect(() => {
@@ -33,8 +34,8 @@ export default function ProfilePage() {
 
   const loadUserData = async () => {
     try {
-      const response = await api.get('/users/me')
-      setUser(response.data)
+      const response = await usersAPI.getMe()
+      setUser(response.data ?? null)
     } catch (error) {
       console.error('Error loading user:', error)
     }
@@ -43,7 +44,7 @@ export default function ProfilePage() {
   const loadSearchHistory = async () => {
     try {
       const response = await recommendationAPI.getSearchHistory()
-      setSearchHistory(response.data)
+      setSearchHistory(response.data?.data || [])
     } catch (error) {
       console.error('Error loading search history:', error)
     }
@@ -52,7 +53,7 @@ export default function ProfilePage() {
   const loadPreferences = async () => {
     try {
       const response = await recommendationAPI.getPreferences()
-      setPreferences(response.data)
+      setPreferences(response.data?.data || null)
     } catch (error) {
       console.error('Error loading preferences:', error)
     }
@@ -91,7 +92,7 @@ export default function ProfilePage() {
                   : 'text-text-secondary hover:text-primary'
               }`}
             >
-              <User className="w-5 h-5 inline mr-2" />
+              <UserIcon className="w-5 h-5 inline mr-2" />
               Профиль
             </button>
             <button
@@ -189,7 +190,7 @@ export default function ProfilePage() {
                     <input
                       type="text"
                       className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      defaultValue={user?.firstName || ''}
+                      defaultValue={user?.firstName ?? ''}
                       placeholder="Ваше имя"
                     />
                   </div>
@@ -200,7 +201,7 @@ export default function ProfilePage() {
                     <input
                       type="text"
                       className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      defaultValue={user?.lastName || ''}
+                      defaultValue={user?.lastName ?? ''}
                       placeholder="Ваша фамилия"
                     />
                   </div>
@@ -211,7 +212,7 @@ export default function ProfilePage() {
                     <input
                       type="email"
                       className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      defaultValue={user?.email || ''}
+                      defaultValue={user?.email ?? ''}
                       placeholder="email@example.com"
                     />
                   </div>
@@ -222,7 +223,7 @@ export default function ProfilePage() {
                     <input
                       type="tel"
                       className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                      defaultValue={user?.phone || ''}
+                      defaultValue={user?.phone ?? ''}
                       placeholder="+7 (999) 123-45-67"
                     />
                   </div>
