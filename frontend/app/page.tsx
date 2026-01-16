@@ -16,7 +16,7 @@ const MapView = dynamic(() => import('@/components/MapView'), {
 })
 import { ListingCardSkeleton } from '@/components/Skeleton'
 import EmptyState from '@/components/EmptyState'
-import { Sparkles, MapPin, Home as HomeIcon, Search, CheckCircle2, Calendar, Shield, Zap, Heart, TrendingUp, Users, Star } from 'lucide-react'
+import { Sparkles, MapPin, Home as HomeIcon, Search, CheckCircle2, Calendar, Shield, Zap, Heart, TrendingUp, Users, Star, X } from 'lucide-react'
 import { listingsAPI } from '@/lib/api'
 import Link from 'next/link'
 import { toast } from '@/components/Toast'
@@ -68,24 +68,65 @@ export default function Home() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/30">
         <Header />
         
-        {/* Hero Section - Полностью переработанный */}
-        <section className="relative bg-gradient-to-br from-blue-50 via-white to-blue-50 py-24 px-4 overflow-hidden">
+        {/* Hero Section - Экономия и выгода */}
+        <section className="relative bg-gradient-to-br from-blue-50 via-white to-blue-50 py-20 px-4 overflow-hidden">
           {/* Декоративные элементы */}
           <div className="absolute top-0 left-0 w-72 h-72 bg-blue-100/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-100/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
           
           <div className="container mx-auto max-w-6xl relative z-10">
-            <div className="text-center mb-10">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
-                Умный способ найти жильё для короткой аренды
+            <div className="text-center mb-12">
+              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                Платите меньше за каждое бронирование
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-                Вы выбираете город, даты и гостей — мы подбираем варианты, которые вам действительно подходят.
+              <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto font-medium">
+                LOCUS берёт 7% — другие сервисы забирают до 25% с каждого бронирования
               </p>
             </div>
 
-            {/* CTA для двух сценариев: поиск и размещение */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+            {/* Усиливающий блок с экономией */}
+            <div className="max-w-2xl mx-auto mb-10 bg-white rounded-2xl shadow-xl border-2 border-blue-100 p-8">
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                  <span className="text-3xl">💰</span>
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Бронирование на 30 000 ₽</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-6 mb-6">
+                <div className="bg-blue-50 rounded-xl p-6 border-2 border-blue-200">
+                  <div className="text-sm text-gray-600 mb-2">LOCUS</div>
+                  <div className="text-3xl font-bold text-primary">2 100 ₽</div>
+                  <div className="text-xs text-gray-500 mt-1">комиссия 7%</div>
+                </div>
+                <div className="bg-red-50 rounded-xl p-6 border-2 border-red-200">
+                  <div className="text-sm text-gray-600 mb-2">Другие сервисы</div>
+                  <div className="text-3xl font-bold text-red-600">до 7 500 ₽</div>
+                  <div className="text-xs text-gray-500 mt-1">комиссия до 25%</div>
+                </div>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-semibold text-gray-900">
+                  👉 Разницу вы оставляете себе
+                </p>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+              <button
+                type="button"
+                onClick={() => {
+                  if (isAuthenticated) {
+                    router.push('/landlord/listings/new-stepper')
+                  } else {
+                    router.push('/register?next=/landlord/listings/new-stepper')
+                  }
+                }}
+                className="inline-flex items-center gap-2 bg-primary text-white px-10 py-4 rounded-xl hover:bg-primary-dark transition-all shadow-lg hover:shadow-xl font-semibold text-lg"
+              >
+                <Zap className="w-6 h-6" />
+                Начать экономить
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -96,24 +137,10 @@ export default function Home() {
                     router.push('/search')
                   }
                 }}
-                className="inline-flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-xl hover:bg-primary-dark transition-all shadow-md hover:shadow-lg font-semibold"
+                className="inline-flex items-center gap-2 px-10 py-4 border-2 border-primary text-primary rounded-xl hover:bg-primary/5 transition-all font-semibold text-lg"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-6 h-6" />
                 Найти жильё
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (isAuthenticated) {
-                    router.push('/landlord/listings/new-stepper')
-                  } else {
-                    router.push('/login?next=/landlord/listings/new-stepper')
-                  }
-                }}
-                className="inline-flex items-center gap-2 px-8 py-3 border-2 border-primary text-primary rounded-xl hover:bg-primary/5 transition-all font-semibold"
-              >
-                <HomeIcon className="w-5 h-5" />
-                Разместить объявление
               </button>
             </div>
 
@@ -124,13 +151,54 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Популярные города */}
+        {/* Почему LOCUS выгоднее */}
         <section className="py-16 px-4 bg-white">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-12 text-center">
+              Почему LOCUS выгоднее
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { 
+                  icon: TrendingUp, 
+                  title: 'Меньше комиссия', 
+                  desc: 'Вы платите за сервис, а не за бренд' 
+                },
+                { 
+                  icon: Shield, 
+                  title: 'Честные условия', 
+                  desc: 'Без скрытых платежей и навязанных услуг' 
+                },
+                { 
+                  icon: Zap, 
+                  title: 'Полный контроль', 
+                  desc: 'Вы управляете ценой, календарём и правилами' 
+                },
+                { 
+                  icon: Heart, 
+                  title: 'Поддержка без ботов', 
+                  desc: 'Живые ответы, а не автоответчики' 
+                },
+              ].map((item, i) => (
+                <div key={i} className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-6 border border-blue-100 hover:shadow-lg transition-all">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
+                    <item.icon className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{item.title}</h3>
+                  <p className="text-gray-600">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Популярные города */}
+        <section className="py-12 px-4 bg-gray-50">
+          <div className="container mx-auto max-w-6xl">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
               Популярные города
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
               {[
                 'Москва', 'Санкт-Петербург', 'Сочи', 'Казань', 'Екатеринбург', 'Краснодар',
                 'Новосибирск', 'Нижний Новгород', 'Ростов-на-Дону', 'Уфа', 'Воронеж', 'Красноярск',
@@ -140,7 +208,7 @@ export default function Home() {
                   onClick={() => {
                     router.push(`/search?city=${encodeURIComponent(city)}`)
                   }}
-                  className="px-4 py-3 bg-gray-50 hover:bg-primary hover:text-white rounded-xl transition-all text-center font-medium text-gray-700 hover:shadow-md"
+                  className="px-4 py-2.5 bg-white hover:bg-primary hover:text-white rounded-lg transition-all text-center font-medium text-gray-700 hover:shadow-md border border-gray-100 hover:border-primary"
                 >
                   {city}
                 </button>
@@ -175,101 +243,101 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Блок доверия */}
-        <section className="py-16 px-4 bg-white">
-          <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-              Почему выбирают LOCUS
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                { icon: Shield, title: 'Безопасность', desc: 'Все платежи защищены. Ваши данные в безопасности.' },
-                { icon: Zap, title: 'Экономия', desc: 'Комиссия 7% — в 2 раза ниже конкурентов. Экономьте на каждом бронировании.' },
-                { icon: Heart, title: 'Поддержка', desc: 'Круглосуточная поддержка. Мы всегда готовы помочь.' },
-              ].map((item, i) => (
-                <div key={i} className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-6 text-center border border-blue-100">
-                  <item.icon className="w-12 h-12 mx-auto mb-4 text-primary" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{item.title}</h3>
-                  <p className="text-gray-600">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
-        {/* Блок сравнения с конкурентами */}
+        {/* Сравнение с конкурентами - Карточки */}
         <section className="py-16 px-4 bg-gray-50">
           <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-              Сравнение с конкурентами
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 text-center">
+              Сколько вы теряете на комиссиях
             </h2>
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Платформа</th>
-                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Комиссия</th>
-                      <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Размещение</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    <tr className="bg-blue-50">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-primary">LOCUS</span>
-                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Выгоднее</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center font-semibold text-primary">7%</td>
-                      <td className="px-6 py-4 text-center">1 бесплатно + 79₽</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 text-gray-700">Суточно.ру</td>
-                      <td className="px-6 py-4 text-center text-gray-600">15–20%</td>
-                      <td className="px-6 py-4 text-center text-gray-600">Бесплатно</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 text-gray-700">Авито</td>
-                      <td className="px-6 py-4 text-center text-gray-600">15–25%</td>
-                      <td className="px-6 py-4 text-center text-gray-600">Платно</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 text-gray-700">Циан</td>
-                      <td className="px-6 py-4 text-center text-gray-600">До 20%</td>
-                      <td className="px-6 py-4 text-center text-gray-600">Платно</td>
-                    </tr>
-                  </tbody>
-                </table>
+            <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+              Сравните условия LOCUS с крупными площадками и посчитайте свою экономию
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {/* LOCUS - Выделенная карточка */}
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl p-8 text-white border-4 border-blue-400 shadow-2xl transform scale-105 md:scale-100">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-3xl font-bold">LOCUS</h3>
+                  <span className="bg-green-400 text-green-900 px-3 py-1 rounded-full text-sm font-semibold">
+                    Выгоднее
+                  </span>
+                </div>
+                <ul className="space-y-4 mb-6">
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="w-6 h-6 flex-shrink-0 mt-0.5" />
+                    <span>Комиссия ниже рынка</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="w-6 h-6 flex-shrink-0 mt-0.5" />
+                    <span>Без навязанных услуг</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <CheckCircle2 className="w-6 h-6 flex-shrink-0 mt-0.5" />
+                    <span>Вы платите только за результат</span>
+                  </li>
+                </ul>
+                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4 text-center">
+                  <div className="text-sm text-blue-100 mb-1">В среднем экономия</div>
+                  <div className="text-2xl font-bold">до 50% комиссии</div>
+                </div>
               </div>
-              <div className="bg-blue-50 px-6 py-4 border-t border-blue-100">
-                <p className="text-center text-gray-700 font-medium">
-                  💰 С LOCUS вы экономите до <span className="text-primary font-bold">50% комиссии</span> на каждом бронировании
-                </p>
+
+              {/* Другие сервисы */}
+              <div className="bg-white rounded-2xl p-8 border-2 border-gray-200 shadow-lg">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Крупные площадки</h3>
+                <ul className="space-y-4 mb-6">
+                  <li className="flex items-start gap-3">
+                    <X className="w-6 h-6 flex-shrink-0 mt-0.5 text-red-500" />
+                    <span className="text-gray-700">Комиссия до 25%</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <X className="w-6 h-6 flex-shrink-0 mt-0.5 text-red-500" />
+                    <span className="text-gray-700">Сложные условия</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <X className="w-6 h-6 flex-shrink-0 mt-0.5 text-red-500" />
+                    <span className="text-gray-700">Переплата с каждого бронирования</span>
+                  </li>
+                </ul>
+                <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-200">
+                  <div className="text-sm text-gray-500 mb-1">Суточно.ру, Авито, Циан</div>
+                  <div className="text-lg font-semibold text-gray-900">15–25% комиссии</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Визуальный акцент на экономию */}
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-10 text-white text-center shadow-xl">
+              <div className="text-5xl md:text-6xl font-bold mb-3">
+                До 5 000 ₽ экономии
+              </div>
+              <div className="text-xl md:text-2xl mb-2">с одного бронирования</div>
+              <div className="text-green-100 text-sm">
+                На примере средней брони 30 000 ₽
               </div>
             </div>
           </div>
         </section>
 
-        {/* Блок для собственников */}
+        {/* Блок для собственников - Обновлённая концепция */}
         <section className="py-20 px-4 bg-white">
           <div className="container mx-auto max-w-6xl">
             <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-3xl p-12 md:p-16 text-white">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div>
                   <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                    Сдаёте жильё?
+                    Вы зарабатываете больше — не сервис
                   </h2>
                   <p className="text-xl mb-8 text-blue-50 leading-relaxed">
-                    Первое объявление — бесплатно. Каждое следующее — 79 ₽. Комиссия всего 7% с бронирования.
+                    LOCUS не зарабатывает на каждом вашем шаге. Мы берём минимальную комиссию — и только когда вы реально зарабатываете.
                   </p>
                   <ul className="space-y-4 mb-8">
                     {[
-                      '1 объявление — бесплатно, далее 79 ₽',
-                      'Комиссия 7% — в 2 раза ниже конкурентов',
-                      'Управляйте календарём в несколько кликов',
-                      'Подтверждайте бронирования быстро',
-                      'Смотрите статистику по вашим объявлениям',
+                      'Комиссия ниже рынка',
+                      'Прозрачные условия',
+                      'Никаких скрытых сборов',
+                      'Вы платите меньше — всегда',
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-3">
                         <CheckCircle2 className="w-6 h-6 flex-shrink-0 mt-0.5" />
@@ -289,7 +357,7 @@ export default function Home() {
                     className="inline-flex items-center gap-2 bg-white text-blue-600 px-8 py-4 rounded-xl hover:bg-blue-50 transition-all font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
                   >
                     <HomeIcon className="w-5 h-5" />
-                    Разместить объявление
+                    Разместить объявление и сравнить
                   </button>
                 </div>
                 <div className="grid grid-cols-2 gap-4">

@@ -21,9 +21,12 @@ export default function DateRangePicker({
   className = '',
 }: DateRangePickerProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [activeField, setActiveField] = useState<'checkIn' | 'checkOut' | null>(null)
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [hoverDate, setHoverDate] = useState<string | null>(null)
   const calendarRef = useRef<HTMLDivElement>(null)
+  const checkInRef = useRef<HTMLButtonElement>(null)
+  const checkOutRef = useRef<HTMLButtonElement>(null)
 
   const today = new Date()
   const minDateObj = minDate ? new Date(minDate) : today
@@ -32,8 +35,15 @@ export default function DateRangePicker({
   // Close calendar on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+      if (
+        calendarRef.current && 
+        !calendarRef.current.contains(target) &&
+        !checkInRef.current?.contains(target) &&
+        !checkOutRef.current?.contains(target)
+      ) {
         setIsOpen(false)
+        setActiveField(null)
       }
     }
 
@@ -96,7 +106,16 @@ export default function DateRangePicker({
 
   // Check if date is disabled
   const isDisabled = (date: Date) => {
-    return date < minDateObj
+    if (date < minDateObj) return true
+    
+    // If selecting check-out, disable dates before check-in
+    if (activeField === 'checkOut' && checkIn) {
+      const checkInDate = new Date(checkIn)
+      checkInDate.setHours(0, 0, 0, 0)
+      return date <= checkInDate
+    }
+    
+    return false
   }
 
   // Handle date click
@@ -105,21 +124,31 @@ export default function DateRangePicker({
 
     const dateStr = formatDate(date)
 
-    if (!checkIn || (checkIn && checkOut)) {
-      // Start new selection
+    if (activeField === 'checkIn') {
       onCheckInChange(dateStr)
-      onCheckOutChange('')
-    } else if (checkIn && !checkOut) {
-      // Complete selection
-      if (dateStr <= checkIn) {
-        // If clicked date is before start, make it new start
-        onCheckInChange(dateStr)
+      // If check-out was selected and is now invalid, clear it
+      if (checkOut && dateStr >= checkOut) {
         onCheckOutChange('')
-      } else {
-        // Set as end date
+      }
+      setIsOpen(false)
+      setActiveField(null)
+    } else if (activeField === 'checkOut') {
+      if (!checkIn || dateStr > checkIn) {
         onCheckOutChange(dateStr)
         setIsOpen(false)
+        setActiveField(null)
       }
+    }
+  }
+
+  // Handle field click
+  const handleFieldClick = (field: 'checkIn' | 'checkOut') => {
+    if (isOpen && activeField === field) {
+      setIsOpen(false)
+      setActiveField(null)
+    } else {
+      setActiveField(field)
+      setIsOpen(true)
     }
   }
 
@@ -140,7 +169,6 @@ export default function DateRangePicker({
     const isStartDate = isStart(date)
     const isEndDate = isEnd(date)
     const isInRangeDate = isInRange(date)
-    const isHovered = hoverDate && checkIn && !checkOut && dateStr > checkIn && dateStr <= hoverDate
 
     let classes = 'w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-all cursor-pointer '
 
@@ -148,7 +176,7 @@ export default function DateRangePicker({
       classes += 'text-gray-300 cursor-not-allowed '
     } else if (isStartDate || isEndDate) {
       classes += 'bg-primary text-white hover:bg-primary-dark '
-    } else if (isInRangeDate || isHovered) {
+    } else if (isInRangeDate) {
       classes += 'bg-blue-100 text-primary hover:bg-blue-200 '
     } else if (isToday) {
       classes += 'border-2 border-primary text-primary hover:bg-blue-50 '
@@ -202,9 +230,12 @@ export default function DateRangePicker({
             Заезд
           </label>
           <button
+            ref={checkInRef}
             type="button"
-            onClick={() => setIsOpen(!isOpen)}
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-left bg-white hover:border-gray-300"
+            onClick={() => handleFieldClick('checkIn')}
+            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-left bg-white hover:border-gray-300 ${
+              activeField === 'checkIn' ? 'border-primary ring-2 ring-primary' : 'border-gray-200'
+            }`}
           >
             {checkIn ? formatDisplayDate(checkIn) : 'Выберите дату'}
           </button>
@@ -214,114 +245,97 @@ export default function DateRangePicker({
             Выезд
           </label>
           <button
+            ref={checkOutRef}
             type="button"
-            onClick={() => setIsOpen(!isOpen)}
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-left bg-white hover:border-gray-300"
+            onClick={() => handleFieldClick('checkOut')}
+            disabled={!checkIn}
+            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-left bg-white hover:border-gray-300 ${
+              !checkIn ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : ''
+            } ${
+              activeField === 'checkOut' ? 'border-primary ring-2 ring-primary' : 'border-gray-200'
+            }`}
           >
             {checkOut ? formatDisplayDate(checkOut) : 'Выберите дату'}
           </button>
         </div>
       </div>
 
-      {isOpen && (
+      {isOpen && activeField && (
         <div
           ref={calendarRef}
-          className="absolute z-50 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl p-6 w-[700px] max-w-[95vw]"
+          className="absolute z-50 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl p-6 w-[350px] md:w-[400px] max-w-[95vw] md:static md:mt-2 fixed md:fixed inset-4 md:inset-auto top-auto md:top-auto max-h-[80vh] md:max-h-none overflow-y-auto md:overflow-y-visible"
         >
-          {/* Two months side by side */}
-          <div className="grid grid-cols-2 gap-6">
-            {/* First month */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <button
-                  type="button"
-                  onClick={() => navigateMonth('prev')}
-                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <ChevronLeft className="w-5 h-5 text-gray-600" />
-                </button>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-                </h3>
-                <div className="w-10" /> {/* Spacer */}
-              </div>
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {weekDays.map((day) => (
-                  <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
-                    {day}
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-1">
-                {getDaysInMonth(currentMonth).map((date, index) => (
-                  <div key={index} className="flex items-center justify-center">
-                    {date ? (
-                      <button
-                        type="button"
-                        onClick={() => handleDateClick(date)}
-                        onMouseEnter={() => handleDateHover(date)}
-                        onMouseLeave={() => handleDateHover(null)}
-                        className={getDateClasses(date)}
-                        disabled={isDisabled(date)}
-                      >
-                        {date.getDate()}
-                      </button>
-                    ) : (
-                      <div className="w-10 h-10" />
-                    )}
-                  </div>
-                ))}
-              </div>
+          {/* Single month calendar */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <button
+                type="button"
+                onClick={() => navigateMonth('prev')}
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ChevronLeft className="w-5 h-5 text-gray-600" />
+              </button>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+              </h3>
+              <button
+                type="button"
+                onClick={() => navigateMonth('next')}
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ChevronRight className="w-5 h-5 text-gray-600" />
+              </button>
             </div>
-
-            {/* Second month */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10" /> {/* Spacer */}
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {monthNames[getNextMonth().getMonth()]} {getNextMonth().getFullYear()}
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => navigateMonth('next')}
-                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {weekDays.map((day) => (
-                  <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
-                    {day}
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-1">
-                {getDaysInMonth(getNextMonth()).map((date, index) => (
-                  <div key={index} className="flex items-center justify-center">
-                    {date ? (
-                      <button
-                        type="button"
-                        onClick={() => handleDateClick(date)}
-                        onMouseEnter={() => handleDateHover(date)}
-                        onMouseLeave={() => handleDateHover(null)}
-                        className={getDateClasses(date)}
-                        disabled={isDisabled(date)}
-                      >
-                        {date.getDate()}
-                      </button>
-                    ) : (
-                      <div className="w-10 h-10" />
-                    )}
-                  </div>
-                ))}
-              </div>
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {weekDays.map((day) => (
+                <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
+                  {day}
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1">
+              {getDaysInMonth(currentMonth).map((date, index) => (
+                <div key={index} className="flex items-center justify-center">
+                  {date ? (
+                    <button
+                      type="button"
+                      onClick={() => handleDateClick(date)}
+                      onMouseEnter={() => handleDateHover(date)}
+                      onMouseLeave={() => handleDateHover(null)}
+                      className={getDateClasses(date)}
+                      disabled={isDisabled(date)}
+                    >
+                      {date.getDate()}
+                    </button>
+                  ) : (
+                    <div className="w-10 h-10" />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Info text */}
           <div className="mt-4 pt-4 border-t border-gray-200 text-sm text-gray-500 text-center">
-            Минимальная длительность бронирования: 1 ночь
+            {activeField === 'checkIn' 
+              ? 'Выберите дату заезда' 
+              : checkIn 
+                ? 'Выберите дату выезда (после заезда)'
+                : 'Сначала выберите дату заезда'}
+          </div>
+          
+          {/* Close button for mobile */}
+          <div className="md:hidden mt-4 pt-4 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false)
+                setActiveField(null)
+              }}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg transition-colors font-medium"
+            >
+              Закрыть
+            </button>
           </div>
         </div>
       )}

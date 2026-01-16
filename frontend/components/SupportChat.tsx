@@ -108,16 +108,18 @@ export default function SupportChat() {
 
   return (
     <>
-      {/* Overlay для мобильных */}
+      {/* Overlay */}
       {!isMinimized && (
         <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
-          onClick={handleMinimize}
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+          onClick={handleClose}
         />
       )}
       <div
-        className={`fixed md:bottom-6 md:right-6 md:w-96 md:max-w-[calc(100vw-3rem)] bottom-0 left-0 right-0 w-full max-w-none bg-white rounded-t-2xl md:rounded-2xl shadow-2xl border border-gray-100 z-50 flex flex-col transition-all ${
-          isMinimized ? 'h-16' : 'h-[85vh] md:h-[600px] md:max-h-[calc(100vh-3rem)]'
+        className={`fixed z-50 flex flex-col transition-all bg-white shadow-2xl border border-gray-100 ${
+          isMinimized 
+            ? 'h-16 md:bottom-6 md:right-6 md:w-96 md:rounded-2xl' 
+            : 'md:bottom-6 md:right-6 md:w-96 md:max-w-[calc(100vw-3rem)] md:rounded-2xl md:h-[600px] md:max-h-[calc(100vh-3rem)] bottom-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] max-w-md h-[85vh] max-h-[calc(100vh-2rem)] rounded-2xl'
         }`}
       >
       {/* Header */}
