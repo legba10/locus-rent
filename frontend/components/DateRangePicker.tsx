@@ -263,55 +263,103 @@ export default function DateRangePicker({
       {isOpen && activeField && (
         <div
           ref={calendarRef}
-          className="absolute z-50 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl p-6 w-[350px] md:w-[400px] max-w-[95vw] md:static md:mt-2 fixed md:fixed inset-4 md:inset-auto top-auto md:top-auto max-h-[80vh] md:max-h-none overflow-y-auto md:overflow-y-visible"
+          className="absolute z-50 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl p-4 md:p-6 max-w-[95vw] md:max-w-[700px] md:static md:mt-2"
         >
-          {/* Single month calendar */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <button
-                type="button"
-                onClick={() => navigateMonth('prev')}
-                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
-              </button>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-              </h3>
-              <button
-                type="button"
-                onClick={() => navigateMonth('next')}
-                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <ChevronRight className="w-5 h-5 text-gray-600" />
-              </button>
+          {/* Mobile: single month, Desktop: two months */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {/* First month */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <button
+                  type="button"
+                  onClick={() => navigateMonth('prev')}
+                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <h3 className="text-base md:text-lg font-semibold text-gray-900">
+                  {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+                </h3>
+                <div className="w-10 md:hidden" /> {/* Spacer for mobile */}
+                <button
+                  type="button"
+                  onClick={() => navigateMonth('next')}
+                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors md:hidden"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+              <div className="grid grid-cols-7 gap-1 mb-2">
+                {weekDays.map((day) => (
+                  <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
+                    {day}
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {getDaysInMonth(currentMonth).map((date, index) => (
+                  <div key={index} className="flex items-center justify-center">
+                    {date ? (
+                      <button
+                        type="button"
+                        onClick={() => handleDateClick(date)}
+                        onMouseEnter={() => handleDateHover(date)}
+                        onMouseLeave={() => handleDateHover(null)}
+                        className={getDateClasses(date)}
+                        disabled={isDisabled(date)}
+                      >
+                        {date.getDate()}
+                      </button>
+                    ) : (
+                      <div className="w-10 h-10" />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {weekDays.map((day) => (
-                <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
-                  {day}
-                </div>
-              ))}
-            </div>
-            <div className="grid grid-cols-7 gap-1">
-              {getDaysInMonth(currentMonth).map((date, index) => (
-                <div key={index} className="flex items-center justify-center">
-                  {date ? (
-                    <button
-                      type="button"
-                      onClick={() => handleDateClick(date)}
-                      onMouseEnter={() => handleDateHover(date)}
-                      onMouseLeave={() => handleDateHover(null)}
-                      className={getDateClasses(date)}
-                      disabled={isDisabled(date)}
-                    >
-                      {date.getDate()}
-                    </button>
-                  ) : (
-                    <div className="w-10 h-10" />
-                  )}
-                </div>
-              ))}
+
+            {/* Second month - desktop only */}
+            <div className="hidden md:block">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-10" /> {/* Spacer */}
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {monthNames[getNextMonth().getMonth()]} {getNextMonth().getFullYear()}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => navigateMonth('next')}
+                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+              <div className="grid grid-cols-7 gap-1 mb-2">
+                {weekDays.map((day) => (
+                  <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
+                    {day}
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {getDaysInMonth(getNextMonth()).map((date, index) => (
+                  <div key={index} className="flex items-center justify-center">
+                    {date ? (
+                      <button
+                        type="button"
+                        onClick={() => handleDateClick(date)}
+                        onMouseEnter={() => handleDateHover(date)}
+                        onMouseLeave={() => handleDateHover(null)}
+                        className={getDateClasses(date)}
+                        disabled={isDisabled(date)}
+                      >
+                        {date.getDate()}
+                      </button>
+                    ) : (
+                      <div className="w-10 h-10" />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -322,20 +370,6 @@ export default function DateRangePicker({
               : checkIn 
                 ? 'Выберите дату выезда (после заезда)'
                 : 'Сначала выберите дату заезда'}
-          </div>
-          
-          {/* Close button for mobile */}
-          <div className="md:hidden mt-4 pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false)
-                setActiveField(null)
-              }}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg transition-colors font-medium"
-            >
-              Закрыть
-            </button>
           </div>
         </div>
       )}
