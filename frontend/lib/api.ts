@@ -5,7 +5,7 @@ import { User } from './types/user'
 import { Listing } from './types/listing'
 import { SmartSearchResults } from './types/recommendation'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
@@ -34,10 +34,10 @@ api.interceptors.response.use(
                             error.message?.includes('ERR_CONNECTION_REFUSED')
       
       if (isNetworkError) {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+        const API_URL = process.env.NEXT_PUBLIC_API_URL;
         error.response = {
           data: {
-            message: `Сервер не отвечает. Проверьте подключение к интернету и убедитесь, что backend запущен. (API: ${apiUrl})`,
+            message: `Сервер не отвечает. Проверьте подключение к интернету и убедитесь, что backend запущен. (API: ${API_URL})`,
             error: 'Connection Error',
           },
           status: 0,
