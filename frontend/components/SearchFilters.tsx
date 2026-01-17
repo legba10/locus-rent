@@ -111,9 +111,6 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
       e.stopPropagation()
     }
     
-    // Сохраняем текущую позицию скролла
-    const scrollY = window.scrollY
-    
     const filters = {
       priceMin: priceMin || undefined,
       priceMax: priceMax || undefined,
@@ -129,11 +126,6 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
     if (onClose) {
       onClose()
     }
-    
-    // Восстанавливаем позицию скролла после небольшой задержки
-    setTimeout(() => {
-      window.scrollTo(0, scrollY)
-    }, 0)
   }
 
   const hasActiveFilters =

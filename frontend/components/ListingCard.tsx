@@ -26,12 +26,14 @@ interface ListingCardProps {
 export default function ListingCard({ listing }: ListingCardProps) {
   const price = listing.pricePerNight || listing.price || 0
   const address = listing.address || listing.city || 'Адрес не указан'
-  const imageUrl = listing.images?.[0] || listing.imageUrl
+  // Гарантируем, что images всегда массив
+  const images = Array.isArray(listing.images) ? listing.images : (listing.images ? [listing.images] : [])
+  const imageUrl = images[0] || listing.imageUrl
   const guests = listing.maxGuests || listing.guests
 
   return (
     <Link href={`/listings/${listing.id}`}>
-      <div className="bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 group w-full">
+      <div className="bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 group w-full h-full flex flex-col">
         {/* Image */}
         <div className="relative w-full h-48 sm:h-56 md:h-64 bg-gray-100 overflow-hidden">
           {imageUrl ? (
@@ -59,7 +61,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-5">
+        <div className="p-4 sm:p-5 flex-1 flex flex-col">
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
             {listing.title}
           </h3>
@@ -92,7 +94,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </div>
 
           {/* Price and Rating */}
-          <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-100 mt-auto">
             <div>
               <div className="text-xl sm:text-2xl font-bold text-gray-900">
                 {price.toLocaleString('ru-RU')} ₽

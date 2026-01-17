@@ -121,7 +121,9 @@ export default function ListingDetailPage() {
     )
   }
 
-  const mainImage = listing.images?.[0] || listing.imageUrl
+  // Гарантируем, что images всегда массив
+  const images = Array.isArray(listing.images) ? listing.images : (listing.images ? [listing.images] : [])
+  const mainImage = images[0] || listing.imageUrl
   const price = listing.pricePerNight || listing.price || 0
 
   return (

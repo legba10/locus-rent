@@ -36,6 +36,27 @@ export default function SearchBar() {
     }
   }, [])
 
+  // Синхронизация фильтров с URL при монтировании (если есть параметры в URL)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const priceMin = params.get('priceMin')
+    const priceMax = params.get('priceMax')
+    const propertyType = params.get('propertyType')
+    const rating = params.get('rating')
+    const amenities = params.get('amenities')
+    
+    if (priceMin || priceMax || propertyType || rating || amenities) {
+      setFilters({
+        priceMin: priceMin || undefined,
+        priceMax: priceMax || undefined,
+        propertyType: propertyType || undefined,
+        rating: rating || undefined,
+        amenities: amenities ? amenities.split(',') : undefined,
+      })
+    }
+  }, [])
+
   const handleSearch = () => {
     if (!selectedCity) {
       setCityError('Выберите город из списка')
@@ -45,9 +66,6 @@ export default function SearchBar() {
     if (selectedCity && typeof window !== 'undefined') {
       localStorage.setItem(LAST_CITY_KEY, selectedCity)
     }
-    
-    // Сохраняем текущую позицию скролла
-    const scrollY = window.scrollY
     
     const params = new URLSearchParams()
     if (selectedCity) params.set('city', selectedCity)
@@ -63,13 +81,6 @@ export default function SearchBar() {
     if (filters.amenities && filters.amenities.length > 0) params.set('amenities', filters.amenities.join(','))
     
     router.push(`/search?${params.toString()}`)
-    
-    // Восстанавливаем позицию скролла после навигации (если остаемся на той же странице)
-    setTimeout(() => {
-      if (window.location.pathname === '/') {
-        window.scrollTo(0, scrollY)
-      }
-    }, 100)
   }
 
   const handleCitySelect = (city: string) => {
