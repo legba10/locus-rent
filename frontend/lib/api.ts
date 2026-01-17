@@ -5,7 +5,7 @@ import { User } from './types/user'
 import { Listing } from './types/listing'
 import { SmartSearchResults } from './types/recommendation'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+export const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 if (!API_URL) {
   throw new Error('NEXT_PUBLIC_API_URL is not defined');
@@ -38,10 +38,9 @@ api.interceptors.response.use(
                             error.message?.includes('ERR_CONNECTION_REFUSED')
       
       if (isNetworkError) {
-        const currentApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://locus-rent.onrender.com';
         error.response = {
           data: {
-            message: `Сервер не отвечает. Проверьте подключение к интернету и убедитесь, что backend запущен. (API: ${currentApiUrl})`,
+            message: `Сервер не отвечает. Проверьте подключение к интернету и убедитесь, что backend запущен. (API: ${API_URL})`,
             error: 'Connection Error',
           },
           status: 0,
@@ -67,11 +66,6 @@ api.interceptors.response.use(
           error.message?.includes('fetch failed') ||
           error.code === 'ERR_NETWORK') {
         error.userMessage = 'Сервер не отвечает. Проверьте подключение к интернету и убедитесь, что backend запущен.'
-        // Добавляем более подробную информацию для разработки
-        if (process.env.NODE_ENV === 'development') {
-          console.error('Backend connection error. Is backend running?')
-          console.error('Expected backend URL:', API_URL)
-        }
       } else {
         error.userMessage = 'Ошибка сети. Проверьте подключение к интернету.'
       }
