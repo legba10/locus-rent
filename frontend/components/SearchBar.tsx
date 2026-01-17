@@ -56,9 +56,9 @@ export default function SearchBar() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto" id="home-search">
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6">
-        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
+    <div className="max-w-5xl mx-auto w-full" id="home-search">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-3 sm:p-4 md:p-6 w-full">
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full">
           {/* Location */}
           <div className="flex-1 w-full">
             <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
@@ -98,11 +98,11 @@ export default function SearchBar() {
           <div className="flex items-end w-full lg:w-auto">
             <button
               onClick={handleSearch}
-              type="submit"
-              className="w-full lg:w-auto bg-primary text-white px-6 sm:px-8 py-3 rounded-lg hover:bg-primary-dark transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 font-medium text-sm sm:text-base"
+              type="button"
+              className="w-full lg:w-auto bg-primary text-white px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-lg hover:bg-primary-dark transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 font-medium text-sm sm:text-base min-h-[44px]"
             >
-              <Search className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span>Найти</span>
+              <Search className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+              <span className="whitespace-nowrap">Найти</span>
             </button>
           </div>
         </div>

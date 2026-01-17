@@ -106,8 +106,8 @@ export const authAPI = {
 }
 
 export const listingsAPI = {
-  getAll: (params?: Record<string, any>): Promise<AxiosResponse<{ data: Listing[] }>> => 
-    api.get<{ data: Listing[] }>('/listings', { params }),
+  getAll: (params?: Record<string, any>): Promise<AxiosResponse<Listing[] | { data: Listing[] }>> => 
+    api.get<Listing[] | { data: Listing[] }>('/listings', { params }),
   getOne: (id: string): Promise<AxiosResponse<{ data: Listing }>> => 
     api.get<{ data: Listing }>(`/listings/${id}`),
   create: (data: Partial<Listing>): Promise<AxiosResponse<{ data: Listing }>> => 

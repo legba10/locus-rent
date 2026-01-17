@@ -416,8 +416,8 @@ export default function NewListingStepperPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/30">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 w-full overflow-x-hidden">
+        <div className="max-w-4xl mx-auto w-full">
           <Breadcrumbs
             items={[
               { label: 'Кабинет арендодателя', href: '/landlord' },
@@ -425,38 +425,38 @@ export default function NewListingStepperPage() {
             ]}
           />
 
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Создать объявление</h1>
-            <p className="text-gray-600">Пошаговое размещение вашего жилья</p>
+          <div className="mb-4 sm:mb-6 md:mb-8">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-1 sm:mb-2">Создать объявление</h1>
+            <p className="text-sm sm:text-base text-gray-600">Пошаговое размещение вашего жилья</p>
           </div>
 
-          {/* Progress Steps */}
-          <div className="mb-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <div className="flex items-center justify-between">
+          {/* Progress Steps - Mobile: вертикально, Desktop: горизонтально */}
+          <div className="mb-4 sm:mb-6 md:mb-8 bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-3 sm:p-4 md:p-6 overflow-x-auto">
+            <div className="flex sm:items-center sm:justify-between min-w-max sm:min-w-0">
               {STEPS.map((step, index) => {
                 const StepIcon = step.icon
                 const isCompleted = currentStep > step.id
                 const isActive = currentStep === step.id
                 return (
-                  <div key={step.id} className="flex items-center flex-1">
-                    <div className="flex flex-col items-center flex-1">
+                  <div key={step.id} className="flex items-center flex-shrink-0 sm:flex-1">
+                    <div className="flex flex-col items-center sm:flex-1">
                       <div
-                        className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+                        className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all ${
                           isCompleted
                             ? 'bg-primary text-white shadow-lg scale-105'
                             : isActive
-                            ? 'bg-primary text-white shadow-lg ring-4 ring-primary/20'
+                            ? 'bg-primary text-white shadow-lg ring-2 sm:ring-4 ring-primary/20'
                             : 'bg-gray-100 text-gray-400'
                         }`}
                       >
                         {isCompleted ? (
-                          <CheckCircle2 className="w-7 h-7" />
+                          <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
                         ) : (
-                          <StepIcon className={`w-6 h-6 ${isActive ? 'text-white' : ''}`} />
+                          <StepIcon className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ${isActive ? 'text-white' : ''}`} />
                         )}
                       </div>
                       <span
-                        className={`mt-3 text-xs font-medium text-center max-w-[100px] ${
+                        className={`mt-2 sm:mt-3 text-[10px] sm:text-xs font-medium text-center max-w-[80px] sm:max-w-[100px] ${
                           isActive || isCompleted ? 'text-primary font-semibold' : 'text-gray-400'
                         }`}
                       >
@@ -465,7 +465,7 @@ export default function NewListingStepperPage() {
                     </div>
                     {index < STEPS.length - 1 && (
                       <div
-                        className={`h-1 flex-1 mx-3 rounded transition-all ${
+                        className={`hidden sm:block h-1 flex-1 mx-2 sm:mx-3 rounded transition-all ${
                           isCompleted ? 'bg-primary' : 'bg-gray-200'
                         }`}
                       />
@@ -477,12 +477,12 @@ export default function NewListingStepperPage() {
           </div>
 
           {/* Form Content */}
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-gray-100 p-4 sm:p-6 md:p-8 w-full">
             {/* Step 1: Основная информация */}
             {currentStep === 1 && (
-              <div className="space-y-6 animate-fade-in">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Расскажите о жилье</h2>
-                <p className="text-sm text-gray-500 mb-4">
+              <div className="space-y-4 sm:space-y-6 animate-fade-in">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">Расскажите о жилье</h2>
+                <p className="text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
                   Опишите ваше жилье так, как рассказали бы другу. Что делает его особенным?
                 </p>
                 
@@ -494,7 +494,7 @@ export default function NewListingStepperPage() {
                     type="text"
                     value={formData.title}
                     onChange={(e) => handleChange('title', e.target.value)}
-                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
+                    className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm sm:text-base min-h-[44px] ${
                       errors.title ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'
                     }`}
                     placeholder="Уютная квартира в центре"
@@ -513,7 +513,7 @@ export default function NewListingStepperPage() {
                     value={formData.description}
                     onChange={(e) => handleChange('description', e.target.value)}
                     rows={6}
-                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none ${
+                    className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 border rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none text-sm sm:text-base ${
                       errors.description ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'
                     }`}
                     placeholder="Опишите, что делает ваше жилье комфортным и привлекательным для гостей..."
@@ -1043,18 +1043,18 @@ export default function NewListingStepperPage() {
             )}
 
             {/* Navigation */}
-            <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
               <button
                 onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
                 disabled={currentStep === 1}
-                className="flex items-center gap-2 px-6 py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 border border-gray-200 rounded-lg sm:rounded-xl hover:bg-gray-50 transition-colors font-medium text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 Назад
               </button>
 
-              <div className="flex flex-col items-end gap-2">
-                <label className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex flex-col items-stretch sm:items-end gap-3">
+                <label className="flex items-center justify-center sm:justify-end gap-2 text-xs sm:text-sm text-gray-600">
                   <input
                     type="checkbox"
                     checked={saveAsDraft}
@@ -1066,19 +1066,20 @@ export default function NewListingStepperPage() {
                 <button
                   onClick={handleNext}
                   disabled={loading || !canProceed()}
-                  className="flex items-center gap-2 px-8 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 px-6 sm:px-8 py-2.5 sm:py-3 bg-primary text-white rounded-lg sm:rounded-xl hover:bg-primary-dark transition-all font-semibold text-sm sm:text-base shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] w-full sm:w-auto"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Сохранение...
+                      <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                      <span className="hidden sm:inline">Сохранение...</span>
+                      <span className="sm:hidden">Сохранение</span>
                     </>
                   ) : currentStep === STEPS.length ? (
                     saveAsDraft ? 'Сохранить черновик' : 'Опубликовать'
                   ) : (
                     <>
                       Далее
-                      <ArrowRight className="w-5 h-5" />
+                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                     </>
                   )}
                 </button>

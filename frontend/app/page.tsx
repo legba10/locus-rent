@@ -47,15 +47,20 @@ export default function Home() {
   const loadListings = async () => {
     try {
       setLoading(true)
-      const response = await listingsAPI.getAll({ limit: 12 })
-      const listings = response.data?.data || []
-      setListings(listings)
-      if (listings.length === 0) {
-        toast('Пока нет доступных объявлений', 'info')
+      const response = await listingsAPI.getAll()
+      // Backend возвращает массив напрямую или { data: [] }
+      let listings: any[] = []
+      if (Array.isArray(response.data)) {
+        listings = response.data
+      } else if (response.data?.data && Array.isArray(response.data.data)) {
+        listings = response.data.data
       }
-    } catch (error) {
+      setListings(listings)
+    } catch (error: any) {
       console.error('Error loading listings:', error)
-      toast('Ошибка загрузки объявлений', 'error')
+      const errorMsg = error.userMessage || error.message || 'Ошибка загрузки объявлений'
+      toast(errorMsg, 'error')
+      setListings([])
     } finally {
       setLoading(false)
     }
@@ -65,23 +70,23 @@ export default function Home() {
     <>
       {showWelcome && <WelcomeAnimation onComplete={handleWelcomeComplete} />}
       
-      <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/30">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/30 w-full overflow-x-hidden">
         <Header />
         
         {/* Hero Section - Поиск как главный элемент */}
-        <section className="relative bg-gradient-to-br from-blue-50/30 via-white to-blue-50/30 py-8 sm:py-12 md:py-20 px-4 overflow-hidden">
-          <div className="container mx-auto max-w-5xl relative z-10">
+        <section className="relative bg-gradient-to-br from-blue-50/30 via-white to-blue-50/30 py-8 sm:py-12 md:py-20 px-3 sm:px-4 w-full overflow-x-hidden">
+          <div className="container mx-auto max-w-5xl relative z-10 w-full">
             <div className="text-center mb-6 sm:mb-8 md:mb-12">
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 md:mb-6 leading-tight px-2">
-                Посуточная аренда без лишних комиссий
+                Найдите жильё для короткой аренды
               </h1>
               <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-2">
-                LOCUS берёт 7% — другие сервисы забирают до 25% с каждого бронирования
+                Укажите город, даты и гостей — мы покажем подходящие варианты
               </p>
             </div>
 
             {/* Поисковая панель - главный элемент */}
-            <div className="max-w-4xl mx-auto mb-4 sm:mb-6">
+            <div className="max-w-4xl mx-auto mb-4 sm:mb-6 w-full">
               <SearchBar />
             </div>
 
@@ -110,7 +115,7 @@ export default function Home() {
         <section className="py-8 sm:py-12 md:py-16 px-4 bg-gray-50">
           <div className="container mx-auto max-w-6xl">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 mb-6 sm:mb-8 text-center px-2">
-              Почему LOCUS выгоднее
+              Почему выбирают LOCUS
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               {[
@@ -171,13 +176,13 @@ export default function Home() {
         <section className="py-8 sm:py-12 md:py-16 px-4 bg-white">
           <div className="container mx-auto max-w-5xl">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 mb-6 sm:mb-8 text-center px-2">
-              Как найти жильё
+              Как это работает
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               {[
-                { icon: Search, title: 'Выберите город и даты', desc: 'Укажите город, даты заезда и выезда, количество гостей' },
-                { icon: Calendar, title: 'Сравните варианты', desc: 'Посмотрите подходящие варианты, сравните цены и удобства' },
-                { icon: CheckCircle2, title: 'Забронируйте онлайн', desc: 'Общайтесь с владельцем и бронируйте напрямую' },
+                { icon: Search, title: 'Выбираете город и даты', desc: 'Укажите город, даты заезда и выезда, количество гостей' },
+                { icon: Calendar, title: 'Сравниваете варианты', desc: 'Посмотрите подходящие варианты, сравните цены и удобства' },
+                { icon: CheckCircle2, title: 'Бронируете онлайн', desc: 'Общайтесь с владельцем и бронируйте напрямую' },
               ].map((step, i) => (
                 <div key={i} className="flex items-start gap-3 sm:gap-4 bg-gray-50 rounded-xl p-4 sm:p-5">
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -197,7 +202,7 @@ export default function Home() {
         {/* Сравнение с конкурентами - Справка */}
         <section className="py-12 md:py-16 px-4 bg-white">
           <div className="container mx-auto max-w-4xl">
-            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-8 text-center">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 mb-6 sm:mb-8 text-center px-2">
               Сравнение с другими сервисами
             </h2>
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -250,11 +255,11 @@ export default function Home() {
           <div className="container mx-auto max-w-4xl">
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 md:p-12">
               <div className="text-center mb-8">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-                  Вы зарабатываете больше — не сервис
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4 px-2">
+                  Сдаёте жильё?
                 </h2>
                 <p className="text-base sm:text-lg text-gray-700 max-w-2xl mx-auto px-2">
-                  LOCUS не зарабатывает на каждом вашем шаге. Мы берём минимальную комиссию — и только когда вы реально зарабатываете.
+                  Размещайте объявления бесплатно и платите комиссию только с подтверждённых бронирований. Без скрытых сборов.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -278,8 +283,8 @@ export default function Home() {
         </section>
 
         {/* Доступные варианты */}
-        <main className="container mx-auto px-4 py-16">
-          <div className="flex justify-between items-center mb-8">
+        <main className="container mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-16 w-full overflow-x-hidden">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
                 {listings.length > 0 ? 'Доступные варианты' : 'Начните поиск'}
@@ -352,7 +357,7 @@ export default function Home() {
             <div className="text-center">
               <Logo size="md" showText={true} className="justify-center mb-4" />
               <p className="text-sm sm:text-base text-gray-600 mb-6 max-w-2xl mx-auto px-2">
-                LOCUS — удобнее Авито. Честная платформа без скрытых комиссий
+                LOCUS — умный сервис подбора жилья для суточной аренды
               </p>
               <div className="flex justify-center gap-6 text-sm text-gray-600">
                 <Link href="/smart-search" className="hover:text-primary transition-colors">

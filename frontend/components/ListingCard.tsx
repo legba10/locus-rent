@@ -31,9 +31,9 @@ export default function ListingCard({ listing }: ListingCardProps) {
 
   return (
     <Link href={`/listings/${listing.id}`}>
-      <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 group">
+      <div className="bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 group w-full">
         {/* Image */}
-        <div className="relative w-full h-64 bg-gray-100 overflow-hidden">
+        <div className="relative w-full h-48 sm:h-56 md:h-64 bg-gray-100 overflow-hidden">
           {imageUrl ? (
             <Image
               src={imageUrl}
@@ -59,18 +59,18 @@ export default function ListingCard({ listing }: ListingCardProps) {
         </div>
 
         {/* Content */}
-        <div className="p-5">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+        <div className="p-4 sm:p-5">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
             {listing.title}
           </h3>
           
-          <div className="flex items-center gap-1 text-gray-600 text-sm mb-3">
-            <MapPin className="w-4 h-4 flex-shrink-0" />
+          <div className="flex items-center gap-1 text-gray-600 text-xs sm:text-sm mb-3">
+            <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
             <span className="line-clamp-1">{address}</span>
           </div>
 
           {/* Features */}
-          <div className="flex items-center gap-4 text-gray-500 text-sm mb-4">
+          <div className="flex items-center gap-3 sm:gap-4 text-gray-500 text-xs sm:text-sm mb-3 sm:mb-4">
             {guests && (
               <div className="flex items-center gap-1">
                 <Users className="w-4 h-4" />
@@ -92,17 +92,17 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </div>
 
           {/* Price and Rating */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-100">
             <div>
-              <div className="text-2xl font-bold text-gray-900">
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">
                 {price.toLocaleString('ru-RU')} ₽
               </div>
-              <div className="text-xs text-gray-500">за ночь</div>
+              <div className="text-[10px] sm:text-xs text-gray-500">за ночь</div>
             </div>
             
             {listing.reviewsCount && listing.reviewsCount > 0 && (
               <div className="text-right">
-                <div className="text-sm font-medium text-gray-700">
+                <div className="text-xs sm:text-sm font-medium text-gray-700">
                   {listing.reviewsCount} {listing.reviewsCount === 1 ? 'отзыв' : listing.reviewsCount < 5 ? 'отзыва' : 'отзывов'}
                 </div>
               </div>

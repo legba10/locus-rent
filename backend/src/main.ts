@@ -3,6 +3,9 @@ import { ValidationPipe, Logger } from '@nestjs/common'
 import { AppModule } from './app.module'
 import { DataSource } from 'typeorm'
 import * as express from 'express'
+import { UsersService } from './users/users.service'
+import { UserRole } from './users/entities/user.entity'
+import * as bcrypt from 'bcrypt'
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap')
@@ -107,6 +110,46 @@ async function bootstrap() {
         transform: true,
       })
     )
+
+    // Автоматическое создание администратора при первом запуске
+    try {
+      const usersService = app.get(UsersService)
+      const adminEmail = process.env.ADMIN_EMAIL || 'feodal.00@bk.ru'
+      const adminPassword = process.env.ADMIN_PASSWORD || 'admin123'
+      
+      const existingAdmin = await usersService.findByEmail(adminEmail)
+      
+      if (!existingAdmin) {
+        logger.log(`👤 Creating admin user: ${adminEmail}`)
+        const hashedPassword = await bcrypt.hash(adminPassword, 10)
+        const newAdmin = await usersService.create({
+          email: adminEmail,
+          password: hashedPassword,
+          firstName: 'Admin',
+          lastName: 'User',
+          role: UserRole.ADMIN,
+          isActive: true,
+          emailVerified: true,
+        })
+        logger.log(`✅ Admin user created successfully`)
+        logger.log(`   Email: ${adminEmail}`)
+        logger.log(`   Password: ${adminPassword}`)
+        logger.warn(`   ⚠️  Please change the default password after first login!`)
+      } else if (existingAdmin.role !== UserRole.ADMIN) {
+        // Обновляем роль существующего пользователя
+        logger.log(`👤 Updating user to admin: ${adminEmail}`)
+        await usersService.update(existingAdmin.id, {
+          role: UserRole.ADMIN,
+          emailVerified: true,
+        })
+        logger.log(`✅ User role updated to admin`)
+      } else {
+        logger.log(`✅ Admin user already exists: ${adminEmail}`)
+      }
+    } catch (adminError) {
+      logger.warn(`⚠️  Failed to create/update admin user: ${adminError.message}`)
+      logger.warn(`   This is not critical, but admin features may not work`)
+    }
 
     const port = process.env.PORT || 3001
     await app.listen(port)

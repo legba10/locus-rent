@@ -176,8 +176,8 @@ export default function CityAutocomplete({
   }
 
   return (
-    <div className={`relative ${className}`}>
-      <div className="relative">
+    <div className={`relative w-full ${className}`}>
+      <div className="relative w-full">
         <input
           ref={inputRef}
           type="text"
@@ -187,7 +187,7 @@ export default function CityAutocomplete({
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
-          className={`w-full px-4 py-3 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all ${
+          className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 pl-9 sm:pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm sm:text-base min-h-[44px] ${
             error ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'
           }`}
         />
@@ -204,7 +204,7 @@ export default function CityAutocomplete({
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-64 overflow-y-auto"
+          className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-64 overflow-y-auto left-0 right-0"
         >
           {suggestions.map((city, index) => (
             <button

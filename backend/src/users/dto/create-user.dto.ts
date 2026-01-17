@@ -42,6 +42,10 @@ export class CreateUserDto {
   phoneVerified?: boolean
 
   @IsOptional()
+  @IsBoolean()
+  isActive?: boolean
+
+  @IsOptional()
   city?: string
 
   @IsOptional()
