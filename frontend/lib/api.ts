@@ -5,7 +5,11 @@ import { User } from './types/user'
 import { Listing } from './types/listing'
 import { SmartSearchResults } from './types/recommendation'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://locus-rent.onrender.com';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!API_URL) {
+  throw new Error('NEXT_PUBLIC_API_URL is not defined');
+}
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
