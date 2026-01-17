@@ -60,27 +60,8 @@ export class SupportService {
   }
 
   private async notifyAdmin(message: SupportMessage): Promise<void> {
-    const adminEmail = 'feodal.00@bk.ru'
-    const subject = 'Новое сообщение в поддержку LOCUS'
-    const text = `
-Новое сообщение в поддержку LOCUS
-
-Имя: ${message.name}
-Телефон: ${message.phone}
-${message.description ? `Описание: ${message.description}` : ''}
-
-Сообщение:
-${message.message}
-
-${message.user ? `Пользователь: ${message.user.email}` : 'Гость'}
-
-Дата: ${message.createdAt.toLocaleString('ru-RU')}
-    `.trim()
-
-    try {
-      await this.notificationsService.sendEmail(adminEmail, subject, text)
-    } catch (error) {
-      console.error('Failed to send admin notification:', error)
-    }
+    // Убрали email-уведомления - все сообщения теперь только в админ-панели
+    // Сообщения сохраняются в БД и отображаются в админ-панели
+    console.log(`New support message from ${message.name} (${message.phone})`)
   }
 }

@@ -49,4 +49,15 @@ export class AdminService {
   async blockUser(id: string) {
     return this.usersService.update(id, { isActive: false } as any)
   }
+
+  async promoteToAdmin(emailOrPhone: string) {
+    const user = await this.usersService.findByEmail(emailOrPhone) || 
+                 await this.usersService.findByPhone(emailOrPhone)
+    
+    if (!user) {
+      throw new Error('Пользователь не найден')
+    }
+    
+    return this.usersService.update(user.id, { role: 'admin' } as any)
+  }
 }

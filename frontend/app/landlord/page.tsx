@@ -61,15 +61,14 @@ export default function LandlordPage() {
   const handleDeleteListing = async (id: string) => {
     confirmDialog.show({
       title: 'Удалить объявление?',
-      message:
-        'Объявление будет скрыто и перестанет отображаться пользователям. Вы всегда сможете создать копию на основе этого объявления.',
+      message: 'Объявление будет скрыто и перестанет отображаться пользователям.',
       confirmText: 'Удалить',
       cancelText: 'Отмена',
       variant: 'danger',
       onConfirm: async () => {
         try {
           await listingsAPI.delete(id)
-          toast('Объявление скрыто (мягкое удаление)', 'success')
+          toast('Объявление скрыто', 'success')
           loadData()
         } catch (error) {
           console.error('Error deleting listing:', error)
@@ -84,125 +83,108 @@ export default function LandlordPage() {
     try {
       await listingsAPI.update(listing.id, { status: newStatus })
       toast(
-        newStatus === 'active'
-          ? 'Объявление опубликовано'
-          : 'Объявление скрыто от пользователей',
+        newStatus === 'active' ? 'Объявление опубликовано' : 'Объявление скрыто',
         'success'
       )
       loadData()
     } catch (error) {
       console.error('Error toggling visibility:', error)
-      toast('Не удалось изменить видимость объявления', 'error')
+      toast('Не удалось изменить видимость', 'error')
     }
   }
 
   const handleDuplicateListing = async (id: string) => {
     try {
-      const response = await listingsAPI.duplicate(id)
-      toast('Копия объявления сохранена как черновик', 'success')
-      // Можем сразу открыть редактирование копии или просто обновить список
+      await listingsAPI.duplicate(id)
+      toast('Копия объявления создана', 'success')
       loadData()
     } catch (error) {
       console.error('Error duplicating listing:', error)
-      toast('Не удалось создать копию объявления', 'error')
+      toast('Не удалось создать копию', 'error')
     }
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
+      <main className="container-custom py-4 sm:py-6 md:py-8">
+        <div className="max-w-6xl mx-auto w-full">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Кабинет арендодателя</h1>
-              <p className="text-gray-600 mt-1">Управляйте объявлениями, бронированиями и статистикой</p>
+              <h1 className="heading-1 mb-2">Кабинет арендодателя</h1>
+              <p className="text-caption">Управляйте объявлениями и бронированиями</p>
             </div>
-            <Link
-              href="/landlord/listings/new-stepper"
-              className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-all shadow-sm hover:shadow-md flex items-center gap-2 font-medium"
-            >
-              <Plus className="w-5 h-5" />
-              Создать объявление
+            <Link href="/landlord/listings/new-stepper" className="btn btn-primary w-full sm:w-auto">
+              <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span>Создать объявление</span>
             </Link>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+            <div className="card">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">Объявления</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.listings}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-caption mb-1">Объявления</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.listings}</p>
                 </div>
-                <Home className="w-10 h-10 text-primary opacity-20" />
+                <Home className="w-8 h-8 sm:w-10 sm:h-10 text-primary opacity-20 flex-shrink-0" />
               </div>
             </div>
-            <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+            <div className="card">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">Бронирования</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.bookings}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-caption mb-1">Бронирования</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.bookings}</p>
                 </div>
-                <Calendar className="w-10 h-10 text-primary opacity-20" />
+                <Calendar className="w-8 h-8 sm:w-10 sm:h-10 text-primary opacity-20 flex-shrink-0" />
               </div>
             </div>
-            <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+            <div className="card">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">Доход</p>
-                  <p className="text-3xl font-bold text-gray-900">{stats.revenue.toLocaleString('ru-RU')} ₽</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-caption mb-1">Доход</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 truncate">
+                    {stats.revenue.toLocaleString('ru-RU')} ₽
+                  </p>
                 </div>
-                <DollarSign className="w-10 h-10 text-primary opacity-20" />
+                <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-primary opacity-20 flex-shrink-0" />
               </div>
             </div>
-            <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+            <div className="card">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm mb-1">Рейтинг</p>
-                  <p className="text-3xl font-bold text-gray-900">
+                <div className="min-w-0 flex-1">
+                  <p className="text-caption mb-1">Рейтинг</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-gray-900">
                     {stats.rating > 0 ? stats.rating.toFixed(1) : '—'}
                   </p>
                 </div>
-                <Star className="w-10 h-10 text-primary opacity-20" />
+                <Star className="w-8 h-8 sm:w-10 sm:h-10 text-primary opacity-20 flex-shrink-0" />
               </div>
             </div>
           </div>
 
-          {/* Tabs */}
-          <div className="flex gap-4 mb-6 border-b border-gray-200">
+          {/* Tabs - Horizontal on all screens */}
+          <div className="flex flex-row gap-2 sm:gap-4 mb-6 overflow-x-auto scrollbar-hide pb-2">
             <button
               onClick={() => setActiveTab('listings')}
-              className={`px-4 py-3 font-medium transition-colors relative ${
-                activeTab === 'listings'
-                  ? 'text-primary'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
+              className={`tab whitespace-nowrap ${activeTab === 'listings' ? 'tab-active' : 'tab-inactive'}`}
             >
               Мои объявления
-              {activeTab === 'listings' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
-              )}
             </button>
             <button
               onClick={() => setActiveTab('bookings')}
-              className={`px-4 py-3 font-medium transition-colors relative ${
-                activeTab === 'bookings'
-                  ? 'text-primary'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
+              className={`tab whitespace-nowrap ${activeTab === 'bookings' ? 'tab-active' : 'tab-inactive'}`}
             >
               Бронирования
-              {activeTab === 'bookings' && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></div>
-              )}
             </button>
           </div>
 
           {/* Content */}
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid-responsive">
               {[...Array(3)].map((_, i) => (
                 <ListingCardSkeleton key={i} />
               ))}
@@ -213,58 +195,58 @@ export default function LandlordPage() {
                 <EmptyState
                   icon={Home}
                   title="Пока нет объявлений"
-                  description="Создайте первое объявление, чтобы начать сдавать жильё. Это займёт всего несколько минут."
+                  description="Создайте первое объявление, чтобы начать сдавать жильё."
                   action={{
                     label: 'Создать объявление',
                     href: '/landlord/listings/new-stepper'
                   }}
                 />
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid-responsive">
                   {listings.map((listing) => (
-                    <div key={listing.id} className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all group">
+                    <div key={listing.id} className="card card-hover overflow-hidden">
                       {/* Image */}
-                      <div className="relative w-full h-48 bg-gray-100">
+                      <div className="relative w-full h-48 bg-gray-100 -m-4 sm:-m-6 mb-4 sm:mb-6">
                         {listing.images?.[0] ? (
                           <img
                             src={listing.images[0]}
                             alt={listing.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-400">
                             <Home className="w-12 h-12" />
                           </div>
                         )}
-                        <div className="absolute top-3 right-3 flex gap-2">
+                        <div className="absolute top-3 right-3">
                           <Link
                             href={`/listings/${listing.id}`}
-                            className="bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full hover:bg-white transition-colors text-xs font-medium text-gray-800"
-                            title="Просмотр объявления"
+                            className="btn btn-sm bg-white/90 backdrop-blur-sm hover:bg-white text-gray-800"
                           >
-                            <span>Открыть</span>
+                            Открыть
                           </Link>
                         </div>
                       </div>
                       
                       {/* Content */}
-                      <div className="p-5">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                          {listing.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                      <div>
+                        <h3 className="heading-3 mb-2 line-clamp-2">{listing.title}</h3>
+                        <p className="text-caption mb-3 line-clamp-1">
                           {listing.address || listing.city}
                         </p>
+                        
                         {/* Status */}
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="mb-3">
                           <span
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                            className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
                               listing.status === 'active'
                                 ? 'bg-green-50 text-green-700 border border-green-100'
                                 : listing.status === 'draft'
                                 ? 'bg-gray-50 text-gray-700 border border-gray-100'
                                 : listing.status === 'hidden'
                                 ? 'bg-yellow-50 text-yellow-700 border border-yellow-100'
+                                : listing.status === 'moderation'
+                                ? 'bg-blue-50 text-blue-700 border border-blue-100'
                                 : 'bg-gray-50 text-gray-500 border border-gray-100'
                             }`}
                           >
@@ -272,44 +254,40 @@ export default function LandlordPage() {
                             {listing.status === 'draft' && 'Черновик'}
                             {listing.status === 'hidden' && 'Скрыто'}
                             {listing.status === 'moderation' && 'На модерации'}
-                            {listing.status === 'rejected' && 'Удалено'}
+                            {listing.status === 'rejected' && 'Отклонено'}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                        
+                        {/* Price and Actions */}
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                           <div>
                             <div className="text-xl font-bold text-gray-900">
                               {listing.pricePerNight?.toLocaleString('ru-RU')} ₽
                             </div>
-                            <div className="text-xs text-gray-500">за ночь</div>
+                            <div className="text-caption">за ночь</div>
                           </div>
-                          <div className="flex flex-col items-end gap-2">
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => handleToggleVisibility(listing)}
-                                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-xs font-medium text-gray-700"
-                              >
-                                {listing.status === 'active' ? 'Скрыть' : 'Показать'}
-                              </button>
-                              <button
-                                onClick={() => handleDuplicateListing(listing.id)}
-                                className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-xs font-medium text-gray-700"
-                              >
-                                Дублировать
-                              </button>
-                              <button
-                                onClick={() => handleDeleteListing(listing.id)}
-                                className="px-3 py-1 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-xs font-medium text-red-700"
-                              >
-                                Удалить
-                              </button>
-                            </div>
-                            <Link
-                              href={`/landlord/listings/${listing.id}/edit`}
-                              className="text-xs text-gray-500 hover:text-gray-700 underline decoration-dotted"
-                            >
-                              Редактировать детали
-                            </Link>
-                          </div>
+                        </div>
+                        
+                        {/* Actions */}
+                        <div className="flex flex-wrap gap-2 mt-4">
+                          <button
+                            onClick={() => handleToggleVisibility(listing)}
+                            className="btn btn-sm btn-secondary flex-1 min-w-0"
+                          >
+                            {listing.status === 'active' ? 'Скрыть' : 'Показать'}
+                          </button>
+                          <button
+                            onClick={() => handleDuplicateListing(listing.id)}
+                            className="btn btn-sm btn-secondary flex-1 min-w-0"
+                          >
+                            Копировать
+                          </button>
+                          <button
+                            onClick={() => handleDeleteListing(listing.id)}
+                            className="btn btn-sm bg-red-50 hover:bg-red-100 text-red-700 flex-1 min-w-0"
+                          >
+                            Удалить
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -323,29 +301,29 @@ export default function LandlordPage() {
                 <EmptyState
                   icon={Calendar}
                   title="Пока нет бронирований"
-                  description="Когда гости забронируют ваше жильё, запросы появятся здесь. Вы сможете подтвердить или отклонить их."
+                  description="Когда гости забронируют ваше жильё, запросы появятся здесь."
                 />
               ) : (
                 <div className="space-y-4">
                   {bookings.map((booking) => (
-                    <div key={booking.id} className="bg-white rounded-xl border border-gray-100 p-6">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <div key={booking.id} className="card">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="heading-3 mb-2">
                             {booking.listing?.title || 'Объявление'}
                           </h3>
-                          <p className="text-sm text-gray-600 mb-1">
-                            {new Date(booking.checkIn).toLocaleDateString('ru-RU')} — {new Date(booking.checkOut).toLocaleDateString('ru-RU')}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Гостей: {booking.guests}
-                          </p>
+                          <div className="space-y-1 text-caption">
+                            <p>
+                              {new Date(booking.checkIn).toLocaleDateString('ru-RU')} — {new Date(booking.checkOut).toLocaleDateString('ru-RU')}
+                            </p>
+                            <p>Гостей: {booking.guests}</p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-xl font-bold text-gray-900 mb-1">
+                        <div className="flex flex-col sm:items-end gap-2 w-full sm:w-auto">
+                          <div className="text-xl font-bold text-gray-900">
                             {booking.totalPrice?.toLocaleString('ru-RU')} ₽
                           </div>
-                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                             booking.status === 'confirmed' ? 'bg-green-100 text-green-700' :
                             booking.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
                             'bg-gray-100 text-gray-700'

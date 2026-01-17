@@ -72,115 +72,69 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Личный кабинет</h1>
-            <p className="text-gray-600">Управляйте профилем, бронированиями и настройками</p>
+      <main className="container-custom py-4 sm:py-6 md:py-8">
+        <div className="max-w-6xl mx-auto w-full">
+          <div className="mb-6 sm:mb-8">
+            <h1 className="heading-1 mb-2">Личный кабинет</h1>
+            <p className="text-caption">Управляйте профилем, бронированиями и настройками</p>
           </div>
 
-          {/* Tabs */}
-          <div className="flex gap-4 mb-6 border-b border-border">
+          {/* Tabs - Horizontal scroll on mobile */}
+          <div className="flex flex-row gap-2 sm:gap-4 mb-6 overflow-x-auto scrollbar-hide pb-2 border-b border-gray-200">
             <button
               onClick={() => setActiveTab('profile')}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'profile'
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-text-secondary hover:text-primary'
-              }`}
+              className={`tab whitespace-nowrap ${activeTab === 'profile' ? 'tab-active' : 'tab-inactive'}`}
             >
-              <UserIcon className="w-5 h-5 inline mr-2" />
+              <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
               Профиль
             </button>
             <button
               onClick={() => setActiveTab('bookings')}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'bookings'
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-text-secondary hover:text-primary'
-              }`}
+              className={`tab whitespace-nowrap ${activeTab === 'bookings' ? 'tab-active' : 'tab-inactive'}`}
             >
-              <Calendar className="w-5 h-5 inline mr-2" />
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
               Бронирования
             </button>
             <button
               onClick={() => setActiveTab('favorites')}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'favorites'
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-text-secondary hover:text-primary'
-              }`}
+              className={`tab whitespace-nowrap ${activeTab === 'favorites' ? 'tab-active' : 'tab-inactive'}`}
             >
-              <Heart className="w-5 h-5 inline mr-2" />
+              <Heart className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
               Избранное
             </button>
             <button
-              onClick={() => setActiveTab('messages')}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'messages'
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-text-secondary hover:text-primary'
-              }`}
-            >
-              <MessageSquare className="w-5 h-5 inline mr-2" />
-              Сообщения
-            </button>
-            <button
-              onClick={() => setActiveTab('notifications')}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'notifications'
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-text-secondary hover:text-primary'
-              }`}
-            >
-              <Bell className="w-5 h-5 inline mr-2" />
-              Уведомления
-            </button>
-            <button
               onClick={() => setActiveTab('history')}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'history'
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-text-secondary hover:text-primary'
-              }`}
+              className={`tab whitespace-nowrap ${activeTab === 'history' ? 'tab-active' : 'tab-inactive'}`}
             >
-              <History className="w-5 h-5 inline mr-2" />
-              История поисков
+              <History className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
+              История
             </button>
             <button
               onClick={() => setActiveTab('preferences')}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'preferences'
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-text-secondary hover:text-primary'
-              }`}
+              className={`tab whitespace-nowrap ${activeTab === 'preferences' ? 'tab-active' : 'tab-inactive'}`}
             >
-              <Sparkles className="w-5 h-5 inline mr-2" />
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
               Предпочтения
             </button>
             <button
               onClick={() => setActiveTab('settings')}
-              className={`px-4 py-2 font-medium transition-colors ${
-                activeTab === 'settings'
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-text-secondary hover:text-primary'
-              }`}
+              className={`tab whitespace-nowrap ${activeTab === 'settings' ? 'tab-active' : 'tab-inactive'}`}
             >
-              <Settings className="w-5 h-5 inline mr-2" />
+              <Settings className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
               Настройки
             </button>
           </div>
 
           {/* Content */}
-          <div className="bg-white rounded-xl shadow-soft p-6">
+          <div className="card">
             {activeTab === 'profile' && (
               <div>
-                <h2 className="text-2xl font-bold mb-4">Ваши данные</h2>
-                <p className="text-sm text-gray-600 mb-6">
-                  Обновите информацию о себе. Это поможет нам лучше подбирать варианты жилья.
+                <h2 className="heading-2 mb-2">Ваши данные</h2>
+                <p className="text-caption mb-6">
+                  Обновите информацию о себе для лучшего подбора вариантов
                 </p>
                 <div className="space-y-4">
                   <div>
@@ -189,7 +143,7 @@ export default function ProfilePage() {
                     </label>
                     <input
                       type="text"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="input"
                       defaultValue={user?.firstName ?? ''}
                       placeholder="Ваше имя"
                     />
@@ -200,7 +154,7 @@ export default function ProfilePage() {
                     </label>
                     <input
                       type="text"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="input"
                       defaultValue={user?.lastName ?? ''}
                       placeholder="Ваша фамилия"
                     />
@@ -211,7 +165,7 @@ export default function ProfilePage() {
                     </label>
                     <input
                       type="email"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="input"
                       defaultValue={user?.email ?? ''}
                       placeholder="email@example.com"
                     />
@@ -222,12 +176,12 @@ export default function ProfilePage() {
                     </label>
                     <input
                       type="tel"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="input"
                       defaultValue={user?.phone ?? ''}
                       placeholder="+7 (999) 123-45-67"
                     />
                   </div>
-                  <button className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors font-medium shadow-sm hover:shadow-md">
+                  <button className="btn btn-primary w-full sm:w-auto">
                     Сохранить изменения
                   </button>
                 </div>

@@ -34,4 +34,9 @@ export class AdminController {
   blockUser(@Param('id') id: string) {
     return this.adminService.blockUser(id)
   }
+
+  @Patch('users/promote')
+  promoteToAdmin(@Body() body: { emailOrPhone: string }) {
+    return this.adminService.promoteToAdmin(body.emailOrPhone)
+  }
 }

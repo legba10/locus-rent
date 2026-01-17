@@ -182,4 +182,6 @@ export const adminAPI = {
     api.patch(`/admin/listings/${id}/moderate`, { status }),
   getAllUsers: () => api.get('/admin/users'),
   blockUser: (id: string) => api.patch(`/admin/users/${id}/block`),
+  promoteToAdmin: (emailOrPhone: string) =>
+    api.patch('/admin/users/promote', { emailOrPhone }),
 }
