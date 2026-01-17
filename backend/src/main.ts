@@ -66,14 +66,29 @@ async function bootstrap() {
 
     // CORS
     app.enableCors({
-      origin: [
-        'https://locus-rent-frontend.vercel.app',
-        'https://locus-rent-frontend-fvfn.vercel.app',
-        'https://locus-rent.onrender.com',
-      ],
+      origin: (origin, callback) => {
+        if (!origin) {
+          callback(null, true)
+          return
+        }
+        const allowedOrigins = [
+          /^https:\/\/.*\.vercel\.app$/,
+          'http://localhost:3000',
+          'http://localhost:3001',
+          'https://locus-rent.onrender.com',
+        ]
+        const isAllowed = allowedOrigins.some(allowed => {
+          if (typeof allowed === 'string') {
+            return origin === allowed
+          }
+          return allowed.test(origin)
+        })
+        callback(null, isAllowed)
+      },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
+      optionsSuccessStatus: 204,
     })
 
     // Global prefix
