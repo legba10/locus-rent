@@ -66,8 +66,14 @@ async function bootstrap() {
 
     // CORS
     app.enableCors({
-      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+      origin: [
+        'https://locus-rent-frontend.vercel.app',
+        'https://locus-rent-frontend-fvfn.vercel.app',
+        'https://locus-rent.onrender.com',
+      ],
       credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
     })
 
     // Global prefix
