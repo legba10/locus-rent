@@ -57,12 +57,6 @@ export class ListingsController {
     return this.listingsService.update(id, updateListingDto)
   }
 
-  @Post(':id/duplicate')
-  @UseGuards(JwtAuthGuard)
-  duplicate(@Param('id') id: string, @Request() req) {
-    return this.listingsService.duplicate(id, req.user.id)
-  }
-
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string) {
