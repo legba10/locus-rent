@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Menu, X, User, LogOut, Home } from 'lucide-react'
+import { Menu, X, User, LogOut, Home, Shield } from 'lucide-react'
 import { useAuthStore } from '@/lib/store'
 import Logo from './Logo'
 
@@ -15,8 +15,8 @@ export default function Header() {
 
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-gray-100/50 sticky top-0 z-50 shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+      <div className="container mx-auto px-3 sm:px-4">
+        <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
           <Logo showText={true} />
 
@@ -68,6 +68,16 @@ export default function Header() {
                       <Home className="w-4 h-4" />
                       Кабинет арендодателя
                     </Link>
+                    {user?.role === 'admin' && (
+                      <Link
+                        href="/admin"
+                        className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <Shield className="w-4 h-4" />
+                        Админ-панель
+                      </Link>
+                    )}
                     <hr className="my-2 border-gray-100" />
                     <button
                       onClick={() => {
@@ -104,7 +114,8 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-gray-600 hover:text-gray-900 transition-colors"
+            className="md:hidden text-gray-600 hover:text-gray-900 transition-colors p-2 -mr-2"
+            aria-label="Меню"
           >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -112,8 +123,8 @@ export default function Header() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-100">
-            <nav className="flex flex-col gap-3">
+          <div className="md:hidden py-3 sm:py-4 border-t border-gray-100">
+            <nav className="flex flex-col gap-2 sm:gap-3">
               <Link
                 href="/smart-search"
                 className="text-gray-600 hover:text-primary transition-colors font-medium py-2"
@@ -151,6 +162,15 @@ export default function Header() {
                   >
                     Кабинет арендодателя
                   </Link>
+                  {user?.role === 'admin' && (
+                    <Link
+                      href="/admin"
+                      className="text-gray-600 hover:text-primary transition-colors font-medium py-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Админ-панель
+                    </Link>
+                  )}
                   <hr className="my-2 border-gray-100" />
                   <button
                     onClick={() => {
@@ -174,7 +194,7 @@ export default function Header() {
                   </Link>
                   <Link
                     href="/register"
-                    className="bg-primary text-white px-5 py-3 rounded-xl hover:bg-primary-dark transition-all text-center font-semibold shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95"
+                    className="bg-primary text-white px-5 py-3 rounded-xl hover:bg-primary-dark transition-all text-center font-semibold shadow-md hover:shadow-lg"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Регистрация

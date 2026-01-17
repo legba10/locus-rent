@@ -11,6 +11,7 @@ import { NotificationsModule } from './notifications/notifications.module'
 import { AdminModule } from './admin/admin.module'
 import { TelegramModule } from './telegram/telegram.module'
 import { RecommendationModule } from './recommendation/recommendation.module'
+import { SupportModule } from './support/support.module'
 
 @Module({
   imports: [
@@ -94,6 +95,7 @@ import { RecommendationModule } from './recommendation/recommendation.module'
     AdminModule,
     TelegramModule,
     RecommendationModule,
+    SupportModule,
   ],
 })
 export class AppModule {}

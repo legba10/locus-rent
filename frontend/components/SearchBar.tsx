@@ -56,12 +56,12 @@ export default function SearchBar() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-        <div className="flex flex-col lg:flex-row gap-4">
+    <div className="max-w-5xl mx-auto" id="home-search">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6">
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
           {/* Location */}
-          <div className="flex-1">
-            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+          <div className="flex-1 w-full">
+            <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
               Город
             </label>
             <CityAutocomplete
@@ -74,7 +74,7 @@ export default function SearchBar() {
           </div>
 
           {/* Dates */}
-          <div className="flex-1">
+          <div className="flex-1 w-full">
             <DateRangePicker
               checkIn={checkIn}
               checkOut={checkOut}
@@ -95,13 +95,14 @@ export default function SearchBar() {
           </div>
 
           {/* Search Button */}
-          <div className="flex items-end">
+          <div className="flex items-end w-full lg:w-auto">
             <button
               onClick={handleSearch}
-              className="w-full lg:w-auto bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary-dark transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 font-medium"
+              type="submit"
+              className="w-full lg:w-auto bg-primary text-white px-6 sm:px-8 py-3 rounded-lg hover:bg-primary-dark transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 font-medium text-sm sm:text-base"
             >
-              <Search className="w-5 h-5" />
-              <span className="hidden sm:inline">Найти</span>
+              <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span>Найти</span>
             </button>
           </div>
         </div>
@@ -109,7 +110,7 @@ export default function SearchBar() {
         {/* Filters Toggle */}
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="mt-4 text-sm text-primary hover:text-primary-dark transition-colors font-medium"
+          className="mt-3 sm:mt-4 text-xs sm:text-sm text-primary hover:text-primary-dark transition-colors font-medium w-full text-left"
         >
           {showFilters ? '▲ Скрыть фильтры' : '▼ Показать фильтры'}
         </button>

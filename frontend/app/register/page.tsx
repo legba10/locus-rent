@@ -132,13 +132,13 @@ function RegisterForm() {
     return (
       <div className="min-h-screen bg-white flex flex-col">
         <Header />
-        <main className="flex-1 flex items-center justify-center px-4 py-12">
+        <main className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
           <div className="text-center max-w-md">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-green-100 mb-6">
-              <CheckCircle2 className="w-10 h-10 text-green-600" />
+            <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-100 mb-4 sm:mb-6">
+              <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Регистрация успешна!</h1>
-            <p className="text-gray-600 mb-6">Вы будете перенаправлены...</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Регистрация успешна!</h1>
+            <p className="text-sm sm:text-base text-gray-600 mb-6">Вы будете перенаправлены...</p>
             <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
           </div>
         </main>
@@ -150,12 +150,12 @@ function RegisterForm() {
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
       
-      <main className="flex-1 flex items-center justify-center px-4 py-12">
+      <main className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <Logo size="lg" className="justify-center mb-4" />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Регистрация в LOCUS</h1>
-            <p className="text-gray-600">Создайте аккаунт, чтобы начать</p>
+          <div className="text-center mb-6 sm:mb-8">
+            <Logo size="lg" className="justify-center mb-3 sm:mb-4" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Регистрация в LOCUS</h1>
+            <p className="text-sm sm:text-base text-gray-600">Создайте аккаунт, чтобы начать</p>
           </div>
 
           {error && (
@@ -165,7 +165,7 @@ function RegisterForm() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div>
               <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
                 Имя <span className="text-red-500">*</span>

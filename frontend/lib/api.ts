@@ -164,3 +164,22 @@ export const citiesAPI = {
   getByCoordinates: (lat: number, lng: number) => api.get('/cities/by-coordinates', { params: { lat, lng } }),
   updateLocation: (lat: number, lng: number) => api.post('/cities/update-location', null, { params: { lat, lng } }),
 }
+
+export const supportAPI = {
+  create: (data: { name: string; phone: string; description?: string; message: string }) =>
+    api.post('/support', data),
+  getAll: (status?: string) => api.get('/support', { params: status ? { status } : {} }),
+  getOne: (id: string) => api.get(`/support/${id}`),
+  update: (id: string, data: { status?: string; adminResponse?: string }) =>
+    api.patch(`/support/${id}`, data),
+  delete: (id: string) => api.delete(`/support/${id}`),
+}
+
+export const adminAPI = {
+  getStats: () => api.get('/admin/stats'),
+  getListingsForModeration: () => api.get('/admin/listings/moderation'),
+  moderateListing: (id: string, status: string) =>
+    api.patch(`/admin/listings/${id}/moderate`, { status }),
+  getAllUsers: () => api.get('/admin/users'),
+  blockUser: (id: string) => api.patch(`/admin/users/${id}/block`),
+}

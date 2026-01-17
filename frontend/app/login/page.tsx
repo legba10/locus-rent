@@ -64,11 +64,11 @@ function LoginForm() {
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
       
-      <main className="flex-1 flex items-center justify-center px-4 py-12">
+      <main className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Вход в LOCUS</h1>
-            <p className="text-gray-600">Войдите, чтобы продолжить</p>
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Вход в LOCUS</h1>
+            <p className="text-sm sm:text-base text-gray-600">Войдите, чтобы продолжить</p>
           </div>
 
           {error && (

@@ -14,4 +14,49 @@
   overflow-wrap: anywhere;
 }
 
-/* ... existing styles ... */
+/* Mobile-first improvements */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  body {
+    @apply antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Improved spacing and typography */
+@layer utilities {
+  .container {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent horizontal scroll on mobile */
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Better touch targets for mobile */
+button, a {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+/* Improved focus states */
+*:focus-visible {
+  @apply outline-2 outline-offset-2 outline-primary;
+}

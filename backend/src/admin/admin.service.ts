@@ -35,8 +35,7 @@ export class AdminService {
   }
 
   async getListingsForModeration() {
-    const listings = await this.listingsService.findAll()
-    return listings.filter((l) => l.status === 'moderation')
+    return this.listingsService.findForModeration()
   }
 
   async moderateListing(id: string, status: string) {

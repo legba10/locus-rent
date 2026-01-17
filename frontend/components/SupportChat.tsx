@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react'
 import { toast } from './Toast'
+import { supportAPI } from '@/lib/api'
 
 interface Message {
   id: string
@@ -73,20 +74,35 @@ export default function SupportChat() {
     }
 
     setMessages((prev) => [...prev, userMessage])
+    const messageText = inputValue
     setInputValue('')
     setLoading(true)
 
-    // Имитация ответа поддержки (в production здесь будет API запрос)
-    setTimeout(() => {
+    try {
+      // Отправляем сообщение в поддержку
+      await supportAPI.create({
+        name: userInfo.name,
+        phone: userInfo.phone,
+        description: userInfo.description,
+        message: messageText,
+      })
+
       const supportMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: 'Спасибо за обращение! Наш специалист свяжется с вами в ближайшее время. Обычно это занимает не более 15 минут.',
+        text: 'Спасибо за обращение! Ваше сообщение отправлено. Наш специалист свяжется с вами в ближайшее время. Обычно это занимает не более 15 минут.',
         sender: 'support',
         timestamp: new Date(),
       }
       setMessages((prev) => [...prev, supportMessage])
+      toast('Сообщение отправлено', 'success')
+    } catch (error: any) {
+      toast(error.userMessage || 'Ошибка при отправке сообщения', 'error')
+      // Удаляем сообщение пользователя при ошибке
+      setMessages((prev) => prev.filter((m) => m.id !== userMessage.id))
+      setInputValue(messageText)
+    } finally {
       setLoading(false)
-    }, 1000)
+    }
   }
 
   if (!isOpen) {

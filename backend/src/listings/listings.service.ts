@@ -17,6 +17,10 @@ export class ListingsService {
     const listing = this.listingsRepository.create({
       ...createListingDto,
       owner: { id: userId } as any,
+      // Если статус не указан или это не draft, ставим на модерацию
+      status: createListingDto.status === ListingStatus.DRAFT 
+        ? ListingStatus.DRAFT 
+        : ListingStatus.MODERATION,
     })
     return this.listingsRepository.save(listing)
   }
@@ -25,6 +29,14 @@ export class ListingsService {
     return this.listingsRepository.find({
       relations: ['owner'],
       where: { status: ListingStatus.ACTIVE },
+    })
+  }
+
+  async findForModeration(): Promise<Listing[]> {
+    return this.listingsRepository.find({
+      relations: ['owner'],
+      where: { status: ListingStatus.MODERATION },
+      order: { createdAt: 'DESC' },
     })
   }
 

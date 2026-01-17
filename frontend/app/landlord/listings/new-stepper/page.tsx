@@ -279,7 +279,7 @@ export default function NewListingStepperPage() {
       }
 
       // Очищаем пустые строки и преобразуем в правильные типы
-      const listingData: Partial<Listing> & { type: ListingType; status: 'draft' | 'active' } = {
+      const listingData: Partial<Listing> & { type: ListingType; status?: 'draft' | 'moderation' } = {
         title: formData.title.trim(),
         description: formData.description.trim(),
         type: formData.type as ListingType,
@@ -287,7 +287,8 @@ export default function NewListingStepperPage() {
         address: formData.address.trim(),
         pricePerNight: pricePerNight,
         maxGuests: maxGuests,
-        status: saveAsDraft ? 'draft' : 'active',
+        // Для черновика ставим draft, для публикации - не указываем (backend поставит moderation)
+        ...(saveAsDraft ? { status: 'draft' } : {}),
       }
 
       // Изображения - для черновика можно без фото, для публикации обязательно
@@ -329,7 +330,12 @@ export default function NewListingStepperPage() {
       const response = await listingsAPI.create(listingData)
       console.log('Listing created successfully:', response.data)
       
-      toast(saveAsDraft ? 'Черновик сохранён' : 'Объявление опубликовано', 'success')
+      toast(
+        saveAsDraft 
+          ? 'Черновик сохранён' 
+          : 'Объявление отправлено на модерацию. После проверки оно будет опубликовано.',
+        'success'
+      )
 
       // Очищаем черновик
       if (typeof window !== 'undefined') {

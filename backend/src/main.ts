@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core'
 import { ValidationPipe, Logger } from '@nestjs/common'
 import { AppModule } from './app.module'
 import { DataSource } from 'typeorm'
+import * as express from 'express'
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap')
@@ -90,6 +91,10 @@ async function bootstrap() {
       allowedHeaders: ['Content-Type', 'Authorization'],
       optionsSuccessStatus: 204,
     })
+
+    // Body size limits for file uploads
+    app.use(express.json({ limit: '50mb' }))
+    app.use(express.urlencoded({ extended: true, limit: '50mb' }))
 
     // Global prefix
     app.setGlobalPrefix('api')
