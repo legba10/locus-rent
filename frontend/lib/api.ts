@@ -70,10 +70,17 @@ api.interceptors.response.use(
         error.userMessage = 'Ошибка сети. Проверьте подключение к интернету.'
       }
     } else {
-      // Есть ответ от сервера, но это ошибка
-      error.userMessage = error.response.data?.message || 
-                         error.response.data?.error ||
-                         `Ошибка сервера: ${error.response.status}`
+      if (error.response.status === 404) {
+        error.userMessage = error.response.data?.message || 'Эндпоинт не найден. Проверьте конфигурацию API.'
+      } else if (error.response.status === 401) {
+        error.userMessage = error.response.data?.message || 'Неверные учетные данные'
+      } else if (error.response.status >= 500) {
+        error.userMessage = error.response.data?.message || 'Ошибка сервера. Попробуйте позже.'
+      } else {
+        error.userMessage = error.response.data?.message || 
+                           error.response.data?.error ||
+                           `Ошибка: ${error.response.status}`
+      }
     }
     
     return Promise.reject(error)

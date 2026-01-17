@@ -45,28 +45,13 @@ function LoginForm() {
     } catch (err: any) {
       console.error('Login error:', err)
       
-      let errorMessage = 'Ошибка входа. Проверьте данные и попробуйте снова.'
-      
-      if (err.response) {
-        // Ошибка от сервера
-        if (err.response.data?.message) {
-          errorMessage = err.response.data.message
-        } else if (err.response.data?.error) {
-          errorMessage = Array.isArray(err.response.data.error) 
-            ? err.response.data.error.join(', ')
-            : err.response.data.error
-        } else if (err.response.status === 401) {
-          errorMessage = 'Неверный email/телефон или пароль.'
-        } else if (err.response.status >= 500) {
-          errorMessage = 'Ошибка сервера. Попробуйте позже.'
-        }
-      } else if (err.request) {
-        // Запрос отправлен, но ответа нет
-        errorMessage = 'Сервер не отвечает. Проверьте подключение к интернету и убедитесь, что backend запущен.'
-      } else {
-        // Ошибка при настройке запроса
-        errorMessage = err.message || 'Ошибка при отправке запроса.'
-      }
+      const errorMessage = err.userMessage || 
+                          err.response?.data?.message || 
+                          err.response?.data?.error ||
+                          (err.response?.status === 401 ? 'Неверный email/телефон или пароль.' :
+                           err.response?.status === 404 ? 'Эндпоинт не найден. Проверьте конфигурацию API.' :
+                           err.response?.status >= 500 ? 'Ошибка сервера. Попробуйте позже.' :
+                           'Ошибка входа. Проверьте данные и попробуйте снова.')
       
       setError(errorMessage)
       toast(errorMessage, 'error')
