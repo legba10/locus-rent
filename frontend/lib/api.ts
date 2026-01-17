@@ -34,10 +34,10 @@ api.interceptors.response.use(
                             error.message?.includes('ERR_CONNECTION_REFUSED')
       
       if (isNetworkError) {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL;
+        const currentApiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://locus-rent.onrender.com';
         error.response = {
           data: {
-            message: `Сервер не отвечает. Проверьте подключение к интернету и убедитесь, что backend запущен. (API: ${API_URL})`,
+            message: `Сервер не отвечает. Проверьте подключение к интернету и убедитесь, что backend запущен. (API: ${currentApiUrl})`,
             error: 'Connection Error',
           },
           status: 0,
@@ -62,7 +62,7 @@ api.interceptors.response.use(
           error.message?.includes('Network Error') ||
           error.message?.includes('fetch failed') ||
           error.code === 'ERR_NETWORK') {
-        error.userMessage = 'Сервер не отвечает. Проверьте, что backend запущен на порту 3001.'
+        error.userMessage = 'Сервер не отвечает. Проверьте подключение к интернету и убедитесь, что backend запущен.'
         // Добавляем более подробную информацию для разработки
         if (process.env.NODE_ENV === 'development') {
           console.error('Backend connection error. Is backend running?')
