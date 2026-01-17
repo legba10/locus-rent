@@ -430,18 +430,18 @@ export default function NewListingStepperPage() {
             <p className="text-sm sm:text-base text-gray-600">Пошаговое размещение вашего жилья</p>
           </div>
 
-          {/* Progress Steps - Mobile: вертикально, Desktop: горизонтально */}
-          <div className="mb-4 sm:mb-6 md:mb-8 bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-3 sm:p-4 md:p-6 overflow-x-auto">
-            <div className="flex sm:items-center sm:justify-between min-w-max sm:min-w-0">
+          {/* Progress Steps - Mobile: горизонтальный скролл, Desktop: горизонтально */}
+          <div className="mb-4 sm:mb-6 md:mb-8 bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-3 sm:p-4 md:p-6 overflow-x-auto scrollbar-hide">
+            <div className="flex items-center justify-between min-w-max sm:min-w-0 gap-2 sm:gap-0">
               {STEPS.map((step, index) => {
                 const StepIcon = step.icon
                 const isCompleted = currentStep > step.id
                 const isActive = currentStep === step.id
                 return (
                   <div key={step.id} className="flex items-center flex-shrink-0 sm:flex-1">
-                    <div className="flex flex-col items-center sm:flex-1">
+                    <div className="flex flex-col items-center sm:flex-1 min-w-[80px] sm:min-w-0">
                       <div
-                        className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all ${
+                        className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all flex-shrink-0 ${
                           isCompleted
                             ? 'bg-primary text-white shadow-lg scale-105'
                             : isActive
@@ -456,7 +456,7 @@ export default function NewListingStepperPage() {
                         )}
                       </div>
                       <span
-                        className={`mt-2 sm:mt-3 text-[10px] sm:text-xs font-medium text-center max-w-[80px] sm:max-w-[100px] ${
+                        className={`mt-2 sm:mt-3 text-[10px] sm:text-xs font-medium text-center max-w-[80px] sm:max-w-[100px] truncate ${
                           isActive || isCompleted ? 'text-primary font-semibold' : 'text-gray-400'
                         }`}
                       >
@@ -465,7 +465,7 @@ export default function NewListingStepperPage() {
                     </div>
                     {index < STEPS.length - 1 && (
                       <div
-                        className={`hidden sm:block h-1 flex-1 mx-2 sm:mx-3 rounded transition-all ${
+                        className={`hidden sm:block h-1 flex-1 mx-2 sm:mx-3 rounded transition-all flex-shrink-0 ${
                           isCompleted ? 'bg-primary' : 'bg-gray-200'
                         }`}
                       />

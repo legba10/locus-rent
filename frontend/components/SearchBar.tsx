@@ -129,7 +129,7 @@ export default function SearchBar() {
             </div>
             {/* Desktop: Inline */}
             <div className="hidden md:block mt-4 pt-4 border-t border-gray-100 animate-fade-in">
-              <SearchFilters />
+              <SearchFilters onClose={() => setShowFilters(false)} />
             </div>
           </>
         )}

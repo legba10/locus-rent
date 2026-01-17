@@ -140,7 +140,7 @@ export default function Home() {
                   onClick={() => {
                     router.push(`/search?city=${encodeURIComponent(city)}`)
                   }}
-                  className="btn btn-secondary text-sm sm:text-base"
+                  className="btn btn-secondary text-sm sm:text-base h-10 sm:h-11 flex items-center justify-center whitespace-nowrap"
                 >
                   {city}
                 </button>

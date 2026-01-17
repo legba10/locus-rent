@@ -221,14 +221,42 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
         </div>
       </div>
 
-      {/* Mobile Apply Button */}
-      {isMobile && (
-        <div className="mt-6 pt-4 border-t border-gray-200">
+      {/* Apply Button - Desktop */}
+      {!isMobile && (
+        <div className="mt-6 pt-4 border-t border-gray-200 flex gap-3">
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium"
+            >
+              Сбросить
+            </button>
+          )}
           <button
-            onClick={onClose}
-            className="w-full bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg"
+            onClick={onClose || (() => {})}
+            className={`${hasActiveFilters ? 'flex-1' : 'w-full'} bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg`}
           >
             Применить фильтры
+          </button>
+        </div>
+      )}
+      
+      {/* Apply Button - Mobile */}
+      {isMobile && (
+        <div className="mt-6 pt-4 border-t border-gray-200 flex gap-3">
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium"
+            >
+              Сбросить
+            </button>
+          )}
+          <button
+            onClick={onClose || (() => {})}
+            className={`${hasActiveFilters ? 'flex-1' : 'w-full'} bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg`}
+          >
+            Применить
           </button>
         </div>
       )}

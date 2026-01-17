@@ -7,6 +7,7 @@ import { User as UserIcon, Calendar, Heart, MessageSquare, Bell, Settings, Histo
 import { usersAPI, recommendationAPI } from '@/lib/api'
 import { useAuthStore } from '@/lib/store'
 import { User } from '@/lib/types/user'
+import { toast } from '@/components/Toast'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -15,6 +16,13 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null)
   const [searchHistory, setSearchHistory] = useState<any[]>([])
   const [preferences, setPreferences] = useState<any | null>(null)
+  const [profileForm, setProfileForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+  })
+  const [saving, setSaving] = useState(false)
 
   // Защита маршрута: редирект неавторизованных пользователей
   useEffect(() => {
@@ -35,9 +43,35 @@ export default function ProfilePage() {
   const loadUserData = async () => {
     try {
       const response = await usersAPI.getMe()
-      setUser(response.data ?? null)
+      const userData = response.data ?? null
+      setUser(userData)
+      if (userData) {
+        setProfileForm({
+          firstName: userData.firstName || '',
+          lastName: userData.lastName || '',
+          email: userData.email || '',
+          phone: userData.phone || '',
+        })
+      }
     } catch (error) {
       console.error('Error loading user:', error)
+    }
+  }
+
+  const handleSaveProfile = async () => {
+    if (!user) return
+    
+    setSaving(true)
+    try {
+      await usersAPI.update(user.id, profileForm)
+      await loadUserData()
+      toast('Профиль успешно обновлён', 'success')
+    } catch (error: any) {
+      console.error('Error saving profile:', error)
+      const errorMessage = error.response?.data?.message || 'Ошибка сохранения профиля'
+      toast(errorMessage, 'error')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -144,8 +178,10 @@ export default function ProfilePage() {
                     <input
                       type="text"
                       className="input"
-                      defaultValue={user?.firstName ?? ''}
+                      value={profileForm.firstName}
+                      onChange={(e) => setProfileForm({ ...profileForm, firstName: e.target.value })}
                       placeholder="Ваше имя"
+                      disabled={saving}
                     />
                   </div>
                   <div>
@@ -155,8 +191,10 @@ export default function ProfilePage() {
                     <input
                       type="text"
                       className="input"
-                      defaultValue={user?.lastName ?? ''}
+                      value={profileForm.lastName}
+                      onChange={(e) => setProfileForm({ ...profileForm, lastName: e.target.value })}
                       placeholder="Ваша фамилия"
+                      disabled={saving}
                     />
                   </div>
                   <div>
@@ -166,8 +204,10 @@ export default function ProfilePage() {
                     <input
                       type="email"
                       className="input"
-                      defaultValue={user?.email ?? ''}
+                      value={profileForm.email}
+                      onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
                       placeholder="email@example.com"
+                      disabled={saving}
                     />
                   </div>
                   <div>
@@ -177,12 +217,18 @@ export default function ProfilePage() {
                     <input
                       type="tel"
                       className="input"
-                      defaultValue={user?.phone ?? ''}
+                      value={profileForm.phone}
+                      onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
                       placeholder="+7 (999) 123-45-67"
+                      disabled={saving}
                     />
                   </div>
-                  <button className="btn btn-primary w-full sm:w-auto">
-                    Сохранить изменения
+                  <button 
+                    onClick={handleSaveProfile}
+                    disabled={saving}
+                    className="btn btn-primary w-full sm:w-auto"
+                  >
+                    {saving ? 'Сохранение...' : 'Сохранить изменения'}
                   </button>
                 </div>
               </div>
