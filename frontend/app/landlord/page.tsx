@@ -214,7 +214,7 @@ export default function LandlordPage() {
                     const images = Array.isArray(listing.images) ? listing.images : (listing.images ? [listing.images] : [])
                     
                     return (
-                    <div key={listing.id} className="card card-hover overflow-hidden">
+                      <div key={listing.id} className="card card-hover overflow-hidden">
                       {/* Image */}
                       <div className="relative w-full h-48 bg-gray-100 -m-4 sm:-m-6 mb-4 sm:mb-6">
                         {images[0] ? (
@@ -312,8 +312,9 @@ export default function LandlordPage() {
                           </button>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>
