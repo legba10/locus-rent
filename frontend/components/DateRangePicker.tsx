@@ -261,7 +261,7 @@ export default function DateRangePicker({
         <>
           {/* Mobile overlay */}
           <div 
-            className="fixed inset-0 bg-black/20 z-40 md:hidden"
+            className="fixed inset-0 bg-black/20 z-[9998] md:hidden"
             onClick={() => {
               setIsOpen(false)
               setActiveField(null)
@@ -269,7 +269,7 @@ export default function DateRangePicker({
           />
         <div
           ref={calendarRef}
-          className="fixed md:absolute z-50 md:mt-2 bg-white border border-gray-200 rounded-t-2xl md:rounded-xl shadow-xl p-4 md:p-6 max-w-[95vw] md:max-w-[700px] md:min-w-[600px] bottom-0 left-0 right-0 md:bottom-auto md:left-0 md:right-auto"
+          className="fixed md:absolute z-[9999] md:mt-2 bg-white border border-gray-200 rounded-t-2xl md:rounded-xl shadow-xl p-4 md:p-6 max-w-[95vw] md:max-w-[700px] md:min-w-[600px] bottom-0 left-0 right-0 md:bottom-auto md:left-0 md:right-auto md:top-full"
         >
             {/* Mobile: single month compact, Desktop: two months */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">

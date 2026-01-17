@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
-import { Shield, MessageSquare, FileText, Users, CheckCircle2, X, Loader2, UserPlus, Mail, Phone } from 'lucide-react'
+import { Shield, MessageSquare, FileText, Users, CheckCircle2, X, Loader2, UserPlus, Mail, Phone, Calendar } from 'lucide-react'
 import { adminAPI, supportAPI } from '@/lib/api'
 import { useAuthStore } from '@/lib/store'
 import { toast } from '@/components/Toast'
@@ -347,44 +347,117 @@ export default function AdminPage() {
             )}
 
             {activeTab === 'stats' && stats && (
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                <div className="card">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Users className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-gray-900">Пользователи</h3>
+              <div className="space-y-6">
+                {/* Основная статистика */}
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                  <div className="card">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Users className="w-5 h-5 text-primary" />
+                      <h3 className="font-semibold text-gray-900">Пользователи</h3>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">{stats.users?.total || 0}</p>
+                    <p className="text-caption">Активных: {stats.users?.active || 0}</p>
                   </div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.users?.total || 0}</p>
-                  <p className="text-caption">Активных: {stats.users?.active || 0}</p>
+                  <div className="card">
+                    <div className="flex items-center gap-3 mb-2">
+                      <FileText className="w-5 h-5 text-primary" />
+                      <h3 className="font-semibold text-gray-900">Объявления</h3>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">{stats.listings?.total || 0}</p>
+                    <p className="text-caption">
+                      Опубликовано: {stats.listings?.published || 0} | На модерации: {stats.listings?.moderation || 0}
+                    </p>
+                  </div>
+                  <div className="card">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Calendar className="w-5 h-5 text-primary" />
+                      <h3 className="font-semibold text-gray-900">Бронирования</h3>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">{stats.bookings?.total || 0}</p>
+                    <p className="text-caption">
+                      Подтверждено: {stats.bookings?.confirmed || 0}
+                    </p>
+                  </div>
+                  <div className="card">
+                    <div className="flex items-center gap-3 mb-2">
+                      <MessageSquare className="w-5 h-5 text-primary" />
+                      <h3 className="font-semibold text-gray-900">Поддержка</h3>
+                    </div>
+                    <p className="text-2xl font-bold text-gray-900">{supportMessages.length}</p>
+                    <p className="text-caption">
+                      Новых: {supportMessages.filter(m => m.status === 'new').length}
+                    </p>
+                  </div>
                 </div>
+
+                {/* Новые пользователи */}
                 <div className="card">
-                  <div className="flex items-center gap-3 mb-2">
-                    <FileText className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-gray-900">Объявления</h3>
+                  <h2 className="heading-2 mb-4">Новые пользователи</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <p className="text-caption mb-1">За день</p>
+                      <p className="text-3xl font-bold text-gray-900">{stats.users?.newToday || 0}</p>
+                    </div>
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <p className="text-caption mb-1">За неделю</p>
+                      <p className="text-3xl font-bold text-gray-900">{stats.users?.newThisWeek || 0}</p>
+                    </div>
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <p className="text-caption mb-1">За месяц</p>
+                      <p className="text-3xl font-bold text-gray-900">{stats.users?.newThisMonth || 0}</p>
+                    </div>
                   </div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.listings?.total || 0}</p>
-                  <p className="text-caption">
-                    Активных: {stats.listings?.active || 0} | На модерации: {stats.listings?.moderation || 0}
-                  </p>
                 </div>
+
+                {/* Бронирования - детали */}
                 <div className="card">
-                  <div className="flex items-center gap-3 mb-2">
-                    <MessageSquare className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-gray-900">Бронирования</h3>
+                  <h2 className="heading-2 mb-4">Бронирования</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <p className="text-caption mb-1">Общая сумма</p>
+                      <p className="text-3xl font-bold text-gray-900">
+                        {stats.bookings?.totalAmount?.toLocaleString('ru-RU') || 0} ₽
+                      </p>
+                    </div>
+                    <div className="p-4 bg-green-50 rounded-lg">
+                      <p className="text-caption mb-1">Средний чек</p>
+                      <p className="text-3xl font-bold text-gray-900">
+                        {stats.bookings?.averageCheck?.toLocaleString('ru-RU') || 0} ₽
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-2xl font-bold text-gray-900">{stats.bookings?.total || 0}</p>
-                  <p className="text-caption">
-                    Подтверждено: {stats.bookings?.confirmed || 0}
-                  </p>
                 </div>
+
+                {/* Юнит-экономика */}
                 <div className="card">
-                  <div className="flex items-center gap-3 mb-2">
-                    <MessageSquare className="w-5 h-5 text-primary" />
-                    <h3 className="font-semibold text-gray-900">Поддержка</h3>
+                  <h2 className="heading-2 mb-4">Юнит-экономика</h2>
+                  <p className="text-caption mb-4">Подготовка под интеграцию с ЮKassa</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="p-4 bg-purple-50 rounded-lg">
+                      <p className="text-caption mb-1">Доход платформы</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {stats.economics?.platformRevenue?.toLocaleString('ru-RU') || 0} ₽
+                      </p>
+                    </div>
+                    <div className="p-4 bg-purple-50 rounded-lg">
+                      <p className="text-caption mb-1">Комиссия</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {stats.economics?.commission?.toLocaleString('ru-RU') || 0} ₽
+                      </p>
+                    </div>
+                    <div className="p-4 bg-purple-50 rounded-lg">
+                      <p className="text-caption mb-1">Ставка комиссии</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {stats.economics?.commissionRate ? (stats.economics.commissionRate * 100).toFixed(0) : 0}%
+                      </p>
+                    </div>
+                    <div className="p-4 bg-purple-50 rounded-lg">
+                      <p className="text-caption mb-1">Средний чек</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {stats.economics?.averageCheck?.toLocaleString('ru-RU') || 0} ₽
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-2xl font-bold text-gray-900">{supportMessages.length}</p>
-                  <p className="text-caption">
-                    Новых: {supportMessages.filter(m => m.status === 'new').length}
-                  </p>
                 </div>
               </div>
             )}

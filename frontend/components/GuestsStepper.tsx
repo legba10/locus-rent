@@ -44,7 +44,7 @@ export default function GuestsStepper({
           type="button"
           onClick={handleDecrease}
           disabled={isMinDisabled}
-          className={`p-1.5 sm:p-2 rounded-lg transition-all flex-shrink-0 flex items-center justify-center min-w-[36px] ${
+          className={`p-1.5 sm:p-2 rounded-lg transition-all flex-shrink-0 flex items-center justify-center min-w-[36px] h-full ${
             isMinDisabled
               ? 'text-gray-300 cursor-not-allowed'
               : 'text-gray-600 hover:bg-gray-100 hover:text-primary active:scale-95'
@@ -53,7 +53,7 @@ export default function GuestsStepper({
         >
           <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
-        <div className="flex-1 text-center min-w-0 flex items-center justify-center gap-1">
+        <div className="flex-1 text-center min-w-0 flex items-center justify-center gap-1.5 h-full">
           <span className="text-base sm:text-lg font-semibold text-gray-900 whitespace-nowrap">
             {value}
           </span>
@@ -65,7 +65,7 @@ export default function GuestsStepper({
           type="button"
           onClick={handleIncrease}
           disabled={isMaxDisabled}
-          className={`p-1.5 sm:p-2 rounded-lg transition-all flex-shrink-0 flex items-center justify-center min-w-[36px] ${
+          className={`p-1.5 sm:p-2 rounded-lg transition-all flex-shrink-0 flex items-center justify-center min-w-[36px] h-full ${
             isMaxDisabled
               ? 'text-gray-300 cursor-not-allowed'
               : 'text-gray-600 hover:bg-gray-100 hover:text-primary active:scale-95'

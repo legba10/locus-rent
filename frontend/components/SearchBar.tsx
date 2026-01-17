@@ -45,6 +45,10 @@ export default function SearchBar() {
     if (selectedCity && typeof window !== 'undefined') {
       localStorage.setItem(LAST_CITY_KEY, selectedCity)
     }
+    
+    // Сохраняем текущую позицию скролла
+    const scrollY = window.scrollY
+    
     const params = new URLSearchParams()
     if (selectedCity) params.set('city', selectedCity)
     if (checkIn) params.set('checkIn', checkIn)
@@ -59,6 +63,13 @@ export default function SearchBar() {
     if (filters.amenities && filters.amenities.length > 0) params.set('amenities', filters.amenities.join(','))
     
     router.push(`/search?${params.toString()}`)
+    
+    // Восстанавливаем позицию скролла после навигации (если остаемся на той же странице)
+    setTimeout(() => {
+      if (window.location.pathname === '/') {
+        window.scrollTo(0, scrollY)
+      }
+    }, 100)
   }
 
   const handleCitySelect = (city: string) => {

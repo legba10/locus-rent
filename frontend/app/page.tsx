@@ -89,6 +89,18 @@ export default function Home() {
             <div className="max-w-4xl mx-auto w-full">
               <SearchBar />
             </div>
+            
+            {/* Умный поиск - UI-акцент */}
+            <div className="max-w-4xl mx-auto mt-4 sm:mt-6">
+              <div className="bg-white/80 backdrop-blur-sm border border-primary/20 rounded-xl px-4 sm:px-6 py-3 sm:py-4 shadow-sm">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                  <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                    <span className="font-semibold text-primary">Умный поиск</span> — мы помогаем быстрее находить подходящее жильё
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 

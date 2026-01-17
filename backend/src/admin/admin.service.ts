@@ -16,20 +16,57 @@ export class AdminService {
     const listings = await this.listingsService.findAll()
     const bookings = await this.bookingsService.findAll()
 
+    const now = new Date()
+    const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+
+    // Новые пользователи
+    const newUsersDay = users.filter((u) => new Date(u.createdAt) >= dayAgo).length
+    const newUsersWeek = users.filter((u) => new Date(u.createdAt) >= weekAgo).length
+    const newUsersMonth = users.filter((u) => new Date(u.createdAt) >= monthAgo).length
+
+    // Объявления
+    const listingsActive = listings.filter((l) => l.status === 'active')
+    const listingsModeration = listings.filter((l) => l.status === 'moderation')
+
+    // Бронирования
+    const bookingsTotal = bookings.length
+    const bookingsConfirmed = bookings.filter((b) => b.status === 'confirmed')
+    const bookingsTotalAmount = bookingsConfirmed.reduce((sum, b) => sum + (b.totalPrice || 0), 0)
+    const averageCheck = bookingsConfirmed.length > 0 ? bookingsTotalAmount / bookingsConfirmed.length : 0
+
+    // Юнит-экономика (заглушки, подготовка под ЮKassa)
+    const platformRevenue = 0 // Пока 0, будет интегрировано с ЮKassa
+    const commission = 0 // Заглушка комиссии
+    const commissionRate = 0.1 // 10% комиссия (заглушка)
+
     return {
       users: {
         total: users.length,
         active: users.filter((u) => u.isActive).length,
+        newToday: newUsersDay,
+        newThisWeek: newUsersWeek,
+        newThisMonth: newUsersMonth,
       },
       listings: {
         total: listings.length,
-        active: listings.filter((l) => l.status === 'active').length,
-        moderation: listings.filter((l) => l.status === 'moderation').length,
+        active: listingsActive.length,
+        moderation: listingsModeration.length,
+        published: listingsActive.length,
       },
       bookings: {
-        total: bookings.length,
+        total: bookingsTotal,
+        confirmed: bookingsConfirmed.length,
         pending: bookings.filter((b) => b.status === 'pending').length,
-        confirmed: bookings.filter((b) => b.status === 'confirmed').length,
+        totalAmount: bookingsTotalAmount,
+        averageCheck: Math.round(averageCheck),
+      },
+      economics: {
+        platformRevenue,
+        commission,
+        commissionRate,
+        averageCheck: Math.round(averageCheck),
       },
     }
   }
