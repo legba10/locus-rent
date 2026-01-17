@@ -1,12 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Star, Wifi, Car, Utensils, Wind, Tv, Coffee, Droplet, Bed, Home, Building2, Filter } from 'lucide-react'
 
 interface SearchFiltersProps {
   onClose?: () => void
   className?: string
   isMobile?: boolean
+  initialFilters?: {
+    priceMin?: string
+    priceMax?: string
+    propertyType?: string
+    rating?: string
+    amenities?: string[]
+  }
+  onApply?: (filters: {
+    priceMin?: string
+    priceMax?: string
+    propertyType?: string
+    rating?: string
+    amenities?: string[]
+  }) => void
 }
 
 const AMENITY_GROUPS = {
@@ -59,12 +73,23 @@ const RATING_OPTIONS = [
   { value: '5', label: '5', min: 5 },
 ]
 
-export default function SearchFilters({ onClose, className = '', isMobile = false }: SearchFiltersProps) {
-  const [priceMin, setPriceMin] = useState('')
-  const [priceMax, setPriceMax] = useState('')
-  const [propertyType, setPropertyType] = useState('any')
-  const [rating, setRating] = useState('any')
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
+export default function SearchFilters({ onClose, className = '', isMobile = false, initialFilters, onApply }: SearchFiltersProps) {
+  const [priceMin, setPriceMin] = useState(initialFilters?.priceMin || '')
+  const [priceMax, setPriceMax] = useState(initialFilters?.priceMax || '')
+  const [propertyType, setPropertyType] = useState(initialFilters?.propertyType || 'any')
+  const [rating, setRating] = useState(initialFilters?.rating || 'any')
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>(initialFilters?.amenities || [])
+
+  // Обновляем состояние при изменении initialFilters
+  useEffect(() => {
+    if (initialFilters) {
+      setPriceMin(initialFilters.priceMin || '')
+      setPriceMax(initialFilters.priceMax || '')
+      setPropertyType(initialFilters.propertyType || 'any')
+      setRating(initialFilters.rating || 'any')
+      setSelectedAmenities(initialFilters.amenities || [])
+    }
+  }, [initialFilters])
 
   const toggleAmenity = (amenityId: string) => {
     setSelectedAmenities((prev) =>
@@ -78,6 +103,29 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
     setPropertyType('any')
     setRating('any')
     setSelectedAmenities([])
+  }
+
+  const handleApply = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    
+    const filters = {
+      priceMin: priceMin || undefined,
+      priceMax: priceMax || undefined,
+      propertyType: propertyType !== 'any' ? propertyType : undefined,
+      rating: rating !== 'any' ? rating : undefined,
+      amenities: selectedAmenities.length > 0 ? selectedAmenities : undefined,
+    }
+    
+    if (onApply) {
+      onApply(filters)
+    }
+    
+    if (onClose) {
+      onClose()
+    }
   }
 
   const hasActiveFilters =
@@ -226,14 +274,20 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
         <div className="mt-6 pt-4 border-t border-gray-200 flex gap-3">
           {hasActiveFilters && (
             <button
-              onClick={clearFilters}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                clearFilters()
+              }}
               className="px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium"
             >
               Сбросить
             </button>
           )}
           <button
-            onClick={onClose || (() => {})}
+            type="button"
+            onClick={handleApply}
             className={`${hasActiveFilters ? 'flex-1' : 'w-full'} bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg`}
           >
             Применить фильтры
@@ -243,17 +297,23 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
       
       {/* Apply Button - Mobile */}
       {isMobile && (
-        <div className="mt-6 pt-4 border-t border-gray-200 flex gap-3">
+        <div className="mt-6 pt-4 border-t border-gray-200 flex gap-3 sticky bottom-0 bg-white pb-4">
           {hasActiveFilters && (
             <button
-              onClick={clearFilters}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                clearFilters()
+              }}
               className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium"
             >
               Сбросить
             </button>
           )}
           <button
-            onClick={onClose || (() => {})}
+            type="button"
+            onClick={handleApply}
             className={`${hasActiveFilters ? 'flex-1' : 'w-full'} bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg`}
           >
             Применить

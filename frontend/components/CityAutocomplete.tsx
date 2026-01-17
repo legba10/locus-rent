@@ -204,7 +204,7 @@ export default function CityAutocomplete({
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-64 overflow-y-auto left-0 right-0"
+          className="absolute z-[9999] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-64 overflow-y-auto left-0 right-0"
         >
           {suggestions.map((city, index) => (
             <button
@@ -230,7 +230,7 @@ export default function CityAutocomplete({
       )}
 
       {showSuggestions && !loading && suggestions.length === 0 && value.length >= 2 && (
-        <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center text-gray-500">
+        <div className="absolute z-[9999] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center text-gray-500">
           Город не найден
         </div>
       )}

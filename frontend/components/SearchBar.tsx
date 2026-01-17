@@ -17,6 +17,13 @@ export default function SearchBar() {
   const [guests, setGuests] = useState(2)
   const [showFilters, setShowFilters] = useState(false)
   const [cityError, setCityError] = useState('')
+  const [filters, setFilters] = useState<{
+    priceMin?: string
+    priceMax?: string
+    propertyType?: string
+    rating?: string
+    amenities?: string[]
+  }>({})
 
   const LAST_CITY_KEY = 'locus_last_city'
 
@@ -44,6 +51,13 @@ export default function SearchBar() {
     if (checkOut) params.set('checkOut', checkOut)
     if (guests) params.set('guests', guests.toString())
     
+    // Добавляем фильтры
+    if (filters.priceMin) params.set('priceMin', filters.priceMin)
+    if (filters.priceMax) params.set('priceMax', filters.priceMax)
+    if (filters.propertyType && filters.propertyType !== 'any') params.set('propertyType', filters.propertyType)
+    if (filters.rating && filters.rating !== 'any') params.set('rating', filters.rating)
+    if (filters.amenities && filters.amenities.length > 0) params.set('amenities', filters.amenities.join(','))
+    
     router.push(`/search?${params.toString()}`)
   }
 
@@ -60,11 +74,11 @@ export default function SearchBar() {
       <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-3 sm:p-4 md:p-6 w-full">
         <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full items-end">
           {/* Location */}
-          <div className="flex-1 w-full lg:min-w-0">
+          <div className="flex-1 w-full lg:min-w-0 lg:flex-shrink">
             <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
               Город
             </label>
-            <div className="h-[44px] sm:h-[48px]">
+            <div className="h-[44px] sm:h-[48px] relative">
               <CityAutocomplete
                 value={searchQuery}
                 onChange={setSearchQuery}
@@ -76,7 +90,7 @@ export default function SearchBar() {
           </div>
 
           {/* Dates */}
-          <div className="flex-1 w-full lg:min-w-0">
+          <div className="flex-1 w-full lg:min-w-0 lg:flex-shrink">
             <DateRangePicker
               checkIn={checkIn}
               checkOut={checkOut}
@@ -124,12 +138,23 @@ export default function SearchBar() {
             <div className="md:hidden">
               <SearchFilters
                 isMobile={true}
+                initialFilters={filters}
+                onApply={(newFilters) => {
+                  setFilters(newFilters)
+                  setShowFilters(false)
+                }}
                 onClose={() => setShowFilters(false)}
               />
             </div>
             {/* Desktop: Inline */}
             <div className="hidden md:block mt-4 pt-4 border-t border-gray-100 animate-fade-in">
-              <SearchFilters onClose={() => setShowFilters(false)} />
+              <SearchFilters
+                initialFilters={filters}
+                onApply={(newFilters) => {
+                  setFilters(newFilters)
+                }}
+                onClose={() => setShowFilters(false)}
+              />
             </div>
           </>
         )}

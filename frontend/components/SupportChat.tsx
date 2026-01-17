@@ -135,7 +135,7 @@ export default function SupportChat() {
         className={`fixed z-50 flex flex-col transition-all bg-white shadow-2xl border border-gray-100 ${
           isMinimized 
             ? 'h-16 md:bottom-6 md:right-6 md:w-96 md:rounded-2xl' 
-            : 'md:bottom-6 md:right-6 md:w-96 md:max-w-[calc(100vw-3rem)] md:rounded-2xl md:h-[600px] md:max-h-[calc(100vh-3rem)] bottom-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] max-w-md h-[85vh] max-h-[calc(100vh-2rem)] rounded-2xl'
+            : 'md:bottom-6 md:right-6 md:w-96 md:max-w-[calc(100vw-3rem)] md:rounded-2xl md:h-[600px] md:max-h-[calc(100vh-3rem)] bottom-0 left-0 right-0 w-full h-[100vh] max-h-[100vh] rounded-t-2xl md:rounded-2xl'
         }`}
       >
       {/* Header */}
@@ -170,7 +170,7 @@ export default function SupportChat() {
       {!isMinimized && (
         <>
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 min-h-0">
             {showUserForm ? (
               <form onSubmit={handleUserFormSubmit} className="space-y-4">
                 <div>

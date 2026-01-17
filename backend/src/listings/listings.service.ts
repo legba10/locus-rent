@@ -94,12 +94,13 @@ export class ListingsService {
   }
 
   async findByOwner(ownerId: string): Promise<Listing[]> {
+    // Показываем ВСЕ объявления пользователя, включая на модерации, опубликованные и отклоненные
     return this.listingsRepository.find({
       where: {
         owner: { id: ownerId } as any,
-        status: Not(ListingStatus.REJECTED), // мягкое удаление: скрываем "удалённые" объявления
       },
       relations: ['owner'],
+      order: { createdAt: 'DESC' },
     })
   }
 

@@ -75,7 +75,7 @@ export default function Header() {
                       <Home className="w-4 h-4" />
                       Кабинет арендодателя
                     </Link>
-                    {user?.role === 'admin' && (
+                    {(user?.role === 'admin' || user?.role === 'ADMIN' || user?.email === 'feodal.00@bk.ru') && (
                       <Link
                         href="/admin"
                         className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700"
@@ -169,7 +169,7 @@ export default function Header() {
                   >
                     Кабинет арендодателя
                   </Link>
-                  {user?.role === 'admin' && (
+                  {(user?.role === 'admin' || user?.role === 'ADMIN' || user?.email === 'feodal.00@bk.ru') && (
                     <Link
                       href="/admin"
                       className="text-gray-600 hover:text-primary transition-colors font-medium py-2"

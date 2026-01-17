@@ -40,7 +40,13 @@ export default function LandlordPage() {
       setLoading(true)
       if (activeTab === 'listings') {
         const response = await listingsAPI.getMy()
-        const listings = response.data?.data || []
+        // Backend может вернуть массив напрямую или { data: [] }
+        let listings: any[] = []
+        if (Array.isArray(response.data)) {
+          listings = response.data
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+          listings = response.data.data
+        }
         setListings(listings)
         setStats(prev => ({ ...prev, listings: listings.length }))
       } else if (activeTab === 'bookings') {

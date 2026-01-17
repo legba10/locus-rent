@@ -36,11 +36,21 @@ function SearchContent() {
       const checkIn = searchParams.get('checkIn')
       const checkOut = searchParams.get('checkOut')
       const guests = searchParams.get('guests')
+      const priceMin = searchParams.get('priceMin')
+      const priceMax = searchParams.get('priceMax')
+      const propertyType = searchParams.get('propertyType')
+      const rating = searchParams.get('rating')
+      const amenities = searchParams.get('amenities')
       
       if (city) params.city = city
       if (checkIn) params.checkIn = checkIn
       if (checkOut) params.checkOut = checkOut
       if (guests) params.guests = parseInt(guests)
+      if (priceMin) params.minPrice = parseInt(priceMin)
+      if (priceMax) params.maxPrice = parseInt(priceMax)
+      if (propertyType && propertyType !== 'any') params.type = propertyType
+      if (rating && rating !== 'any') params.minRating = parseFloat(rating)
+      if (amenities) params.amenities = amenities.split(',')
 
       const response = await listingsAPI.getAll(params)
       // Backend возвращает массив напрямую или { data: [] }
