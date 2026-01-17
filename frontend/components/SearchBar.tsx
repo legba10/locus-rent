@@ -58,23 +58,25 @@ export default function SearchBar() {
   return (
     <div className="max-w-5xl mx-auto w-full" id="home-search">
       <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-3 sm:p-4 md:p-6 w-full">
-        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full">
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full items-end">
           {/* Location */}
-          <div className="flex-1 w-full">
+          <div className="flex-1 w-full lg:min-w-0">
             <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
               Город
             </label>
-            <CityAutocomplete
-              value={searchQuery}
-              onChange={setSearchQuery}
-              onSelect={handleCitySelect}
-              placeholder="Введите название города..."
-              error={cityError}
-            />
+            <div className="h-[44px] sm:h-[48px]">
+              <CityAutocomplete
+                value={searchQuery}
+                onChange={setSearchQuery}
+                onSelect={handleCitySelect}
+                placeholder="Введите название города..."
+                error={cityError}
+              />
+            </div>
           </div>
 
           {/* Dates */}
-          <div className="flex-1 w-full">
+          <div className="flex-1 w-full lg:min-w-0">
             <DateRangePicker
               checkIn={checkIn}
               checkOut={checkOut}
@@ -85,7 +87,7 @@ export default function SearchBar() {
           </div>
 
           {/* Guests */}
-          <div className="w-full lg:w-40">
+          <div className="w-full lg:w-40 lg:flex-shrink-0">
             <GuestsStepper
               value={guests}
               onChange={setGuests}
@@ -95,11 +97,11 @@ export default function SearchBar() {
           </div>
 
           {/* Search Button */}
-          <div className="flex items-end w-full lg:w-auto">
+          <div className="w-full lg:w-auto lg:flex-shrink-0">
             <button
               onClick={handleSearch}
               type="button"
-              className="w-full lg:w-auto bg-primary text-white px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-lg hover:bg-primary-dark transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 font-medium text-sm sm:text-base min-h-[44px]"
+              className="w-full lg:w-auto bg-primary text-white px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-lg hover:bg-primary-dark transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 font-medium text-sm sm:text-base min-h-[44px] sm:min-h-[48px] h-[44px] sm:h-[48px]"
             >
               <Search className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
               <span className="whitespace-nowrap">Найти</span>
@@ -110,16 +112,26 @@ export default function SearchBar() {
         {/* Filters Toggle */}
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="mt-3 sm:mt-4 text-xs sm:text-sm text-primary hover:text-primary-dark transition-colors font-medium w-full text-left"
+          className="mt-3 sm:mt-4 flex items-center gap-2 text-xs sm:text-sm text-primary hover:text-primary-dark transition-colors font-medium w-full sm:w-auto"
         >
-          {showFilters ? '▲ Скрыть фильтры' : '▼ Показать фильтры'}
+          <span>{showFilters ? '▲ Скрыть фильтры' : '▼ Показать фильтры'}</span>
         </button>
 
         {/* Filters */}
         {showFilters && (
-          <div className="mt-4 pt-4 border-t border-gray-100 animate-fade-in">
-            <SearchFilters />
-          </div>
+          <>
+            {/* Mobile: Bottom Sheet */}
+            <div className="md:hidden">
+              <SearchFilters
+                isMobile={true}
+                onClose={() => setShowFilters(false)}
+              />
+            </div>
+            {/* Desktop: Inline */}
+            <div className="hidden md:block mt-4 pt-4 border-t border-gray-100 animate-fade-in">
+              <SearchFilters />
+            </div>
+          </>
         )}
       </div>
     </div>

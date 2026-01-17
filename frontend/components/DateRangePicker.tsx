@@ -223,39 +223,36 @@ export default function DateRangePicker({
 
   return (
     <div className={`relative ${className}`}>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="flex-1 min-w-[140px]">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-            <Calendar className="w-4 h-4 text-gray-500" />
-            Заезд
-          </label>
+      <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+        <Calendar className="w-4 h-4 text-gray-500" />
+        Даты
+      </label>
+      <div className="flex flex-col sm:flex-row gap-2 h-[44px] sm:h-[48px]">
+        <div className="flex-1 min-w-0">
           <button
             ref={checkInRef}
             type="button"
             onClick={() => handleFieldClick('checkIn')}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-left bg-white hover:border-gray-300 ${
+            className={`w-full h-full px-3 sm:px-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-left bg-white hover:border-gray-300 text-xs sm:text-sm ${
               activeField === 'checkIn' ? 'border-primary ring-2 ring-primary' : 'border-gray-200'
             }`}
           >
-            {checkIn ? formatDisplayDate(checkIn) : 'Выберите дату'}
+            {checkIn ? formatDisplayDate(checkIn) : 'Заезд'}
           </button>
         </div>
-        <div className="flex-1 min-w-[140px]">
-          <label className="text-sm font-medium text-gray-700 mb-2 block">
-            Выезд
-          </label>
+        <div className="flex-1 min-w-0">
           <button
             ref={checkOutRef}
             type="button"
             onClick={() => handleFieldClick('checkOut')}
             disabled={!checkIn}
-            className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-left bg-white hover:border-gray-300 ${
+            className={`w-full h-full px-3 sm:px-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-left bg-white hover:border-gray-300 text-xs sm:text-sm ${
               !checkIn ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : ''
             } ${
               activeField === 'checkOut' ? 'border-primary ring-2 ring-primary' : 'border-gray-200'
             }`}
           >
-            {checkOut ? formatDisplayDate(checkOut) : 'Выберите дату'}
+            {checkOut ? formatDisplayDate(checkOut) : 'Выезд'}
           </button>
         </div>
       </div>

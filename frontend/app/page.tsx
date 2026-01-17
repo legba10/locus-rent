@@ -78,35 +78,16 @@ export default function Home() {
           <div className="container mx-auto max-w-5xl relative z-10 w-full">
             <div className="text-center mb-6 sm:mb-8 md:mb-12">
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 md:mb-6 leading-tight px-2">
-                Найдите жильё для короткой аренды
+                Аренда жилья без посредников
               </h1>
               <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-2">
-                Укажите город, даты и гостей — мы покажем подходящие варианты
+                Прямое общение с владельцами. Минимальная комиссия. Полный контроль условий
               </p>
             </div>
 
             {/* Поисковая панель - главный элемент */}
-            <div className="max-w-4xl mx-auto mb-4 sm:mb-6 w-full">
+            <div className="max-w-4xl mx-auto w-full">
               <SearchBar />
-            </div>
-
-            {/* CTA кнопка */}
-            <div className="text-center px-2">
-              <button
-                type="button"
-                onClick={() => {
-                  const el = document.querySelector('[id="home-search"] button[type="submit"], [id="home-search"] button:has(svg)')
-                  if (el) {
-                    (el as HTMLElement).click()
-                  } else {
-                    router.push('/search')
-                  }
-                }}
-                className="btn btn-primary btn-lg w-full sm:w-auto"
-              >
-                <Search className="w-5 h-5 md:w-6 md:h-6" />
-                Найти жильё
-              </button>
             </div>
           </div>
         </section>
@@ -114,23 +95,23 @@ export default function Home() {
         {/* Блок доверия/выгоды */}
         <section className="py-8 sm:py-12 md:py-16 px-4 bg-gray-50 w-full">
           <div className="container-custom max-w-6xl">
-            <h2 className="heading-2 mb-6 sm:mb-8 text-center">Почему выбирают LOCUS</h2>
+            <h2 className="heading-2 mb-6 sm:mb-8 text-center">Преимущества LOCUS</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               {[
                 { 
                   icon: Zap, 
-                  title: 'Низкая комиссия', 
-                  desc: 'Платите только за результат, без скрытых сборов' 
+                  title: 'Минимальная комиссия', 
+                  desc: 'Экономьте до 5000 ₽ с каждого бронирования по сравнению с конкурентами' 
                 },
                 { 
                   icon: Shield, 
-                  title: 'Честные условия', 
-                  desc: 'Прозрачные правила без навязанных услуг' 
+                  title: 'Прямое общение', 
+                  desc: 'Общайтесь с владельцами напрямую, без посредников и скрытых комиссий' 
                 },
                 { 
                   icon: Heart, 
-                  title: 'Полный контроль', 
-                  desc: 'Управляйте ценой, календарём и правилами самостоятельно' 
+                  title: 'Вы контролируете всё', 
+                  desc: 'Самостоятельно управляйте ценами, календарём и условиями аренды' 
                 },
               ].map((item, i) => (
                 <div key={i} className="card card-hover">
@@ -148,7 +129,7 @@ export default function Home() {
         {/* Популярные города */}
         <section className="py-8 sm:py-12 px-4 bg-gray-50 w-full">
           <div className="container-custom max-w-6xl">
-            <h2 className="heading-2 mb-4 sm:mb-6 text-center">Популярные города</h2>
+            <h2 className="heading-2 mb-4 sm:mb-6 text-center">Популярные направления</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
               {[
                 'Москва', 'Санкт-Петербург', 'Сочи', 'Казань', 'Екатеринбург', 'Краснодар',
@@ -171,12 +152,12 @@ export default function Home() {
         {/* Кратко о процессе */}
         <section className="py-8 sm:py-12 md:py-16 px-4 bg-white w-full">
           <div className="container-custom max-w-5xl">
-            <h2 className="heading-2 mb-6 sm:mb-8 text-center">Как это работает</h2>
+            <h2 className="heading-2 mb-6 sm:mb-8 text-center">Как забронировать жильё</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               {[
-                { icon: Search, title: 'Выбираете город и даты', desc: 'Укажите город, даты заезда и выезда, количество гостей' },
-                { icon: Calendar, title: 'Сравниваете варианты', desc: 'Посмотрите подходящие варианты, сравните цены и удобства' },
-                { icon: CheckCircle2, title: 'Бронируете онлайн', desc: 'Общайтесь с владельцем и бронируйте напрямую' },
+                { icon: Search, title: 'Выберите параметры', desc: 'Укажите город, даты заезда и выезда, количество гостей' },
+                { icon: Calendar, title: 'Сравните варианты', desc: 'Изучите предложения, сравните цены, удобства и расположение' },
+                { icon: CheckCircle2, title: 'Бронируйте напрямую', desc: 'Свяжитесь с владельцем и забронируйте без посредников' },
               ].map((step, i) => (
                 <div key={i} className="card">
                   <div className="flex items-start gap-3 sm:gap-4">
@@ -199,7 +180,7 @@ export default function Home() {
         <section className="py-12 md:py-16 px-4 bg-white">
           <div className="container mx-auto max-w-4xl">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 mb-6 sm:mb-8 text-center px-2">
-              Сравнение с другими сервисами
+              Сравнение с конкурентами
             </h2>
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
@@ -252,10 +233,10 @@ export default function Home() {
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 md:p-12">
               <div className="text-center mb-8">
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4 px-2">
-                  Сдаёте жильё?
+                  Сдаёте жильё? Зарабатывайте больше
                 </h2>
                 <p className="text-base sm:text-lg text-gray-700 max-w-2xl mx-auto px-2">
-                  Размещайте объявления бесплатно и платите комиссию только с подтверждённых бронирований. Без скрытых сборов.
+                  Размещение объявлений бесплатно. Комиссия только с подтверждённых бронирований. Прямое общение с гостями без посредников.
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -271,7 +252,7 @@ export default function Home() {
                   className="inline-flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-xl hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg"
                 >
                   <HomeIcon className="w-5 h-5" />
-                  Разместить объявление и сравнить
+                  Разместить объявление
                 </button>
               </div>
             </div>
@@ -353,7 +334,7 @@ export default function Home() {
             <div className="text-center">
               <Logo size="md" showText={true} className="justify-center mb-4" />
               <p className="text-sm sm:text-base text-gray-600 mb-6 max-w-2xl mx-auto px-2">
-                LOCUS — умный сервис подбора жилья для суточной аренды
+                LOCUS — платформа для аренды жилья без посредников. Минимальная комиссия, прямое общение, полный контроль
               </p>
               <div className="flex justify-center gap-6 text-sm text-gray-600">
                 <Link href="/smart-search" className="hover:text-primary transition-colors">

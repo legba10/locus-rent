@@ -187,7 +187,7 @@ export default function CityAutocomplete({
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
-          className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 pl-9 sm:pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm sm:text-base min-h-[44px] ${
+          className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 pl-9 sm:pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm sm:text-base h-[44px] sm:h-[48px] ${
             error ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'
           }`}
         />

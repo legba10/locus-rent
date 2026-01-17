@@ -21,10 +21,10 @@ export default function Header() {
           <Logo showText={true} />
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-6 h-full">
             <Link
               href="/smart-search"
-              className="text-gray-600 hover:text-primary transition-colors font-medium"
+              className="text-gray-600 hover:text-primary transition-colors font-medium py-2 flex items-center h-full"
             >
               Умный поиск
             </Link>
@@ -37,15 +37,15 @@ export default function Header() {
                   router.push('/login?next=/landlord/listings/new-stepper')
                 }
               }}
-              className="text-gray-600 hover:text-primary transition-colors font-medium"
+              className="text-gray-600 hover:text-primary transition-colors font-medium py-2 flex items-center h-full"
             >
               Разместить объявление
             </button>
             {isAuthenticated ? (
-              <div className="relative">
+              <div className="relative h-full flex items-center">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors font-medium"
+                  className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors font-medium py-2 h-full"
                 >
                   <User className="w-5 h-5" />
                   <span className="hidden lg:inline">{user?.firstName || 'Профиль'}</span>
@@ -94,16 +94,16 @@ export default function Header() {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 h-full">
                 <Link
                   href="/login"
-                  className="text-gray-600 hover:text-primary transition-colors font-medium"
+                  className="text-gray-600 hover:text-primary transition-colors font-medium py-2 flex items-center h-full"
                 >
                   Войти
                 </Link>
                 <Link
                   href="/register"
-                  className="bg-primary text-white px-5 py-2.5 rounded-xl hover:bg-primary-dark transition-all shadow-md hover:shadow-lg font-semibold transform hover:scale-105 active:scale-95"
+                  className="bg-primary text-white px-5 py-2.5 rounded-xl hover:bg-primary-dark transition-all shadow-md hover:shadow-lg font-semibold transform hover:scale-105 active:scale-95 flex items-center h-full"
                 >
                   Регистрация
                 </Link>

@@ -35,29 +35,29 @@ export default function GuestsStepper({
 
   return (
     <div className={className}>
-      <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+      <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
         <Users className="w-4 h-4 text-gray-500" />
         Гостей
       </label>
-      <div className="flex items-center gap-3 border border-gray-200 rounded-lg px-2 py-1 bg-white">
+      <div className="flex items-center gap-2 sm:gap-3 border border-gray-200 rounded-lg px-2 sm:px-3 bg-white h-[44px] sm:h-[48px]">
         <button
           type="button"
           onClick={handleDecrease}
           disabled={isMinDisabled}
-          className={`p-2 rounded-lg transition-all ${
+          className={`p-1.5 sm:p-2 rounded-lg transition-all flex-shrink-0 ${
             isMinDisabled
               ? 'text-gray-300 cursor-not-allowed'
               : 'text-gray-600 hover:bg-gray-100 hover:text-primary active:scale-95'
           }`}
           aria-label="Уменьшить количество гостей"
         >
-          <Minus className="w-5 h-5" />
+          <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
-        <div className="flex-1 text-center">
-          <span className="text-lg font-semibold text-gray-900 min-w-[2rem] inline-block">
+        <div className="flex-1 text-center min-w-0">
+          <span className="text-base sm:text-lg font-semibold text-gray-900">
             {value}
           </span>
-          <span className="text-sm text-gray-500 ml-1">
+          <span className="text-xs sm:text-sm text-gray-500 ml-1 hidden sm:inline">
             {value === 1 ? 'гость' : value < 5 ? 'гостя' : 'гостей'}
           </span>
         </div>
@@ -65,14 +65,14 @@ export default function GuestsStepper({
           type="button"
           onClick={handleIncrease}
           disabled={isMaxDisabled}
-          className={`p-2 rounded-lg transition-all ${
+          className={`p-1.5 sm:p-2 rounded-lg transition-all flex-shrink-0 ${
             isMaxDisabled
               ? 'text-gray-300 cursor-not-allowed'
               : 'text-gray-600 hover:bg-gray-100 hover:text-primary active:scale-95'
           }`}
           aria-label="Увеличить количество гостей"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
         </button>
       </div>
     </div>

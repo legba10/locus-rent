@@ -100,6 +100,16 @@ export class AuthService {
       throw new UnauthorizedException('Неверные учетные данные')
     }
 
+    // Автоматическое назначение ADMIN для feodal.00@bk.ru
+    const adminEmail = process.env.ADMIN_EMAIL || 'feodal.00@bk.ru'
+    if (user.email === adminEmail && user.role !== UserRole.ADMIN) {
+      await this.usersService.update(user.id, {
+        role: UserRole.ADMIN,
+        emailVerified: true,
+      })
+      user.role = UserRole.ADMIN
+    }
+
     // Генерация токена
     const payload = { sub: user.id, email: user.email, role: user.role }
     const accessToken = this.jwtService.sign(payload)
