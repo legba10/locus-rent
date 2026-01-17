@@ -27,6 +27,24 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Обработка ошибок подключения к серверу
+    if (!error.response && error.request) {
+      const isNetworkError = error.code === 'ERR_NETWORK' || 
+                            error.message?.includes('Network Error') ||
+                            error.message?.includes('ERR_CONNECTION_REFUSED')
+      
+      if (isNetworkError) {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'
+        error.response = {
+          data: {
+            message: `Сервер не отвечает. Проверьте подключение к интернету и убедитесь, что backend запущен. (API: ${apiUrl})`,
+            error: 'Connection Error',
+          },
+          status: 0,
+        }
+      }
+    }
+    
     // Обработка 401 - неавторизован
     if (error.response?.status === 401) {
       // Не перенаправляем на /login если мы уже на странице логина/регистрации

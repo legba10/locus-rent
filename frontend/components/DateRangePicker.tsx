@@ -261,12 +261,21 @@ export default function DateRangePicker({
       </div>
 
       {isOpen && activeField && (
-        <div
-          ref={calendarRef}
-          className="absolute z-50 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl p-4 md:p-6 max-w-[95vw] md:max-w-[700px] md:static md:mt-2"
-        >
-          {/* Mobile: single month, Desktop: two months */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <>
+          {/* Mobile overlay */}
+          <div 
+            className="fixed inset-0 bg-black/20 z-40 md:hidden"
+            onClick={() => {
+              setIsOpen(false)
+              setActiveField(null)
+            }}
+          />
+          <div
+            ref={calendarRef}
+            className="fixed md:absolute z-50 md:mt-2 bg-white border border-gray-200 rounded-t-2xl md:rounded-xl shadow-xl p-4 md:p-6 max-w-[95vw] md:max-w-[700px] bottom-0 left-0 right-0 md:bottom-auto md:left-auto md:right-auto md:static"
+          >
+            {/* Mobile: single month compact, Desktop: two months */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
             {/* First month */}
             <div>
               <div className="flex items-center justify-between mb-4">
@@ -289,14 +298,14 @@ export default function DateRangePicker({
                   <ChevronRight className="w-5 h-5 text-gray-600" />
                 </button>
               </div>
-              <div className="grid grid-cols-7 gap-1 mb-2">
+              <div className="grid grid-cols-7 gap-0.5 md:gap-1 mb-1 md:mb-2">
                 {weekDays.map((day) => (
-                  <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
+                  <div key={day} className="text-center text-[10px] md:text-xs font-medium text-gray-500 py-1.5 md:py-2">
                     {day}
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-7 gap-1">
+              <div className="grid grid-cols-7 gap-0.5 md:gap-1">
                 {getDaysInMonth(currentMonth).map((date, index) => (
                   <div key={index} className="flex items-center justify-center">
                     {date ? (
@@ -305,13 +314,13 @@ export default function DateRangePicker({
                         onClick={() => handleDateClick(date)}
                         onMouseEnter={() => handleDateHover(date)}
                         onMouseLeave={() => handleDateHover(null)}
-                        className={getDateClasses(date)}
+                        className={getDateClasses(date).replace('w-10 h-10', 'w-9 h-9 md:w-10 md:h-10')}
                         disabled={isDisabled(date)}
                       >
-                        {date.getDate()}
+                        <span className="text-xs md:text-sm">{date.getDate()}</span>
                       </button>
                     ) : (
-                      <div className="w-10 h-10" />
+                      <div className="w-9 h-9 md:w-10 md:h-10" />
                     )}
                   </div>
                 ))}
@@ -363,15 +372,30 @@ export default function DateRangePicker({
             </div>
           </div>
 
-          {/* Info text */}
-          <div className="mt-4 pt-4 border-t border-gray-200 text-sm text-gray-500 text-center">
+            {/* Info text */}
+          <div className="mt-3 pt-3 border-t border-gray-200 text-xs md:text-sm text-gray-500 text-center">
             {activeField === 'checkIn' 
               ? 'Выберите дату заезда' 
               : checkIn 
                 ? 'Выберите дату выезда (после заезда)'
                 : 'Сначала выберите дату заезда'}
           </div>
+          
+          {/* Close button for mobile */}
+          <div className="md:hidden mt-3 pt-3 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false)
+                setActiveField(null)
+              }}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-lg transition-colors font-medium text-sm"
+            >
+              Закрыть
+            </button>
+          </div>
         </div>
+        </>
       )}
     </div>
   )
