@@ -43,6 +43,7 @@ export default function CityAutocomplete({
   const [loading, setLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [highlightedText, setHighlightedText] = useState('')
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const debounceTimerRef = useRef<NodeJS.Timeout>()
@@ -159,6 +160,31 @@ export default function CityAutocomplete({
     }
   }, [selectedIndex])
 
+  // Update dropdown position
+  useEffect(() => {
+    if (showSuggestions && inputRef.current) {
+      const updatePosition = () => {
+        const rect = inputRef.current?.getBoundingClientRect()
+        if (rect) {
+          setDropdownPosition({
+            top: rect.bottom + window.scrollY + 4,
+            left: rect.left + window.scrollX,
+            width: rect.width
+          })
+        }
+      }
+      updatePosition()
+      window.addEventListener('scroll', updatePosition, true)
+      window.addEventListener('resize', updatePosition)
+      return () => {
+        window.removeEventListener('scroll', updatePosition, true)
+        window.removeEventListener('resize', updatePosition)
+      }
+    } else {
+      setDropdownPosition(null)
+    }
+  }, [showSuggestions])
+
   // Show popular cities on focus if input is empty
   const handleFocus = () => {
     if (value.length < 2) {
@@ -176,7 +202,7 @@ export default function CityAutocomplete({
   }
 
   return (
-    <div className={`relative w-full ${className}`}>
+    <div className={`relative w-full ${className}`} style={{ zIndex: 1 }}>
       <div className="relative w-full">
         <input
           ref={inputRef}
@@ -204,7 +230,13 @@ export default function CityAutocomplete({
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="absolute z-[10000] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-64 overflow-y-auto left-0 right-0"
+          className={`${dropdownPosition ? 'fixed' : 'absolute'} md:absolute z-[10002] w-[calc(100vw-2rem)] md:w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto left-4 md:left-0 right-4 md:right-0`}
+          style={dropdownPosition ? {
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`,
+            maxWidth: 'calc(100vw - 2rem)'
+          } : undefined}
         >
           {suggestions.map((city, index) => (
             <button
@@ -230,7 +262,15 @@ export default function CityAutocomplete({
       )}
 
       {showSuggestions && !loading && suggestions.length === 0 && value.length >= 2 && (
-        <div className="absolute z-[10000] w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center text-gray-500">
+        <div 
+          className={`${dropdownPosition ? 'fixed' : 'absolute'} md:absolute z-[10002] w-[calc(100vw-2rem)] md:w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl p-4 text-center text-gray-500 left-4 md:left-0 right-4 md:right-0`}
+          style={dropdownPosition ? {
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`,
+            maxWidth: 'calc(100vw - 2rem)'
+          } : undefined}
+        >
           Город не найден
         </div>
       )}

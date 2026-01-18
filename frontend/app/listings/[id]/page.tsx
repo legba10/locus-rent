@@ -9,7 +9,7 @@ import { useAuthStore } from '@/lib/store'
 import { 
   MapPin, Star, Users, Bed, Bath, Calendar, 
   Wifi, Car, UtensilsCrossed, Wind, Tv, 
-  Home, ArrowLeft, Heart, Share2, Loader2 
+  Home, ArrowLeft, Heart, Share2, Loader2, Eye 
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -121,10 +121,30 @@ export default function ListingDetailPage() {
     )
   }
 
+  // Защита от null/undefined
+  if (!listing) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="container mx-auto px-4 py-20">
+          <div className="text-center">
+            <p className="text-gray-600 mb-4">Объявление не найдено</p>
+            <Link href="/" className="text-primary hover:text-primary-dark">
+              Вернуться на главную
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Гарантируем, что images всегда массив
-  const images = Array.isArray(listing.images) ? listing.images : (listing.images ? [listing.images] : [])
-  const mainImage = images[0] || listing.imageUrl
+  const images = Array.isArray(listing.images) 
+    ? listing.images 
+    : (listing.images ? [listing.images] : [])
+  const mainImage = images[0] || listing.imageUrl || null
   const price = listing.pricePerNight || listing.price || 0
+  const views = listing.views || listing.viewCount || 0
 
   return (
     <div className="min-h-screen bg-white">
@@ -186,6 +206,10 @@ export default function ListingDetailPage() {
                     <div className="flex items-center gap-1 text-gray-600">
                       <MapPin className="w-5 h-5" />
                       <span>{listing.address || listing.city}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-gray-600">
+                      <Eye className="w-5 h-5" />
+                      <span>{views} {views === 1 ? 'просмотр' : views < 5 ? 'просмотра' : 'просмотров'}</span>
                     </div>
                   </div>
                 </div>
@@ -250,6 +274,44 @@ export default function ListingDetailPage() {
                     </div>
                   </div>
                 )}
+
+                {/* Reviews */}
+                <div>
+                  <h2 className="text-xl font-semibold mb-4 text-gray-900">Отзывы</h2>
+                  {listing.reviews && Array.isArray(listing.reviews) && listing.reviews.length > 0 ? (
+                    <div className="space-y-4">
+                      {listing.reviews.map((review: any, index: number) => (
+                        <div key={review.id || index} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <span className="font-semibold text-gray-900">
+                                {review.user?.firstName || review.userName || 'Анонимный пользователь'}
+                              </span>
+                              {review.rating && (
+                                <div className="flex items-center gap-1">
+                                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                  <span className="text-sm font-medium">{review.rating}</span>
+                                </div>
+                              )}
+                            </div>
+                            {review.createdAt && (
+                              <span className="text-sm text-gray-500">
+                                {new Date(review.createdAt).toLocaleDateString('ru-RU')}
+                              </span>
+                            )}
+                          </div>
+                          {review.comment && (
+                            <p className="text-gray-700">{review.comment}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 rounded-lg p-8 border border-gray-200 text-center">
+                      <p className="text-gray-600">Отзывов пока нет</p>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Booking Sidebar */}

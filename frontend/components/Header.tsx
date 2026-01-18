@@ -42,7 +42,7 @@ export default function Header() {
               Разместить объявление
             </button>
             {isAuthenticated ? (
-              <div className="relative h-full flex items-center">
+              <div className="relative h-full flex items-center" style={{ zIndex: 1000 }}>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors font-medium py-2 h-full"
@@ -51,7 +51,13 @@ export default function Header() {
                   <span className="hidden lg:inline">{user?.firstName || 'Меню'}</span>
                 </button>
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50">
+                  <div 
+                    className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[10001]"
+                    style={{
+                      maxWidth: 'calc(100vw - 2rem)',
+                      right: 0
+                    }}
+                  >
                     <Link
                       href="/profile"
                       className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700"

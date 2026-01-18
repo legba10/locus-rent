@@ -135,11 +135,11 @@ export default function SupportChat() {
         className={`fixed z-[10000] flex flex-col transition-all bg-white shadow-2xl border border-gray-100 ${
           isMinimized 
             ? 'h-16 md:bottom-6 md:right-6 md:w-96 md:rounded-2xl' 
-            : 'md:bottom-6 md:right-6 md:w-96 md:max-w-[calc(100vw-3rem)] md:rounded-2xl md:h-[600px] md:max-h-[calc(100vh-3rem)] bottom-0 left-0 right-0 w-full h-[100vh] max-h-[100vh] rounded-t-2xl md:rounded-2xl flex flex-col'
+            : 'md:bottom-6 md:right-6 md:w-96 md:max-w-[calc(100vw-3rem)] md:rounded-2xl md:h-[600px] md:max-h-[calc(100vh-3rem)] bottom-0 left-0 right-0 w-full h-[100vh] max-h-[100vh] rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden'
         }`}
       >
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-2xl flex items-center justify-between">
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-2xl flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
             <MessageCircle className="w-5 h-5" />
@@ -170,7 +170,7 @@ export default function SupportChat() {
       {!isMinimized && (
         <>
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 min-h-0 overscroll-contain" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 min-h-0 overscroll-contain">
             {showUserForm ? (
               <form onSubmit={handleUserFormSubmit} className="space-y-4">
                 <div>
@@ -260,7 +260,7 @@ export default function SupportChat() {
 
           {/* Input */}
           {!showUserForm && (
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 bg-white">
+            <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 bg-white flex-shrink-0">
               <div className="flex gap-2">
                 <input
                   type="text"

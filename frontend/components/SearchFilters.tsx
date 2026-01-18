@@ -132,7 +132,7 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
     priceMin || priceMax || propertyType !== 'any' || rating !== 'any' || selectedAmenities.length > 0
 
   const content = (
-    <div className={`${isMobile ? 'p-4' : 'p-4 sm:p-6'} ${className}`}>
+    <div className={`${isMobile ? 'p-4 flex flex-col h-full' : 'p-4 sm:p-6'} ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div className="flex items-center gap-2">
@@ -160,7 +160,7 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
         </div>
       </div>
 
-      <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+      <div className="space-y-6 overflow-y-auto flex-1 min-h-0" style={{ maxHeight: isMobile ? 'calc(90vh - 200px)' : 'calc(100vh - 200px)' }}>
         {/* Price Range */}
         <div>
           <label className="block text-sm font-semibold text-gray-900 mb-3">
@@ -297,7 +297,7 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
       
       {/* Apply Button - Mobile */}
       {isMobile && (
-        <div className="mt-6 pt-4 border-t border-gray-200 flex gap-3 sticky bottom-0 bg-white pb-4">
+        <div className="mt-6 pt-4 border-t border-gray-200 flex gap-3 bg-white pb-safe">
           {hasActiveFilters && (
             <button
               type="button"
@@ -332,12 +332,14 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
           onClick={onClose}
         />
         {/* Bottom Sheet */}
-        <div className="relative w-full bg-white rounded-t-2xl shadow-2xl max-h-[90vh] flex flex-col">
+        <div className="relative w-full bg-white rounded-t-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
           {/* Handle */}
-          <div className="flex justify-center pt-3 pb-2">
+          <div className="flex justify-center pt-3 pb-2 flex-shrink-0">
             <div className="w-12 h-1 bg-gray-300 rounded-full" />
           </div>
-          {content}
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {content}
+          </div>
         </div>
       </div>
     )

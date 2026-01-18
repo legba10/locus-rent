@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { MapPin, Star, Users, Bed, Bath } from 'lucide-react'
+import { MapPin, Star, Users, Bed, Bath, Eye } from 'lucide-react'
 
 interface ListingCardProps {
   listing: {
@@ -20,6 +20,8 @@ interface ListingCardProps {
     bathrooms?: number
     images?: string[]
     imageUrl?: string
+    views?: number
+    viewCount?: number
   }
 }
 
@@ -28,8 +30,9 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const address = listing.address || listing.city || 'Адрес не указан'
   // Гарантируем, что images всегда массив
   const images = Array.isArray(listing.images) ? listing.images : (listing.images ? [listing.images] : [])
-  const imageUrl = images[0] || listing.imageUrl
+  const imageUrl = images[0] || listing.imageUrl || null
   const guests = listing.maxGuests || listing.guests
+  const views = listing.views || listing.viewCount || 0
 
   return (
     <Link href={`/listings/${listing.id}`}>
@@ -72,7 +75,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
           </div>
 
           {/* Features */}
-          <div className="flex items-center gap-3 sm:gap-4 text-gray-500 text-xs sm:text-sm mb-3 sm:mb-4">
+          <div className="flex items-center gap-3 sm:gap-4 text-gray-500 text-xs sm:text-sm mb-3 sm:mb-4 flex-wrap">
             {guests && (
               <div className="flex items-center gap-1">
                 <Users className="w-4 h-4" />
@@ -89,6 +92,12 @@ export default function ListingCard({ listing }: ListingCardProps) {
               <div className="flex items-center gap-1">
                 <Bath className="w-4 h-4" />
                 <span>{listing.bathrooms}</span>
+              </div>
+            )}
+            {views > 0 && (
+              <div className="flex items-center gap-1">
+                <Eye className="w-4 h-4" />
+                <span>{views}</span>
               </div>
             )}
           </div>
