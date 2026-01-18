@@ -164,14 +164,22 @@ export default function ListingDetailPage() {
         {/* Image Gallery */}
         <div className="container mx-auto px-4 py-6">
           <div className="relative w-full h-[500px] rounded-2xl overflow-hidden bg-gray-100">
-            {mainImage ? (
-              <Image
+            {mainImage && (mainImage.startsWith('http') || mainImage.startsWith('data:')) ? (
+              <img
                 src={mainImage}
-                alt={listing.title}
-                fill
-                className="object-cover"
-                priority
-                sizes="100vw"
+                alt={listing.title || 'Объявление'}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement
+                  target.style.display = 'none'
+                  const parent = target.parentElement
+                  if (parent && !parent.querySelector('.image-fallback')) {
+                    const fallback = document.createElement('div')
+                    fallback.className = 'image-fallback w-full h-full flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-50 to-gray-100'
+                    fallback.innerHTML = '<svg class="w-24 h-24 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>'
+                    parent.appendChild(fallback)
+                  }
+                }}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -215,14 +223,16 @@ export default function ListingDetailPage() {
                 </div>
 
                 {/* Description */}
-                {listing.description && (
-                  <div>
-                    <h2 className="text-xl font-semibold mb-4 text-gray-900">Описание</h2>
+                <div>
+                  <h2 className="text-xl font-semibold mb-4 text-gray-900">Описание</h2>
+                  {listing.description ? (
                     <p className="text-gray-700 leading-relaxed whitespace-pre-line">
                       {listing.description}
                     </p>
-                  </div>
-                )}
+                  ) : (
+                    <p className="text-gray-500 italic">Описание отсутствует</p>
+                  )}
+                </div>
 
                 {/* Features */}
                 <div>

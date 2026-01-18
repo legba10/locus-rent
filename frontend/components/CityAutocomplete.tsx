@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { MapPin, Loader2 } from 'lucide-react'
 import { citiesAPI } from '@/lib/api'
 
@@ -44,9 +45,14 @@ export default function CityAutocomplete({
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [highlightedText, setHighlightedText] = useState('')
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null)
+  const [mounted, setMounted] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const debounceTimerRef = useRef<NodeJS.Timeout>()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Debounced search function
   const searchCities = useCallback(async (query: string) => {
@@ -162,28 +168,30 @@ export default function CityAutocomplete({
 
   // Update dropdown position
   useEffect(() => {
-    if (showSuggestions && inputRef.current) {
+    if (showSuggestions && inputRef.current && mounted) {
       const updatePosition = () => {
         const rect = inputRef.current?.getBoundingClientRect()
         if (rect) {
           setDropdownPosition({
-            top: rect.bottom + window.scrollY + 4,
-            left: rect.left + window.scrollX,
+            top: rect.bottom + 4,
+            left: rect.left,
             width: rect.width
           })
         }
       }
       updatePosition()
-      window.addEventListener('scroll', updatePosition, true)
-      window.addEventListener('resize', updatePosition)
+      const handleScroll = () => updatePosition()
+      const handleResize = () => updatePosition()
+      window.addEventListener('scroll', handleScroll, true)
+      window.addEventListener('resize', handleResize)
       return () => {
-        window.removeEventListener('scroll', updatePosition, true)
-        window.removeEventListener('resize', updatePosition)
+        window.removeEventListener('scroll', handleScroll, true)
+        window.removeEventListener('resize', handleResize)
       }
     } else {
       setDropdownPosition(null)
     }
-  }, [showSuggestions])
+  }, [showSuggestions, mounted])
 
   // Show popular cities on focus if input is empty
   const handleFocus = () => {
@@ -227,16 +235,16 @@ export default function CityAutocomplete({
         <p className="mt-1 text-xs text-red-600">{error}</p>
       )}
 
-      {showSuggestions && suggestions.length > 0 && (
+      {mounted && showSuggestions && suggestions.length > 0 && dropdownPosition && createPortal(
         <div
           ref={suggestionsRef}
-          className={`${dropdownPosition ? 'fixed' : 'absolute'} md:absolute z-[10002] w-[calc(100vw-2rem)] md:w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto left-4 md:left-0 right-4 md:right-0`}
-          style={dropdownPosition ? {
+          className="fixed z-[10002] bg-white border border-gray-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto"
+          style={{
             top: `${dropdownPosition.top}px`,
-            left: `${dropdownPosition.left}px`,
-            width: `${dropdownPosition.width}px`,
-            maxWidth: 'calc(100vw - 2rem)'
-          } : undefined}
+            left: `${Math.max(8, Math.min(dropdownPosition.left, window.innerWidth - dropdownPosition.width - 8))}px`,
+            width: `${Math.min(dropdownPosition.width, window.innerWidth - 16)}px`,
+            maxHeight: '16rem'
+          }}
         >
           {suggestions.map((city, index) => (
             <button
@@ -258,21 +266,22 @@ export default function CityAutocomplete({
               </div>
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
 
-      {showSuggestions && !loading && suggestions.length === 0 && value.length >= 2 && (
+      {mounted && showSuggestions && !loading && suggestions.length === 0 && value.length >= 2 && dropdownPosition && createPortal(
         <div 
-          className={`${dropdownPosition ? 'fixed' : 'absolute'} md:absolute z-[10002] w-[calc(100vw-2rem)] md:w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-2xl p-4 text-center text-gray-500 left-4 md:left-0 right-4 md:right-0`}
-          style={dropdownPosition ? {
+          className="fixed z-[10002] bg-white border border-gray-200 rounded-xl shadow-2xl p-4 text-center text-gray-500"
+          style={{
             top: `${dropdownPosition.top}px`,
-            left: `${dropdownPosition.left}px`,
-            width: `${dropdownPosition.width}px`,
-            maxWidth: 'calc(100vw - 2rem)'
-          } : undefined}
+            left: `${Math.max(8, Math.min(dropdownPosition.left, window.innerWidth - dropdownPosition.width - 8))}px`,
+            width: `${Math.min(dropdownPosition.width, window.innerWidth - 16)}px`
+          }}
         >
           Город не найден
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )

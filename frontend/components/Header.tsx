@@ -55,7 +55,8 @@ export default function Header() {
                     className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[10001]"
                     style={{
                       maxWidth: 'calc(100vw - 2rem)',
-                      right: 0
+                      right: 0,
+                      left: 'auto'
                     }}
                   >
                     <Link
@@ -118,14 +119,71 @@ export default function Header() {
           </nav>
 
           {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-gray-600 hover:text-gray-900 transition-colors p-2 -mr-2"
-            aria-label="Меню"
-          >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="md:hidden flex items-center gap-2">
+            {isAuthenticated && (
+              <button
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="text-gray-600 hover:text-primary transition-colors p-2 -mr-2"
+                aria-label="Профиль"
+              >
+                <User className="w-6 h-6" />
+              </button>
+            )}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-gray-600 hover:text-gray-900 transition-colors p-2 -mr-2"
+              aria-label="Меню"
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile User Menu */}
+        {isAuthenticated && isUserMenuOpen && (
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-lg z-[10001]">
+            <div className="px-4 py-2">
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
+                onClick={() => setIsUserMenuOpen(false)}
+              >
+                <User className="w-4 h-4" />
+                Профиль
+              </Link>
+              <Link
+                href="/landlord"
+                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
+                onClick={() => setIsUserMenuOpen(false)}
+              >
+                <Home className="w-4 h-4" />
+                Кабинет арендодателя
+              </Link>
+              {(user?.role === 'admin' || user?.role === 'ADMIN' || user?.email === 'feodal.00@bk.ru') && (
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
+                  onClick={() => setIsUserMenuOpen(false)}
+                >
+                  <Shield className="w-4 h-4" />
+                  Админ-панель
+                </Link>
+              )}
+              <hr className="my-2 border-gray-100" />
+              <button
+                onClick={() => {
+                  logout()
+                  setIsUserMenuOpen(false)
+                  router.push('/')
+                }}
+                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors w-full text-left text-gray-700 rounded-lg"
+              >
+                <LogOut className="w-4 h-4" />
+                Выйти
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Menu */}
         {isMenuOpen && (
