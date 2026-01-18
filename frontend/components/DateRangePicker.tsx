@@ -427,14 +427,14 @@ export default function DateRangePicker({
   )
 
   return (
-    <div className={`relative ${className}`} style={{ zIndex: 0 }}>
+    <div className={`relative ${className}`}>
       <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
         <Calendar className="w-4 h-4 text-gray-500" />
         Даты
       </label>
-      {/* Mobile: без фиксированной высоты, Desktop: с высотой */}
+      {/* Mobile: строго вертикальный layout без перекрытий, Desktop: горизонтальный */}
       <div className="flex flex-col sm:flex-row gap-2 sm:h-[48px]">
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-full">
           <button
             ref={checkInRef}
             type="button"
@@ -446,7 +446,7 @@ export default function DateRangePicker({
             {checkIn ? formatDisplayDate(checkIn) : 'Заезд'}
           </button>
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 w-full">
           <button
             ref={checkOutRef}
             type="button"

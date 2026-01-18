@@ -353,12 +353,13 @@ export default function ListingDetailPage() {
                         {/* Image or Fallback */}
                         {hasImage && !hasError ? (
                           <>
+                            {isLoading && (
+                              <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 z-0" />
+                            )}
                             <img
                               src={imageUrl}
                               alt={`${listing && typeof listing.title === 'string' ? listing.title : 'Объявление'} - фото ${index + 1}`}
-                              className={`w-full h-full object-cover transition-opacity duration-300 ${
-                                isLoading ? 'opacity-0 absolute' : 'opacity-100'
-                              }`}
+                              className="w-full h-full object-cover transition-opacity duration-300"
                               loading="lazy"
                               decoding="async"
                               onLoad={() => {

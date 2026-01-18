@@ -26,7 +26,7 @@ interface ListingCardProps {
 }
 
 export default function ListingCard({ listing }: ListingCardProps) {
-  const [imageLoading, setImageLoading] = useState(true)
+  const [imageLoading, setImageLoading] = useState<boolean>(true)
   const [imageError, setImageError] = useState(false)
   
   const price = listing.pricePerNight || listing.price || 0
@@ -81,34 +81,32 @@ export default function ListingCard({ listing }: ListingCardProps) {
       <div className="bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 group w-full h-full flex flex-col">
         {/* Image */}
         <div className="relative w-full h-48 sm:h-56 md:h-64 bg-gray-100 overflow-hidden">
-          {/* Skeleton Loader */}
-          {imageLoading && hasImage && !imageError && (
-            <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
-          )}
-          
           {/* Image or Fallback */}
           {hasImage && !imageError ? (
-            <img
-              src={imageUrl!}
-              alt={listing.title || 'Объявление'}
-              className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${
-                imageLoading ? 'opacity-0 absolute' : 'opacity-100'
-              }`}
-              loading="lazy"
-              decoding="async"
-              onLoad={() => {
-                setImageLoading(false)
-                setImageError(false)
-              }}
-              onError={(e) => {
-                console.error('Image load error in ListingCard:', imageUrl)
-                setImageLoading(false)
-                setImageError(true)
-                // Скрываем битое изображение
-                const target = e.target as HTMLImageElement
-                target.style.display = 'none'
-              }}
-            />
+            <>
+              {imageLoading && (
+                <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 z-0" />
+              )}
+              <img
+                src={imageUrl!}
+                alt={listing.title || 'Объявление'}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                loading="lazy"
+                decoding="async"
+                onLoad={() => {
+                  setImageLoading(false)
+                  setImageError(false)
+                }}
+                onError={(e) => {
+                  console.error('Image load error in ListingCard:', imageUrl)
+                  setImageLoading(false)
+                  setImageError(true)
+                  // Скрываем битое изображение
+                  const target = e.target as HTMLImageElement
+                  target.style.display = 'none'
+                }}
+              />
+            </>
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-50 to-gray-100">
               <div className="text-center px-4">
