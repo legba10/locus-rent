@@ -32,36 +32,10 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const price = listing.pricePerNight || listing.price || 0
   const address = listing.address || listing.city || 'Адрес не указан'
   // Гарантируем, что images всегда массив - CRITICAL GUARD
-  // Обрабатываем разные форматы: массив, строка с запятыми (simple-array из TypeORM), отдельный imageUrl
-  let images: string[] = []
-  try {
-    if (listing.images != null && listing.images !== '') {
-      if (Array.isArray(listing.images)) {
-        // Массив строк
-        images = listing.images
-          .filter((img: any) => img != null && String(img).trim().length > 0)
-          .map((url: any) => String(url).trim())
-      } else if (typeof listing.images === 'string') {
-        const imagesStr = String(listing.images).trim()
-        // Проверяем, это строка с запятыми (simple-array) или одна строка
-        if (imagesStr.includes(',')) {
-          // Разбиваем по запятым (simple-array из TypeORM)
-          images = imagesStr.split(',')
-            .map((url: string) => url.trim())
-            .filter((url: string) => url.length > 0)
-        } else if (imagesStr.length > 0) {
-          // Одна строка
-          images = [imagesStr]
-        }
-      }
-    }
-    
-    // Фильтруем только валидные строки (не пустые)
-    images = images.filter((url: string) => url && String(url).trim().length > 0).map((url: string) => String(url).trim())
-  } catch (error) {
-    console.error('Error processing images in ListingCard:', error)
-    images = []
-  }
+  // TypeScript безопасная обработка: только проверка массива, без сравнения со строками
+  const images: string[] = Array.isArray(listing.images) && listing.images.length > 0
+    ? listing.images.filter((img): img is string => img != null && typeof img === 'string' && img.trim().length > 0).map(url => url.trim())
+    : []
   
   // Проверяем также imageUrl - безопасно
   let imageUrl: string | null = null
