@@ -46,19 +46,27 @@ export default function DateRangePicker({
         const activeRef = activeField === 'checkIn' ? checkInRef.current : checkOutRef.current
         if (activeRef) {
           const rect = activeRef.getBoundingClientRect()
-          const scrollY = window.scrollY || window.pageYOffset
-          const scrollX = window.scrollX || window.pageXOffset
           const viewportWidth = window.innerWidth
           const calendarWidth = 700 // max-w-[700px]
+          const isMobile = viewportWidth < 768
           
-          setCalendarPosition({
-            top: rect.bottom + scrollY + 8,
-            left: Math.max(8, Math.min(rect.left + scrollX, viewportWidth - calendarWidth - 8))
-          })
+          if (!isMobile) {
+            // Desktop: fixed positioning relative to viewport
+            setCalendarPosition({
+              top: rect.bottom + 8,
+              left: Math.max(8, Math.min(rect.left, viewportWidth - calendarWidth - 8))
+            })
+          } else {
+            setCalendarPosition(null)
+          }
         }
       }
       updatePosition()
-      const handleScroll = () => requestAnimationFrame(updatePosition)
+      const handleScroll = () => {
+        if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+          requestAnimationFrame(updatePosition)
+        }
+      }
       const handleResize = () => requestAnimationFrame(updatePosition)
       window.addEventListener('scroll', handleScroll, true)
       window.addEventListener('resize', handleResize)

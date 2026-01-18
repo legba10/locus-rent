@@ -29,10 +29,20 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const price = listing.pricePerNight || listing.price || 0
   const address = listing.address || listing.city || 'Адрес не указан'
   // Гарантируем, что images всегда массив
-  const images = Array.isArray(listing.images) 
-    ? listing.images.filter((img: any) => img && (typeof img === 'string'))
-    : (listing.images && typeof listing.images === 'string' ? [listing.images] : [])
-  const imageUrl = (images.length > 0 && images[0]) || (listing.imageUrl && typeof listing.imageUrl === 'string' ? listing.imageUrl : null) || null
+  let images: string[] = []
+  if (Array.isArray(listing.images)) {
+    images = listing.images.filter((img: any) => img && typeof img === 'string' && img.trim().length > 0)
+  } else if (listing.images && typeof listing.images === 'string') {
+    images = [listing.images]
+  }
+  
+  // Проверяем также imageUrl
+  let imageUrl: string | null = null
+  if (images.length > 0) {
+    imageUrl = images[0]
+  } else if (listing.imageUrl && typeof listing.imageUrl === 'string' && listing.imageUrl.trim().length > 0) {
+    imageUrl = listing.imageUrl
+  }
   const guests = listing.maxGuests || listing.guests
   const views = listing.views || listing.viewCount || 0
 

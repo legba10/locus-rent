@@ -41,11 +41,20 @@ export default function ListingDetailPage() {
   const loadListing = async () => {
     try {
       setLoading(true)
+      setError('')
       const response = await listingsAPI.getOne(params.id as string)
-      setListing(response.data?.data || null)
-    } catch (error) {
+      // Обрабатываем разные форматы ответа
+      const listingData = response.data?.data || response.data || null
+      if (listingData) {
+        setListing(listingData)
+      } else {
+        setError('Объявление не найдено')
+        setListing(null)
+      }
+    } catch (error: any) {
       console.error('Error loading listing:', error)
-      setError('Объявление не найдено')
+      setError(error.response?.data?.message || 'Объявление не найдено')
+      setListing(null)
     } finally {
       setLoading(false)
     }

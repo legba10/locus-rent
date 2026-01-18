@@ -175,8 +175,6 @@ export default function CityAutocomplete({
           const viewportHeight = window.innerHeight
           const viewportWidth = window.innerWidth
           const dropdownHeight = 256 // max-h-64 = 16rem = 256px
-          const scrollY = window.scrollY || window.pageYOffset
-          const scrollX = window.scrollX || window.pageXOffset
           
           const spaceBelow = viewportHeight - rect.bottom
           const spaceAbove = rect.top
@@ -184,17 +182,17 @@ export default function CityAutocomplete({
           // Определяем, где больше места - сверху или снизу
           const showBelow = spaceBelow >= dropdownHeight || spaceBelow >= spaceAbove
           
-          // Рассчитываем позицию с учетом скролла
+          // Fixed positioning relative to viewport (not scroll)
           const top = showBelow 
-            ? rect.bottom + scrollY + 4
-            : rect.top + scrollY - dropdownHeight - 4
+            ? rect.bottom + 4
+            : rect.top - dropdownHeight - 4
           
           // Ограничиваем по viewport
-          const left = Math.max(8, Math.min(rect.left + scrollX, viewportWidth - rect.width - 8))
+          const left = Math.max(8, Math.min(rect.left, viewportWidth - rect.width - 8))
           const width = Math.min(rect.width, viewportWidth - 16)
           
           setDropdownPosition({
-            top: Math.max(8, Math.min(top, viewportHeight + scrollY - dropdownHeight - 8)),
+            top: Math.max(8, Math.min(top, viewportHeight - dropdownHeight - 8)),
             left,
             width
           })

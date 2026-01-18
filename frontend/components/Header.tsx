@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Menu, X, User, LogOut, Home, Shield } from 'lucide-react'
+import { Menu, X, User, LogOut, Home, Shield, Search } from 'lucide-react'
 import { useAuthStore } from '@/lib/store'
 import Logo from './Logo'
 
@@ -120,15 +120,6 @@ export default function Header() {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2">
-            {isAuthenticated && (
-              <button
-                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="text-gray-600 hover:text-primary transition-colors p-2 -mr-2"
-                aria-label="Профиль"
-              >
-                <User className="w-6 h-6" />
-              </button>
-            )}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-600 hover:text-gray-900 transition-colors p-2 -mr-2"
@@ -139,54 +130,98 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile User Menu */}
-        {isAuthenticated && isUserMenuOpen && (
+        {/* Mobile Menu - объединенное */}
+        {isMenuOpen && (
           <div className="md:hidden fixed top-16 left-0 right-0 bg-white border-b border-gray-100 shadow-lg z-[10001] max-h-[calc(100vh-4rem)] overflow-y-auto">
             <div className="px-4 py-3 space-y-1">
+              {/* Navigation links */}
               <Link
-                href="/profile"
+                href="/smart-search"
                 className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
-                onClick={() => setIsUserMenuOpen(false)}
+                onClick={() => setIsMenuOpen(false)}
               >
-                <User className="w-4 h-4" />
-                Профиль
+                <Search className="w-4 h-4" />
+                Умный поиск
               </Link>
               <Link
-                href="/landlord"
+                href="/landlord/listings/new"
                 className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
-                onClick={() => setIsUserMenuOpen(false)}
+                onClick={() => setIsMenuOpen(false)}
               >
                 <Home className="w-4 h-4" />
-                Кабинет арендодателя
+                Разместить объявление
               </Link>
-              {(user?.role === 'admin' || user?.role === 'ADMIN' || user?.email === 'feodal.00@bk.ru') && (
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
-                  onClick={() => setIsUserMenuOpen(false)}
-                >
-                  <Shield className="w-4 h-4" />
-                  Админ-панель
-                </Link>
+              
+              {/* User menu items */}
+              {isAuthenticated && (
+                <>
+                  <hr className="my-2 border-gray-100" />
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <User className="w-4 h-4" />
+                    Профиль
+                  </Link>
+                  <Link
+                    href="/landlord"
+                    className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Home className="w-4 h-4" />
+                    Кабинет арендодателя
+                  </Link>
+                  {(user?.role === 'admin' || user?.role === 'ADMIN' || user?.email === 'feodal.00@bk.ru') && (
+                    <Link
+                      href="/admin"
+                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Shield className="w-4 h-4" />
+                      Админ-панель
+                    </Link>
+                  )}
+                  <hr className="my-2 border-gray-100" />
+                  <button
+                    onClick={() => {
+                      logout()
+                      setIsMenuOpen(false)
+                      router.push('/')
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors w-full text-left text-gray-700 rounded-lg"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Выйти
+                  </button>
+                </>
               )}
-              <hr className="my-2 border-gray-100" />
-              <button
-                onClick={() => {
-                  logout()
-                  setIsUserMenuOpen(false)
-                  router.push('/')
-                }}
-                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors w-full text-left text-gray-700 rounded-lg"
-              >
-                <LogOut className="w-4 h-4" />
-                Выйти
-              </button>
+              
+              {!isAuthenticated && (
+                <>
+                  <hr className="my-2 border-gray-100" />
+                  <Link
+                    href="/login"
+                    className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Войти
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Регистрация
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
 
-        {/* Mobile Menu */}
-        {isMenuOpen && (
+        {/* Old Mobile Menu - удаляем */}
+        {false && isMenuOpen && (
           <div className="md:hidden py-3 sm:py-4 border-t border-gray-100">
             <nav className="flex flex-col gap-2 sm:gap-3">
               <Link
