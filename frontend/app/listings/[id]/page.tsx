@@ -140,9 +140,9 @@ export default function ListingDetailPage() {
 
   // Гарантируем, что images всегда массив
   const images = Array.isArray(listing.images) 
-    ? listing.images 
-    : (listing.images ? [listing.images] : [])
-  const mainImage = images[0] || listing.imageUrl || null
+    ? listing.images.filter((img: any) => img && (typeof img === 'string'))
+    : (listing.images && typeof listing.images === 'string' ? [listing.images] : [])
+  const mainImage = (images.length > 0 && images[0]) || (listing.imageUrl && typeof listing.imageUrl === 'string' ? listing.imageUrl : null) || null
   const price = listing.pricePerNight || listing.price || 0
   const views = listing.views || listing.viewCount || 0
 

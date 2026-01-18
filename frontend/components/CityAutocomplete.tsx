@@ -172,10 +172,19 @@ export default function CityAutocomplete({
       const updatePosition = () => {
         const rect = inputRef.current?.getBoundingClientRect()
         if (rect) {
+          const viewportHeight = window.innerHeight
+          const viewportWidth = window.innerWidth
+          const dropdownHeight = 256 // max-h-64 = 16rem = 256px
+          const spaceBelow = viewportHeight - rect.bottom
+          const spaceAbove = rect.top
+          
+          // Определяем, где больше места - сверху или снизу
+          const showBelow = spaceBelow >= dropdownHeight || spaceBelow >= spaceAbove
+          
           setDropdownPosition({
-            top: rect.bottom + 4,
-            left: rect.left,
-            width: rect.width
+            top: showBelow ? rect.bottom + 4 : rect.top - dropdownHeight - 4,
+            left: Math.max(8, Math.min(rect.left, viewportWidth - rect.width - 8)),
+            width: Math.min(rect.width, viewportWidth - 16)
           })
         }
       }
@@ -184,9 +193,12 @@ export default function CityAutocomplete({
       const handleResize = () => updatePosition()
       window.addEventListener('scroll', handleScroll, true)
       window.addEventListener('resize', handleResize)
+      // Обновляем позицию при изменении размера контента
+      const intervalId = setInterval(updatePosition, 100)
       return () => {
         window.removeEventListener('scroll', handleScroll, true)
         window.removeEventListener('resize', handleResize)
+        clearInterval(intervalId)
       }
     } else {
       setDropdownPosition(null)
@@ -235,15 +247,16 @@ export default function CityAutocomplete({
         <p className="mt-1 text-xs text-red-600">{error}</p>
       )}
 
-      {mounted && showSuggestions && suggestions.length > 0 && dropdownPosition && createPortal(
+      {mounted && showSuggestions && suggestions.length > 0 && dropdownPosition && typeof window !== 'undefined' && createPortal(
         <div
           ref={suggestionsRef}
           className="fixed z-[10002] bg-white border border-gray-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto"
           style={{
             top: `${dropdownPosition.top}px`,
-            left: `${Math.max(8, Math.min(dropdownPosition.left, window.innerWidth - dropdownPosition.width - 8))}px`,
-            width: `${Math.min(dropdownPosition.width, window.innerWidth - 16)}px`,
-            maxHeight: '16rem'
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`,
+            maxHeight: '16rem',
+            position: 'fixed'
           }}
         >
           {suggestions.map((city, index) => (
@@ -270,13 +283,14 @@ export default function CityAutocomplete({
         document.body
       )}
 
-      {mounted && showSuggestions && !loading && suggestions.length === 0 && value.length >= 2 && dropdownPosition && createPortal(
+      {mounted && showSuggestions && !loading && suggestions.length === 0 && value.length >= 2 && dropdownPosition && typeof window !== 'undefined' && createPortal(
         <div 
           className="fixed z-[10002] bg-white border border-gray-200 rounded-xl shadow-2xl p-4 text-center text-gray-500"
           style={{
             top: `${dropdownPosition.top}px`,
-            left: `${Math.max(8, Math.min(dropdownPosition.left, window.innerWidth - dropdownPosition.width - 8))}px`,
-            width: `${Math.min(dropdownPosition.width, window.innerWidth - 16)}px`
+            left: `${dropdownPosition.left}px`,
+            width: `${dropdownPosition.width}px`,
+            position: 'fixed'
           }}
         >
           Город не найден
