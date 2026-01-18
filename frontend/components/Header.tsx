@@ -120,11 +120,11 @@ export default function Header() {
                     ref={userMenuRef}
                     className="fixed bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[10001]"
                     style={{
-                      right: userMenuPosition?.right != null ? `${userMenuPosition.right}px` : '0',
-                      top: userMenuPosition?.top != null ? `${userMenuPosition.top}px` : (userMenuButtonRef.current ? `${userMenuButtonRef.current.getBoundingClientRect().bottom + 8}px` : 'auto'),
-                      maxWidth: userMenuPosition?.maxWidth != null ? `${userMenuPosition.maxWidth}px` : 'calc(100vw - 2rem)',
+                      right: '1rem',
+                      top: userMenuButtonRef.current ? `${userMenuButtonRef.current.getBoundingClientRect().bottom + 8}px` : 'auto',
                       width: '224px',
                       minWidth: '200px',
+                      maxWidth: 'calc(100vw - 2rem)',
                       maxHeight: 'calc(100vh - 2rem)',
                       overflowY: 'auto'
                     }}

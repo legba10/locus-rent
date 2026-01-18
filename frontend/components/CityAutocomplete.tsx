@@ -166,50 +166,26 @@ export default function CityAutocomplete({
     }
   }, [selectedIndex])
 
-  // Update dropdown position
+  // Update dropdown position - только один раз при открытии, без обновлений при скролле
   useEffect(() => {
-    if (showSuggestions && inputRef.current && mounted) {
-      const updatePosition = () => {
-        const rect = inputRef.current?.getBoundingClientRect()
-        if (rect && typeof window !== 'undefined') {
-          const viewportHeight = window.innerHeight
-          const viewportWidth = window.innerWidth
-          const dropdownHeight = 256 // max-h-64 = 16rem = 256px
-          
-          const spaceBelow = viewportHeight - rect.bottom
-          const spaceAbove = rect.top
-          
-          // Определяем, где больше места - сверху или снизу
-          const showBelow = spaceBelow >= dropdownHeight || spaceBelow >= spaceAbove
-          
-          // Fixed positioning relative to viewport (not scroll)
-          const top = showBelow 
-            ? rect.bottom + 4
-            : rect.top - dropdownHeight - 4
-          
-          // Ограничиваем по viewport
-          const left = Math.max(8, Math.min(rect.left, viewportWidth - rect.width - 8))
-          const width = Math.min(rect.width, viewportWidth - 16)
-          
-          setDropdownPosition({
-            top: Math.max(8, Math.min(top, viewportHeight - dropdownHeight - 8)),
-            left,
-            width
-          })
+    if (showSuggestions && inputRef.current && mounted && typeof window !== 'undefined') {
+      const rect = inputRef.current.getBoundingClientRect()
+      const viewportWidth = window.innerWidth
+      const isMobile = viewportWidth < 768
+      
+      // Fixed positioning relative to viewport
+      const left = Math.max(8, Math.min(rect.left, viewportWidth - rect.width - 8))
+      const width = Math.min(rect.width, viewportWidth - 16)
+      const top = rect.bottom + 4
+      
+      setDropdownPosition({ top, left, width })
+      
+      // Блокируем скролл страницы при открытом dropdown на мобильных
+      if (isMobile) {
+        document.body.style.overflow = 'hidden'
+        return () => {
+          document.body.style.overflow = ''
         }
-      }
-      updatePosition()
-      const handleScroll = () => {
-        requestAnimationFrame(updatePosition)
-      }
-      const handleResize = () => {
-        requestAnimationFrame(updatePosition)
-      }
-      window.addEventListener('scroll', handleScroll, true)
-      window.addEventListener('resize', handleResize)
-      return () => {
-        window.removeEventListener('scroll', handleScroll, true)
-        window.removeEventListener('resize', handleResize)
       }
     } else {
       setDropdownPosition(null)
@@ -261,12 +237,12 @@ export default function CityAutocomplete({
       {mounted && showSuggestions && suggestions.length > 0 && dropdownPosition && typeof window !== 'undefined' && createPortal(
         <div
           ref={suggestionsRef}
-          className="fixed z-[10002] bg-white border border-gray-200 rounded-xl shadow-2xl max-h-64 overflow-y-auto"
+          className="fixed z-[10002] bg-white border border-gray-200 rounded-xl shadow-2xl overflow-y-auto"
           style={{
             top: `${dropdownPosition.top}px`,
             left: `${dropdownPosition.left}px`,
             width: `${dropdownPosition.width}px`,
-            maxHeight: '16rem',
+            maxHeight: window.innerWidth < 768 ? '60vh' : '16rem',
             position: 'fixed'
           }}
         >

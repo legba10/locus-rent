@@ -54,7 +54,7 @@ export default function GuestsStepper({
           <Minus className="w-4 h-4" />
         </button>
         <div className="flex-1 text-center min-w-0 flex items-center justify-center h-full">
-          <span className="text-sm font-semibold text-gray-900 whitespace-nowrap">
+          <span className="text-sm font-semibold text-gray-900 whitespace-nowrap" style={{ fontSize: '14px', lineHeight: '1.5' }}>
             {value}
           </span>
           <span className="text-xs text-gray-500 whitespace-nowrap hidden sm:inline ml-1.5">

@@ -73,13 +73,8 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const guests = listing.maxGuests || listing.guests
   const views = listing.views || listing.viewCount || 0
 
-  const hasImage = imageUrl && imageUrl.length > 0 && (
-    imageUrl.startsWith('http://') || 
-    imageUrl.startsWith('https://') || 
-    imageUrl.startsWith('data:') || 
-    imageUrl.startsWith('/') ||
-    imageUrl.startsWith('blob:')
-  )
+  // Принимаем любую непустую строку как потенциальный URL изображения
+  const hasImage = imageUrl != null && imageUrl.length > 0
 
   return (
     <Link href={`/listings/${listing.id}`}>

@@ -65,7 +65,7 @@ export default function DateRangePicker({
                 placement: 'top'
               })
             } else {
-              // Обычно открываем снизу
+              // Mobile: всегда снизу экрана, fixed bottom: 0
               setCalendarPosition({
                 top: 0,
                 left: 0,
@@ -432,13 +432,14 @@ export default function DateRangePicker({
         <Calendar className="w-4 h-4 text-gray-500" />
         Даты
       </label>
-      <div className="flex flex-col sm:flex-row gap-2 h-[44px] sm:h-[48px]">
+      {/* Mobile: без фиксированной высоты, Desktop: с высотой */}
+      <div className="flex flex-col sm:flex-row gap-2 sm:h-[48px]">
         <div className="flex-1 min-w-0">
           <button
             ref={checkInRef}
             type="button"
             onClick={() => handleFieldClick('checkIn')}
-            className={`w-full h-full px-3 sm:px-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-left bg-white hover:border-gray-300 text-xs sm:text-sm ${
+            className={`w-full min-h-[44px] sm:h-full px-3 sm:px-4 py-2.5 sm:py-0 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-left bg-white hover:border-gray-300 text-xs sm:text-sm flex items-center ${
               activeField === 'checkIn' ? 'border-primary ring-2 ring-primary' : 'border-gray-200'
             }`}
           >
@@ -451,7 +452,7 @@ export default function DateRangePicker({
             type="button"
             onClick={() => handleFieldClick('checkOut')}
             disabled={!checkIn}
-            className={`w-full h-full px-3 sm:px-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-left bg-white hover:border-gray-300 text-xs sm:text-sm ${
+            className={`w-full min-h-[44px] sm:h-full px-3 sm:px-4 py-2.5 sm:py-0 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-left bg-white hover:border-gray-300 text-xs sm:text-sm flex items-center ${
               !checkIn ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : ''
             } ${
               activeField === 'checkOut' ? 'border-primary ring-2 ring-primary' : 'border-gray-200'
@@ -490,16 +491,15 @@ export default function DateRangePicker({
                   {renderCalendarContent()}
                 </div>
               ) : (
-                // Mobile calendar - всегда через Portal в body с высоким z-index чтобы не перекрываться
+                // Mobile calendar - всегда fixed bottom: 0 через Portal в body
                 <div
                   ref={calendarRef}
-                  className={`fixed z-[99999] bg-white border-t border-gray-200 rounded-t-3xl shadow-2xl p-4 pb-4 left-0 right-0 max-h-[85vh] overflow-y-auto ${
-                    calendarPosition.placement === 'top' ? 'top-0 rounded-b-3xl border-b border-t-0' : 'bottom-0'
-                  }`}
+                  className="fixed z-[99999] bg-white border-t border-gray-200 rounded-t-3xl shadow-2xl p-4 pb-4 left-0 right-0 max-h-[60vh] overflow-y-auto bottom-0"
                   style={{ 
                     maxWidth: '100vw',
                     width: '100%',
-                    zIndex: 99999
+                    zIndex: 99999,
+                    bottom: 0
                   }}
                 >
                   {/* Handle */}
