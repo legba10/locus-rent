@@ -28,6 +28,7 @@ export default function ListingDetailPage() {
   const { isAuthenticated } = useAuthStore()
   const [listing, setListing] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const [bookingDates, setBookingDates] = useState({
     checkIn: '',
     checkOut: '',
@@ -41,9 +42,16 @@ export default function ListingDetailPage() {
   const [imageLoading, setImageLoading] = useState<Record<number, boolean>>({})
   const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({})
 
+  // Fix hydration error - mount check
   useEffect(() => {
-    loadListing()
-  }, [params.id])
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (mounted && params.id) {
+      loadListing()
+    }
+  }, [params.id, mounted])
 
   const loadListing = async () => {
     try {
@@ -112,14 +120,61 @@ export default function ListingDetailPage() {
     tv: Tv,
   }
 
-  if (loading) {
+  // Гарантируем, что images всегда массив - CRITICAL GUARD
+  const getImages = (listingData: any): string[] => {
+    if (!listingData) return []
+    let images: string[] = []
+    try {
+      // Проверяем images
+      if (listingData.images) {
+        if (Array.isArray(listingData.images)) {
+          images = listingData.images
+            .filter((img: any) => img != null && typeof img === 'string' && String(img).trim().length > 0)
+            .map((url: string) => String(url).trim())
+            .filter((url: string) => {
+              try {
+                // Принимаем любые URL, включая относительные пути
+                return url.length > 0 && (
+                  url.startsWith('http://') || 
+                  url.startsWith('https://') || 
+                  url.startsWith('data:') || 
+                  url.startsWith('/') ||
+                  url.startsWith('blob:')
+                )
+              } catch {
+                return false
+              }
+            })
+        } else if (typeof listingData.images === 'string') {
+          const imgUrl = String(listingData.images).trim()
+          if (imgUrl.length > 0) {
+            images = [imgUrl]
+          }
+        }
+      }
+      
+      // Добавляем imageUrl если он есть и валиден
+      if (listingData.imageUrl && typeof listingData.imageUrl === 'string') {
+        const imgUrl = String(listingData.imageUrl).trim()
+        if (imgUrl.length > 0 && !images.includes(imgUrl)) {
+          images.unshift(imgUrl)
+        }
+      }
+    } catch (error) {
+      console.error('Error processing images:', error)
+      images = []
+    }
+    return images
+  }
+
+  if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-white">
         <Header />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">
             <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-gray-600">Загрузка...</p>
+            <p className="text-gray-600">Загрузка объявления...</p>
           </div>
         </div>
       </div>
@@ -131,9 +186,13 @@ export default function ListingDetailPage() {
       <div className="min-h-screen bg-white">
         <Header />
         <div className="container mx-auto px-4 py-20">
-          <div className="text-center">
-            <p className="text-red-600 mb-4">{error}</p>
-            <Link href="/" className="text-primary hover:text-primary-dark">
+          <div className="text-center max-w-md mx-auto">
+            <div className="mb-6">
+              <Home className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Объявление не найдено</h1>
+            <p className="text-red-600 mb-6">{error}</p>
+            <Link href="/" className="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors font-medium">
               Вернуться на главную
             </Link>
           </div>
@@ -148,9 +207,13 @@ export default function ListingDetailPage() {
       <div className="min-h-screen bg-white">
         <Header />
         <div className="container mx-auto px-4 py-20">
-          <div className="text-center">
-            <p className="text-gray-600 mb-4">Объявление не найдено</p>
-            <Link href="/" className="text-primary hover:text-primary-dark">
+          <div className="text-center max-w-md mx-auto">
+            <div className="mb-6">
+              <Home className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Объявление не найдено</h1>
+            <p className="text-gray-600 mb-6">К сожалению, запрашиваемое объявление отсутствует</p>
+            <Link href="/" className="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors font-medium">
               Вернуться на главную
             </Link>
           </div>
@@ -159,38 +222,8 @@ export default function ListingDetailPage() {
     )
   }
 
-  // Гарантируем, что images всегда массив - CRITICAL GUARD
-  let images: string[] = []
-  try {
-    if (Array.isArray(listing.images)) {
-      images = listing.images
-        .filter((img: any) => img != null && typeof img === 'string' && img.trim().length > 0)
-        .filter((url: string) => {
-          try {
-            // Базовая валидация URL
-            return url.startsWith('http') || url.startsWith('data:') || url.startsWith('/')
-          } catch {
-            return false
-          }
-        })
-    } else if (listing.images && typeof listing.images === 'string' && listing.images.trim().length > 0) {
-      const imgUrl = listing.images.trim()
-      if (imgUrl.startsWith('http') || imgUrl.startsWith('data:') || imgUrl.startsWith('/')) {
-        images = [imgUrl]
-      }
-    }
-    
-    // Добавляем imageUrl если он есть и валиден
-    if (listing.imageUrl && typeof listing.imageUrl === 'string' && listing.imageUrl.trim().length > 0) {
-      const imgUrl = listing.imageUrl.trim()
-      if ((imgUrl.startsWith('http') || imgUrl.startsWith('data:') || imgUrl.startsWith('/')) && !images.includes(imgUrl)) {
-        images.unshift(imgUrl)
-      }
-    }
-  } catch (error) {
-    console.error('Error processing images:', error)
-    images = []
-  }
+  // Получаем images после проверки listing
+  const images = getImages(listing)
   
   // Безопасное получение цены
   const price = (listing?.pricePerNight != null && !isNaN(Number(listing.pricePerNight))) 
@@ -227,9 +260,12 @@ export default function ListingDetailPage() {
     setImageErrors(prev => ({ ...prev, [index]: true }))
   }
 
-  // Keyboard navigation for fullscreen gallery
+  // Keyboard navigation for fullscreen gallery - только после mounted
   useEffect(() => {
-    if (!isFullscreen) return
+    if (!mounted || !isFullscreen || !listing) return
+
+    const images = getImages(listing)
+    if (images.length === 0) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -243,28 +279,31 @@ export default function ListingDetailPage() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isFullscreen, currentImageIndex, images.length])
+  }, [mounted, isFullscreen, currentImageIndex, listing])
 
-  // Update current image index when clicking on gallery images
+  // Update current image index when clicking on gallery images - только после mounted
   useEffect(() => {
-    if (galleryRef.current) {
-      const handleScroll = () => {
-        if (!galleryRef.current) return
-        const scrollLeft = galleryRef.current.scrollLeft
-        const imageWidth = galleryRef.current.clientWidth
-        const newIndex = Math.round(scrollLeft / imageWidth)
-        if (newIndex !== currentImageIndex && newIndex >= 0 && newIndex < images.length) {
-          setCurrentImageIndex(newIndex)
-        }
-      }
-      galleryRef.current.addEventListener('scroll', handleScroll)
-      return () => {
-        if (galleryRef.current) {
-          galleryRef.current.removeEventListener('scroll', handleScroll)
-        }
+    if (!mounted || !galleryRef.current || !listing) return
+
+    const images = getImages(listing)
+    if (images.length === 0) return
+
+    const handleScroll = () => {
+      if (!galleryRef.current) return
+      const scrollLeft = galleryRef.current.scrollLeft
+      const imageWidth = galleryRef.current.clientWidth
+      const newIndex = Math.round(scrollLeft / imageWidth)
+      if (newIndex !== currentImageIndex && newIndex >= 0 && newIndex < images.length) {
+        setCurrentImageIndex(newIndex)
       }
     }
-  }, [images.length, currentImageIndex])
+    galleryRef.current.addEventListener('scroll', handleScroll)
+    return () => {
+      if (galleryRef.current) {
+        galleryRef.current.removeEventListener('scroll', handleScroll)
+      }
+    }
+  }, [mounted, currentImageIndex, listing])
 
   return (
     <div className="min-h-screen bg-white">
@@ -292,8 +331,15 @@ export default function ListingDetailPage() {
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {images.map((image: string, index: number) => {
-                  const imageUrl = image
-                  const hasImage = imageUrl && (imageUrl.startsWith('http') || imageUrl.startsWith('data:'))
+                  const imageUrl = String(image).trim()
+                  // Более гибкая проверка - принимаем любые валидные URL
+                  const hasImage = imageUrl.length > 0 && (
+                    imageUrl.startsWith('http://') || 
+                    imageUrl.startsWith('https://') || 
+                    imageUrl.startsWith('data:') || 
+                    imageUrl.startsWith('/') ||
+                    imageUrl.startsWith('blob:')
+                  )
                   const isLoading = imageLoading[index] !== false
                   const hasError = imageErrors[index] === true
                   
@@ -319,10 +365,21 @@ export default function ListingDetailPage() {
                               src={imageUrl}
                               alt={`${listing?.title || 'Объявление'} - фото ${index + 1}`}
                               className={`w-full h-full object-cover transition-opacity duration-300 ${
-                                isLoading ? 'opacity-0' : 'opacity-100'
+                                isLoading ? 'opacity-0 absolute' : 'opacity-100'
                               }`}
-                              onLoad={() => handleImageLoad(index)}
-                              onError={() => handleImageError(index)}
+                              loading="lazy"
+                              decoding="async"
+                              onLoad={() => {
+                                handleImageLoad(index)
+                                setImageLoading(prev => ({ ...prev, [index]: false }))
+                              }}
+                              onError={(e) => {
+                                handleImageError(index)
+                                console.error('Image load error:', imageUrl)
+                                // Скрываем битое изображение
+                                const target = e.target as HTMLImageElement
+                                target.style.display = 'none'
+                              }}
                             />
                             {/* Fullscreen Icon on Hover */}
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -380,15 +437,15 @@ export default function ListingDetailPage() {
           )}
         </div>
         
-        {/* Fullscreen Gallery Modal */}
-        {isFullscreen && images.length > 0 && (
+        {/* Fullscreen Gallery Modal - только после mounted */}
+        {mounted && isFullscreen && images.length > 0 && (
           <div
             className="fixed inset-0 bg-black z-[10000] flex items-center justify-center"
             onClick={() => setIsFullscreen(false)}
           >
             <button
               onClick={() => setIsFullscreen(false)}
-              className="absolute top-4 right-4 text-white p-2 hover:bg-white/20 rounded-full transition-colors z-10"
+              className="absolute top-4 right-4 text-white p-3 hover:bg-white/20 rounded-full transition-colors z-10"
               aria-label="Закрыть"
             >
               <X className="w-6 h-6" />
@@ -400,7 +457,7 @@ export default function ListingDetailPage() {
                   e.stopPropagation()
                   setCurrentImageIndex(prev => Math.max(0, prev - 1))
                 }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-2 hover:bg-white/20 rounded-full transition-colors z-10"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-3 hover:bg-white/20 rounded-full transition-colors z-10"
                 aria-label="Предыдущее фото"
               >
                 <ChevronLeft className="w-8 h-8" />
@@ -413,7 +470,7 @@ export default function ListingDetailPage() {
                   e.stopPropagation()
                   setCurrentImageIndex(prev => Math.min(images.length - 1, prev + 1))
                 }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-2 hover:bg-white/20 rounded-full transition-colors z-10"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-3 hover:bg-white/20 rounded-full transition-colors z-10"
                 aria-label="Следующее фото"
               >
                 <ChevronRight className="w-8 h-8" />
@@ -426,6 +483,11 @@ export default function ListingDetailPage() {
                   src={images[currentImageIndex]}
                   alt={`${listing?.title || 'Объявление'} - фото ${currentImageIndex + 1}`}
                   className="max-w-full max-h-[90vh] object-contain"
+                  onError={(e) => {
+                    handleImageError(currentImageIndex)
+                    const target = e.target as HTMLImageElement
+                    target.style.display = 'none'
+                  }}
                 />
               ) : (
                 <div className="text-white text-center">
@@ -598,17 +660,17 @@ export default function ListingDetailPage() {
                 </div>
               </div>
 
-              {/* Booking Sidebar */}
+              {/* Booking Sidebar - улучшенный дизайн */}
               <div className="lg:col-span-1">
-                <div className="sticky top-24 bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-lg">
-                  {/* Price */}
-                  <div className="mb-6 pb-6 border-b border-gray-200">
-                    <div className="flex items-baseline gap-2 mb-1">
+                <div className="sticky top-24 bg-white border-2 border-primary/20 rounded-2xl p-5 sm:p-6 shadow-xl">
+                  {/* Price - выделенный блок */}
+                  <div className="mb-6 pb-6 border-b-2 border-gray-200">
+                    <div className="flex items-baseline gap-2 mb-2">
                       <div className="text-3xl sm:text-4xl font-bold text-primary">
                         {price.toLocaleString('ru-RU')} ₽
                       </div>
                     </div>
-                    <div className="text-base text-gray-600 font-medium">за ночь</div>
+                    <div className="text-base text-gray-600 font-semibold">за ночь</div>
                   </div>
 
                   {/* Booking Form */}
@@ -638,7 +700,7 @@ export default function ListingDetailPage() {
                   <button
                     onClick={handleBooking}
                     disabled={bookingLoading}
-                    className="w-full bg-primary text-white py-3.5 rounded-lg hover:bg-primary-dark transition-all font-medium shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full bg-primary text-white py-4 rounded-lg hover:bg-primary-dark transition-all font-semibold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transform hover:scale-[1.02] active:scale-[0.98]"
                   >
                     {bookingLoading ? (
                       <>
@@ -646,7 +708,10 @@ export default function ListingDetailPage() {
                         Бронирование...
                       </>
                     ) : (
-                      'Забронировать'
+                      <>
+                        <Calendar className="w-5 h-5" />
+                        Забронировать
+                      </>
                     )}
                   </button>
 

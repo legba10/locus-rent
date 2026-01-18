@@ -71,7 +71,13 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const guests = listing.maxGuests || listing.guests
   const views = listing.views || listing.viewCount || 0
 
-  const hasImage = imageUrl && (imageUrl.startsWith('http') || imageUrl.startsWith('data:'))
+  const hasImage = imageUrl && imageUrl.length > 0 && (
+    imageUrl.startsWith('http://') || 
+    imageUrl.startsWith('https://') || 
+    imageUrl.startsWith('data:') || 
+    imageUrl.startsWith('/') ||
+    imageUrl.startsWith('blob:')
+  )
 
   return (
     <Link href={`/listings/${listing.id}`}>
@@ -87,14 +93,23 @@ export default function ListingCard({ listing }: ListingCardProps) {
           {hasImage && !imageError ? (
             <img
               src={imageUrl!}
-              alt={listing.title}
+              alt={listing.title || 'Объявление'}
               className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${
                 imageLoading ? 'opacity-0 absolute' : 'opacity-100'
               }`}
-              onLoad={() => setImageLoading(false)}
-              onError={() => {
+              loading="lazy"
+              decoding="async"
+              onLoad={() => {
+                setImageLoading(false)
+                setImageError(false)
+              }}
+              onError={(e) => {
+                console.error('Image load error in ListingCard:', imageUrl)
                 setImageLoading(false)
                 setImageError(true)
+                // Скрываем битое изображение
+                const target = e.target as HTMLImageElement
+                target.style.display = 'none'
               }}
             />
           ) : (
