@@ -121,47 +121,40 @@ export default function ListingDetailPage() {
   }
 
   // Гарантируем, что images всегда массив - CRITICAL GUARD
-  // Обрабатываем разные форматы: массив, строка с запятыми (simple-array из TypeORM), отдельный imageUrl
+  // TypeScript безопасная обработка: только проверка массива
   const getImages = (listingData: any): string[] => {
     if (!listingData) return []
+    
     let images: string[] = []
-    try {
-      // Проверяем images - может быть массив, строка (simple-array), или строка с запятыми
-      if (listingData.images != null && listingData.images !== '') {
-        if (Array.isArray(listingData.images)) {
-          // Массив строк
-          images = listingData.images
-            .filter((img: any) => img != null && String(img).trim().length > 0)
-            .map((url: any) => String(url).trim())
-        } else if (typeof listingData.images === 'string') {
-          const imagesStr = String(listingData.images).trim()
-          // Проверяем, это строка с запятыми (simple-array) или одна строка
-          if (imagesStr.includes(',')) {
-            // Разбиваем по запятым (simple-array из TypeORM)
-            images = imagesStr.split(',')
-              .map((url: string) => url.trim())
-              .filter((url: string) => url.length > 0)
-          } else if (imagesStr.length > 0) {
-            // Одна строка
-            images = [imagesStr]
-          }
-        }
+    
+    // Проверяем images - может быть массив (string[]) или строка (simple-array из TypeORM)
+    if (Array.isArray(listingData.images) && listingData.images.length > 0) {
+      // Массив строк - фильтруем валидные
+      images = listingData.images
+        .filter((img: any): img is string => img != null && typeof img === 'string' && img.trim().length > 0)
+        .map((url: string) => url.trim())
+    } else if (typeof listingData.images === 'string' && listingData.images.trim().length > 0) {
+      // Строка (simple-array из TypeORM) - может быть с запятыми или одна строка
+      const imagesStr = listingData.images.trim()
+      if (imagesStr.includes(',')) {
+        // Разбиваем по запятым
+        images = imagesStr.split(',')
+          .map((url: string) => url.trim())
+          .filter((url: string) => url.length > 0)
+      } else {
+        // Одна строка
+        images = [imagesStr]
       }
-      
-      // Добавляем imageUrl если он есть и валиден
-      if (listingData.imageUrl && typeof listingData.imageUrl === 'string') {
-        const imgUrl = String(listingData.imageUrl).trim()
-        if (imgUrl.length > 0 && !images.includes(imgUrl)) {
-          images.unshift(imgUrl)
-        }
-      }
-      
-      // Фильтруем только валидные строки (не пустые)
-      images = images.filter((url: string) => url && String(url).trim().length > 0).map((url: string) => String(url).trim())
-    } catch (error) {
-      console.error('Error processing images:', error)
-      images = []
     }
+    
+    // Добавляем imageUrl если он есть и валиден
+    if (listingData.imageUrl && typeof listingData.imageUrl === 'string') {
+      const imgUrl = listingData.imageUrl.trim()
+      if (imgUrl.length > 0 && !images.includes(imgUrl)) {
+        images.unshift(imgUrl)
+      }
+    }
+    
     return images
   }
 
@@ -222,6 +215,17 @@ export default function ListingDetailPage() {
 
   // Получаем images после проверки listing
   const images = getImages(listing)
+  
+  // Debug: логируем для отладки (убрать в продакшене)
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    console.log('Listing images debug:', {
+      hasListing: !!listing,
+      imagesRaw: listing?.images,
+      imagesProcessed: images,
+      imagesCount: images.length,
+      imageUrl: listing?.imageUrl
+    })
+  }
   
   // Безопасное получение цены
   const price = (listing?.pricePerNight != null && !isNaN(Number(listing.pricePerNight))) 
@@ -332,7 +336,8 @@ export default function ListingDetailPage() {
                   const imageUrl = String(image).trim()
                   // Принимаем любую непустую строку как потенциальный URL изображения
                   const hasImage = imageUrl.length > 0
-                  const isLoading = imageLoading[index] !== false
+                  // imageLoading по умолчанию пустой объект {}, поэтому проверяем явно
+                  const isLoading = imageLoading[index] === undefined || imageLoading[index] === true
                   const hasError = imageErrors[index] === true
                   
                   return (
