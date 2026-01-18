@@ -135,7 +135,7 @@ export default function SupportChat() {
         className={`fixed z-[10000] flex flex-col transition-all bg-white shadow-2xl border border-gray-100 ${
           isMinimized 
             ? 'h-16 md:bottom-6 md:right-6 md:w-96 md:rounded-2xl' 
-            : 'md:bottom-6 md:right-6 md:w-96 md:max-w-[calc(100vw-3rem)] md:rounded-2xl md:h-[600px] md:max-h-[calc(100vh-3rem)] bottom-0 left-0 right-0 w-full h-[100vh] max-h-[100vh] rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden'
+            : 'md:bottom-6 md:right-6 md:w-96 md:max-w-[calc(100vw-3rem)] md:rounded-2xl md:h-[600px] md:max-h-[calc(100vh-3rem)] bottom-0 left-0 right-0 w-full h-[85vh] max-h-[85vh] rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden'
         }`}
       >
       {/* Header */}

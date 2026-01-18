@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface DateRangePickerProps {
@@ -24,13 +25,51 @@ export default function DateRangePicker({
   const [activeField, setActiveField] = useState<'checkIn' | 'checkOut' | null>(null)
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [hoverDate, setHoverDate] = useState<string | null>(null)
+  const [calendarPosition, setCalendarPosition] = useState<{ top: number; left: number } | null>(null)
+  const [mounted, setMounted] = useState(false)
   const calendarRef = useRef<HTMLDivElement>(null)
   const checkInRef = useRef<HTMLButtonElement>(null)
   const checkOutRef = useRef<HTMLButtonElement>(null)
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const today = new Date()
   const minDateObj = minDate ? new Date(minDate) : today
   minDateObj.setHours(0, 0, 0, 0)
+
+  // Update calendar position for desktop
+  useEffect(() => {
+    if (isOpen && activeField && mounted && typeof window !== 'undefined') {
+      const updatePosition = () => {
+        const activeRef = activeField === 'checkIn' ? checkInRef.current : checkOutRef.current
+        if (activeRef) {
+          const rect = activeRef.getBoundingClientRect()
+          const scrollY = window.scrollY || window.pageYOffset
+          const scrollX = window.scrollX || window.pageXOffset
+          const viewportWidth = window.innerWidth
+          const calendarWidth = 700 // max-w-[700px]
+          
+          setCalendarPosition({
+            top: rect.bottom + scrollY + 8,
+            left: Math.max(8, Math.min(rect.left + scrollX, viewportWidth - calendarWidth - 8))
+          })
+        }
+      }
+      updatePosition()
+      const handleScroll = () => requestAnimationFrame(updatePosition)
+      const handleResize = () => requestAnimationFrame(updatePosition)
+      window.addEventListener('scroll', handleScroll, true)
+      window.addEventListener('resize', handleResize)
+      return () => {
+        window.removeEventListener('scroll', handleScroll, true)
+        window.removeEventListener('resize', handleResize)
+      }
+    } else {
+      setCalendarPosition(null)
+    }
+  }, [isOpen, activeField, mounted])
 
   // Close calendar on outside click
   useEffect(() => {
@@ -221,6 +260,131 @@ export default function DateRangePicker({
 
   const weekDays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
 
+  const renderCalendarContent = () => (
+    <>
+      {/* Mobile: single month compact, Desktop: two months */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+        {/* First month */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <button
+              type="button"
+              onClick={() => navigateMonth('prev')}
+              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <h3 className="text-base md:text-lg font-semibold text-gray-900">
+              {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+            </h3>
+            <div className="w-10 md:hidden" /> {/* Spacer for mobile */}
+            <button
+              type="button"
+              onClick={() => navigateMonth('next')}
+              className="p-1 hover:bg-gray-100 rounded-lg transition-colors md:hidden"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
+          <div className="grid grid-cols-7 gap-0.5 md:gap-1 mb-1 md:mb-2">
+            {weekDays.map((day) => (
+              <div key={day} className="text-center text-[10px] md:text-xs font-medium text-gray-500 py-1.5 md:py-2">
+                {day}
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-0.5 md:gap-1">
+            {getDaysInMonth(currentMonth).map((date, index) => (
+              <div key={index} className="flex items-center justify-center">
+                {date ? (
+                  <button
+                    type="button"
+                    onClick={() => handleDateClick(date)}
+                    onMouseEnter={() => handleDateHover(date)}
+                    onMouseLeave={() => handleDateHover(null)}
+                    className={getDateClasses(date).replace('w-10 h-10', 'w-9 h-9 md:w-10 md:h-10')}
+                    disabled={isDisabled(date)}
+                  >
+                    <span className="text-xs md:text-sm">{date.getDate()}</span>
+                  </button>
+                ) : (
+                  <div className="w-9 h-9 md:w-10 md:h-10" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Second month - desktop only */}
+        <div className="hidden md:block">
+          <div className="flex items-center justify-between mb-4">
+            <div className="w-10" /> {/* Spacer */}
+            <h3 className="text-lg font-semibold text-gray-900">
+              {monthNames[getNextMonth().getMonth()]} {getNextMonth().getFullYear()}
+            </h3>
+            <button
+              type="button"
+              onClick={() => navigateMonth('next')}
+              className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {weekDays.map((day) => (
+              <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
+                {day}
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {getDaysInMonth(getNextMonth()).map((date, index) => (
+              <div key={index} className="flex items-center justify-center">
+                {date ? (
+                  <button
+                    type="button"
+                    onClick={() => handleDateClick(date)}
+                    onMouseEnter={() => handleDateHover(date)}
+                    onMouseLeave={() => handleDateHover(null)}
+                    className={getDateClasses(date)}
+                    disabled={isDisabled(date)}
+                  >
+                    {date.getDate()}
+                  </button>
+                ) : (
+                  <div className="w-10 h-10" />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Info text */}
+      <div className="mt-3 pt-3 border-t border-gray-200 text-xs md:text-sm text-gray-500 text-center">
+        {activeField === 'checkIn' 
+          ? 'Выберите дату заезда' 
+          : checkIn 
+            ? 'Выберите дату выезда (после заезда)'
+            : 'Сначала выберите дату заезда'}
+      </div>
+      
+      {/* Close button for mobile */}
+      <div className="md:hidden mt-3 pt-3 border-t border-gray-200">
+        <button
+          type="button"
+          onClick={() => {
+            setIsOpen(false)
+            setActiveField(null)
+          }}
+          className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-lg transition-colors font-medium text-sm"
+        >
+          Закрыть
+        </button>
+      </div>
+    </>
+  )
+
   return (
     <div className={`relative ${className}`}>
       <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
@@ -260,138 +424,37 @@ export default function DateRangePicker({
       {isOpen && activeField && (
         <>
           {/* Mobile overlay */}
-          <div 
-            className="fixed inset-0 bg-black/20 z-[9998] md:hidden"
-            onClick={() => {
-              setIsOpen(false)
-              setActiveField(null)
-            }}
-          />
-        <div
-          ref={calendarRef}
-          className="fixed md:absolute z-[10001] md:mt-2 bg-white border border-gray-200 rounded-t-2xl md:rounded-xl shadow-xl p-4 md:p-6 max-w-[95vw] md:max-w-[700px] md:min-w-[600px] bottom-0 left-0 right-0 md:bottom-auto md:left-0 md:right-auto md:top-full"
-        >
-            {/* Mobile: single month compact, Desktop: two months */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
-            {/* First month */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <button
-                  type="button"
-                  onClick={() => navigateMonth('prev')}
-                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <ChevronLeft className="w-5 h-5 text-gray-600" />
-                </button>
-                <h3 className="text-base md:text-lg font-semibold text-gray-900">
-                  {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-                </h3>
-                <div className="w-10 md:hidden" /> {/* Spacer for mobile */}
-                <button
-                  type="button"
-                  onClick={() => navigateMonth('next')}
-                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors md:hidden"
-                >
-                  <ChevronRight className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
-              <div className="grid grid-cols-7 gap-0.5 md:gap-1 mb-1 md:mb-2">
-                {weekDays.map((day) => (
-                  <div key={day} className="text-center text-[10px] md:text-xs font-medium text-gray-500 py-1.5 md:py-2">
-                    {day}
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-0.5 md:gap-1">
-                {getDaysInMonth(currentMonth).map((date, index) => (
-                  <div key={index} className="flex items-center justify-center">
-                    {date ? (
-                      <button
-                        type="button"
-                        onClick={() => handleDateClick(date)}
-                        onMouseEnter={() => handleDateHover(date)}
-                        onMouseLeave={() => handleDateHover(null)}
-                        className={getDateClasses(date).replace('w-10 h-10', 'w-9 h-9 md:w-10 md:h-10')}
-                        disabled={isDisabled(date)}
-                      >
-                        <span className="text-xs md:text-sm">{date.getDate()}</span>
-                      </button>
-                    ) : (
-                      <div className="w-9 h-9 md:w-10 md:h-10" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Second month - desktop only */}
-            <div className="hidden md:block">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-10" /> {/* Spacer */}
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {monthNames[getNextMonth().getMonth()]} {getNextMonth().getFullYear()}
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => navigateMonth('next')}
-                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <ChevronRight className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
-              <div className="grid grid-cols-7 gap-1 mb-2">
-                {weekDays.map((day) => (
-                  <div key={day} className="text-center text-xs font-medium text-gray-500 py-2">
-                    {day}
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-1">
-                {getDaysInMonth(getNextMonth()).map((date, index) => (
-                  <div key={index} className="flex items-center justify-center">
-                    {date ? (
-                      <button
-                        type="button"
-                        onClick={() => handleDateClick(date)}
-                        onMouseEnter={() => handleDateHover(date)}
-                        onMouseLeave={() => handleDateHover(null)}
-                        className={getDateClasses(date)}
-                        disabled={isDisabled(date)}
-                      >
-                        {date.getDate()}
-                      </button>
-                    ) : (
-                      <div className="w-10 h-10" />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-            {/* Info text */}
-          <div className="mt-3 pt-3 border-t border-gray-200 text-xs md:text-sm text-gray-500 text-center">
-            {activeField === 'checkIn' 
-              ? 'Выберите дату заезда' 
-              : checkIn 
-                ? 'Выберите дату выезда (после заезда)'
-                : 'Сначала выберите дату заезда'}
-          </div>
-          
-          {/* Close button for mobile */}
-          <div className="md:hidden mt-3 pt-3 border-t border-gray-200">
-            <button
-              type="button"
+          {mounted && typeof window !== 'undefined' && window.innerWidth < 768 && (
+            <div 
+              className="fixed inset-0 bg-black/20 z-[9998]"
               onClick={() => {
                 setIsOpen(false)
                 setActiveField(null)
               }}
-              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-lg transition-colors font-medium text-sm"
-            >
-              Закрыть
-            </button>
-          </div>
-        </div>
+            />
+          )}
+          {mounted && typeof window !== 'undefined' && (
+            (window.innerWidth >= 768 && calendarPosition ? createPortal(
+              <div
+                ref={calendarRef}
+                className="fixed z-[10001] bg-white border border-gray-200 rounded-xl shadow-xl p-6 max-w-[700px] min-w-[600px]"
+                style={{
+                  top: `${calendarPosition.top}px`,
+                  left: `${calendarPosition.left}px`
+                }}
+              >
+                {renderCalendarContent()}
+              </div>,
+              document.body
+            ) : window.innerWidth < 768 ? (
+              <div
+                ref={calendarRef}
+                className="fixed z-[10001] bg-white border border-gray-200 rounded-t-2xl shadow-xl p-4 max-w-[95vw] bottom-0 left-0 right-0"
+              >
+                {renderCalendarContent()}
+              </div>
+            ) : null)
+          )}
         </>
       )}
     </div>

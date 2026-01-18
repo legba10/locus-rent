@@ -141,8 +141,8 @@ export default function Header() {
 
         {/* Mobile User Menu */}
         {isAuthenticated && isUserMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-lg z-[10001] max-h-[calc(100vh-4rem)] overflow-y-auto">
-            <div className="px-4 py-2 space-y-1">
+          <div className="md:hidden fixed top-16 left-0 right-0 bg-white border-b border-gray-100 shadow-lg z-[10001] max-h-[calc(100vh-4rem)] overflow-y-auto">
+            <div className="px-4 py-3 space-y-1">
               <Link
                 href="/profile"
                 className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
