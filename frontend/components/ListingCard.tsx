@@ -31,20 +31,42 @@ export default function ListingCard({ listing }: ListingCardProps) {
   
   const price = listing.pricePerNight || listing.price || 0
   const address = listing.address || listing.city || 'Адрес не указан'
-  // Гарантируем, что images всегда массив
+  // Гарантируем, что images всегда массив - CRITICAL GUARD
   let images: string[] = []
-  if (Array.isArray(listing.images)) {
-    images = listing.images.filter((img: any) => img && typeof img === 'string' && img.trim().length > 0)
-  } else if (listing.images && typeof listing.images === 'string') {
-    images = [listing.images]
+  try {
+    if (Array.isArray(listing.images)) {
+      images = listing.images
+        .filter((img: any) => img != null && typeof img === 'string' && img.trim().length > 0)
+        .filter((url: string) => {
+          try {
+            // Базовая валидация URL - jpg, jpeg, png, webp, http, data
+            const trimmed = url.trim()
+            return trimmed.startsWith('http') || trimmed.startsWith('data:') || trimmed.startsWith('/') ||
+                   /\.(jpg|jpeg|png|webp)$/i.test(trimmed)
+          } catch {
+            return false
+          }
+        })
+    } else if (listing.images && typeof (listing.images as any) === 'string') {
+      const imgUrl = String(listing.images).trim()
+      if (imgUrl.length > 0 && (imgUrl.startsWith('http') || imgUrl.startsWith('data:') || imgUrl.startsWith('/') || /\.(jpg|jpeg|png|webp)$/i.test(imgUrl))) {
+        images = [imgUrl]
+      }
+    }
+  } catch (error) {
+    console.error('Error processing images in ListingCard:', error)
+    images = []
   }
   
-  // Проверяем также imageUrl
+  // Проверяем также imageUrl - безопасно
   let imageUrl: string | null = null
   if (images.length > 0) {
     imageUrl = images[0]
   } else if (listing.imageUrl && typeof listing.imageUrl === 'string' && listing.imageUrl.trim().length > 0) {
-    imageUrl = listing.imageUrl
+    const trimmed = listing.imageUrl.trim()
+    if (trimmed.startsWith('http') || trimmed.startsWith('data:') || trimmed.startsWith('/') || /\.(jpg|jpeg|png|webp)$/i.test(trimmed)) {
+      imageUrl = trimmed
+    }
   }
   const guests = listing.maxGuests || listing.guests
   const views = listing.views || listing.viewCount || 0

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Menu, X, User, LogOut, Home, Shield, Search } from 'lucide-react'
 import { useAuthStore } from '@/lib/store'
 import Logo from './Logo'
@@ -10,8 +10,60 @@ import Logo from './Logo'
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [userMenuPosition, setUserMenuPosition] = useState<{ right: number; maxWidth: number } | null>(null)
+  const userMenuButtonRef = useRef<HTMLButtonElement>(null)
+  const userMenuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuthStore()
+
+  // Calculate user menu position
+  useEffect(() => {
+    if (isUserMenuOpen && userMenuButtonRef.current && typeof window !== 'undefined') {
+      const updatePosition = () => {
+        const rect = userMenuButtonRef.current?.getBoundingClientRect()
+        if (!rect) return
+
+        const viewportWidth = window.innerWidth
+        const menuWidth = 224 // w-56 = 14rem = 224px
+        const padding = 16 // 1rem
+
+        // Проверяем, выходит ли меню за правый край
+        const spaceRight = viewportWidth - rect.right
+        const spaceLeft = rect.left
+
+        let right = 0
+        let maxWidth = Math.min(menuWidth, viewportWidth - padding * 2)
+
+        if (spaceRight >= menuWidth) {
+          // Помещается справа
+          right = viewportWidth - rect.right
+        } else if (spaceLeft >= menuWidth) {
+          // Помещается слева
+          right = viewportWidth - rect.left
+        } else {
+          // Не помещается, выравниваем по краю с padding
+          right = padding
+          maxWidth = Math.min(menuWidth, viewportWidth - padding * 2)
+        }
+
+        setUserMenuPosition({ right, maxWidth })
+      }
+
+      updatePosition()
+      const handleResize = () => requestAnimationFrame(updatePosition)
+      const handleScroll = () => requestAnimationFrame(updatePosition)
+      
+      window.addEventListener('resize', handleResize)
+      window.addEventListener('scroll', handleScroll, true)
+      
+      return () => {
+        window.removeEventListener('resize', handleResize)
+        window.removeEventListener('scroll', handleScroll, true)
+      }
+    } else {
+      setUserMenuPosition(null)
+    }
+  }, [isUserMenuOpen])
 
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-gray-100/50 sticky top-0 z-50 shadow-sm">
@@ -44,6 +96,7 @@ export default function Header() {
             {isAuthenticated ? (
               <div className="relative h-full flex items-center" style={{ zIndex: 1000 }}>
                 <button
+                  ref={userMenuButtonRef}
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors font-medium py-2 h-full"
                 >
@@ -52,11 +105,14 @@ export default function Header() {
                 </button>
                 {isUserMenuOpen && (
                   <div 
-                    className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[10001]"
+                    ref={userMenuRef}
+                    className="fixed bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[10001]"
                     style={{
-                      maxWidth: 'calc(100vw - 2rem)',
-                      right: 0,
-                      left: 'auto'
+                      right: userMenuPosition?.right ? `${userMenuPosition.right}px` : '0',
+                      top: userMenuButtonRef.current ? `${userMenuButtonRef.current.getBoundingClientRect().bottom + 8}px` : 'auto',
+                      maxWidth: userMenuPosition?.maxWidth ? `${userMenuPosition.maxWidth}px` : 'calc(100vw - 2rem)',
+                      width: '224px',
+                      minWidth: '200px'
                     }}
                   >
                     <Link

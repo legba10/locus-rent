@@ -39,25 +39,26 @@ export default function GuestsStepper({
         <Users className="w-4 h-4 text-gray-500 flex-shrink-0" />
         <span className="whitespace-nowrap">Гостей</span>
       </label>
-      <div className="flex items-center gap-2 sm:gap-3 border border-gray-200 rounded-lg px-2 sm:px-3 bg-white h-[44px] sm:h-[48px] w-full">
+      <div className="flex items-center gap-2 sm:gap-3 border border-gray-200 rounded-lg px-2 sm:px-3 bg-white w-full" style={{ display: 'flex', alignItems: 'center', height: '44px', minHeight: '44px' }}>
         <button
           type="button"
           onClick={handleDecrease}
           disabled={isMinDisabled}
-          className={`p-1.5 sm:p-2 rounded-lg transition-all flex-shrink-0 flex items-center justify-center min-w-[36px] h-full ${
+          className={`p-1.5 rounded-lg transition-colors flex-shrink-0 flex items-center justify-center ${
             isMinDisabled
               ? 'text-gray-300 cursor-not-allowed'
-              : 'text-gray-600 hover:bg-gray-100 hover:text-primary active:scale-95'
+              : 'text-gray-600 hover:bg-gray-100 hover:text-primary'
           }`}
           aria-label="Уменьшить количество гостей"
+          style={{ width: '36px', height: '36px', minWidth: '36px', minHeight: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
+          <Minus className="w-4 h-4" style={{ width: '16px', height: '16px' }} />
         </button>
-        <div className="flex-1 text-center min-w-0 flex items-center justify-center gap-1.5 h-full">
-          <span className="text-base sm:text-lg font-semibold text-gray-900 whitespace-nowrap">
+        <div className="flex-1 text-center min-w-0 flex items-center justify-center" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+          <span className="text-sm font-semibold text-gray-900 whitespace-nowrap" style={{ fontSize: '14px', lineHeight: '1.5' }}>
             {value}
           </span>
-          <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap hidden sm:inline">
+          <span className="text-xs text-gray-500 whitespace-nowrap hidden sm:inline ml-1.5" style={{ fontSize: '12px' }}>
             {value === 1 ? 'гость' : value < 5 ? 'гостя' : 'гостей'}
           </span>
         </div>
@@ -65,14 +66,15 @@ export default function GuestsStepper({
           type="button"
           onClick={handleIncrease}
           disabled={isMaxDisabled}
-          className={`p-1.5 sm:p-2 rounded-lg transition-all flex-shrink-0 flex items-center justify-center min-w-[36px] h-full ${
+          className={`p-1.5 rounded-lg transition-colors flex-shrink-0 flex items-center justify-center ${
             isMaxDisabled
               ? 'text-gray-300 cursor-not-allowed'
-              : 'text-gray-600 hover:bg-gray-100 hover:text-primary active:scale-95'
+              : 'text-gray-600 hover:bg-gray-100 hover:text-primary'
           }`}
           aria-label="Увеличить количество гостей"
+          style={{ width: '36px', height: '36px', minWidth: '36px', minHeight: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
-          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+          <Plus className="w-4 h-4" style={{ width: '16px', height: '16px' }} />
         </button>
       </div>
     </div>

@@ -82,6 +82,11 @@ export default function ListingDetailPage() {
     setError('')
 
     try {
+      if (!listing?.id) {
+        setError('Ошибка: объявление не найдено')
+        return
+      }
+      
       await bookingsAPI.create({
         listingId: listing.id,
         checkIn: bookingDates.checkIn,
@@ -154,18 +159,52 @@ export default function ListingDetailPage() {
     )
   }
 
-  // Гарантируем, что images всегда массив
-  const images = Array.isArray(listing.images) 
-    ? listing.images.filter((img: any) => img && (typeof img === 'string') && img.trim().length > 0)
-    : (listing.images && typeof listing.images === 'string' ? [listing.images] : [])
-  
-  // Добавляем imageUrl если он есть
-  if (listing.imageUrl && typeof listing.imageUrl === 'string' && listing.imageUrl.trim().length > 0 && !images.includes(listing.imageUrl)) {
-    images.unshift(listing.imageUrl)
+  // Гарантируем, что images всегда массив - CRITICAL GUARD
+  let images: string[] = []
+  try {
+    if (Array.isArray(listing.images)) {
+      images = listing.images
+        .filter((img: any) => img != null && typeof img === 'string' && img.trim().length > 0)
+        .filter((url: string) => {
+          try {
+            // Базовая валидация URL
+            return url.startsWith('http') || url.startsWith('data:') || url.startsWith('/')
+          } catch {
+            return false
+          }
+        })
+    } else if (listing.images && typeof listing.images === 'string' && listing.images.trim().length > 0) {
+      const imgUrl = listing.images.trim()
+      if (imgUrl.startsWith('http') || imgUrl.startsWith('data:') || imgUrl.startsWith('/')) {
+        images = [imgUrl]
+      }
+    }
+    
+    // Добавляем imageUrl если он есть и валиден
+    if (listing.imageUrl && typeof listing.imageUrl === 'string' && listing.imageUrl.trim().length > 0) {
+      const imgUrl = listing.imageUrl.trim()
+      if ((imgUrl.startsWith('http') || imgUrl.startsWith('data:') || imgUrl.startsWith('/')) && !images.includes(imgUrl)) {
+        images.unshift(imgUrl)
+      }
+    }
+  } catch (error) {
+    console.error('Error processing images:', error)
+    images = []
   }
   
-  const price = listing.pricePerNight || listing.price || 0
-  const views = listing.views || listing.viewCount || 0
+  // Безопасное получение цены
+  const price = (listing?.pricePerNight != null && !isNaN(Number(listing.pricePerNight))) 
+    ? Number(listing.pricePerNight) 
+    : (listing?.price != null && !isNaN(Number(listing.price))) 
+      ? Number(listing.price) 
+      : 0
+  
+  // Безопасное получение просмотров
+  const views = (listing?.views != null && !isNaN(Number(listing.views))) 
+    ? Number(listing.views) 
+    : (listing?.viewCount != null && !isNaN(Number(listing.viewCount))) 
+      ? Number(listing.viewCount) 
+      : 0
 
   // Gallery scroll handler
   const scrollGallery = (direction: 'left' | 'right') => {
@@ -278,7 +317,7 @@ export default function ListingDetailPage() {
                           <>
                             <img
                               src={imageUrl}
-                              alt={`${listing.title} - фото ${index + 1}`}
+                              alt={`${listing?.title || 'Объявление'} - фото ${index + 1}`}
                               className={`w-full h-full object-cover transition-opacity duration-300 ${
                                 isLoading ? 'opacity-0' : 'opacity-100'
                               }`}
@@ -385,7 +424,7 @@ export default function ListingDetailPage() {
               {images[currentImageIndex] && !imageErrors[currentImageIndex] ? (
                 <img
                   src={images[currentImageIndex]}
-                  alt={`${listing.title} - фото ${currentImageIndex + 1}`}
+                  alt={`${listing?.title || 'Объявление'} - фото ${currentImageIndex + 1}`}
                   className="max-w-full max-h-[90vh] object-contain"
                 />
               ) : (
@@ -412,14 +451,14 @@ export default function ListingDetailPage() {
                 {/* Header */}
                 <div>
                   <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    {listing.title}
+                    {listing?.title || 'Объявление'}
                   </h1>
                   <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                    {listing.rating && (
+                    {listing?.rating != null && !isNaN(Number(listing.rating)) && (
                       <div className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 rounded-lg border border-yellow-200">
                         <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                        <span className="font-semibold text-gray-900">{listing.rating.toFixed(1)}</span>
-                        {listing.reviewsCount && listing.reviewsCount > 0 && (
+                        <span className="font-semibold text-gray-900">{Number(listing.rating).toFixed(1)}</span>
+                        {listing?.reviewsCount != null && Number(listing.reviewsCount) > 0 && (
                           <span className="text-sm text-gray-600">
                             ({listing.reviewsCount} {listing.reviewsCount === 1 ? 'отзыв' : listing.reviewsCount < 5 ? 'отзыва' : 'отзывов'})
                           </span>
@@ -428,7 +467,7 @@ export default function ListingDetailPage() {
                     )}
                     <div className="flex items-center gap-1.5 text-gray-600 px-3 py-1.5 bg-gray-50 rounded-lg">
                       <MapPin className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                      <span className="text-sm sm:text-base">{listing.address || listing.city || 'Адрес не указан'}</span>
+                      <span className="text-sm sm:text-base">{listing?.address || listing?.city || 'Адрес не указан'}</span>
                     </div>
                     {views > 0 && (
                       <div className="flex items-center gap-1.5 text-gray-600 px-3 py-1.5 bg-gray-50 rounded-lg">
@@ -442,7 +481,7 @@ export default function ListingDetailPage() {
                 {/* Description */}
                 <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                   <h2 className="text-xl font-semibold mb-4 text-gray-900">Описание</h2>
-                  {listing.description && listing.description.trim().length > 0 ? (
+                  {listing?.description && typeof listing.description === 'string' && listing.description.trim().length > 0 ? (
                     <p className="text-gray-700 leading-relaxed whitespace-pre-line text-base">
                       {listing.description}
                     </p>
@@ -455,31 +494,31 @@ export default function ListingDetailPage() {
                 <div>
                   <h2 className="text-xl font-semibold mb-4 text-gray-900">Удобства</h2>
                   <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                    {listing.maxGuests && (
+                    {listing?.maxGuests != null && Number(listing.maxGuests) > 0 && (
                       <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition-colors">
                         <Users className="w-5 h-5 text-primary flex-shrink-0" />
                         <span className="text-sm sm:text-base text-gray-700">До {listing.maxGuests} {listing.maxGuests === 1 ? 'гостя' : 'гостей'}</span>
                       </div>
                     )}
-                    {listing.bedrooms && listing.bedrooms > 0 && (
+                    {listing?.bedrooms != null && Number(listing.bedrooms) > 0 && (
                       <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition-colors">
                         <Bed className="w-5 h-5 text-primary flex-shrink-0" />
                         <span className="text-sm sm:text-base text-gray-700">{listing.bedrooms} {listing.bedrooms === 1 ? 'спальня' : listing.bedrooms < 5 ? 'спальни' : 'спален'}</span>
                       </div>
                     )}
-                    {listing.beds && listing.beds > 0 && (
+                    {listing?.beds != null && Number(listing.beds) > 0 && (
                       <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition-colors">
                         <Bed className="w-5 h-5 text-primary flex-shrink-0" />
                         <span className="text-sm sm:text-base text-gray-700">{listing.beds} {listing.beds === 1 ? 'кровать' : listing.beds < 5 ? 'кровати' : 'кроватей'}</span>
                       </div>
                     )}
-                    {listing.bathrooms && listing.bathrooms > 0 && (
+                    {listing?.bathrooms != null && Number(listing.bathrooms) > 0 && (
                       <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition-colors">
                         <Bath className="w-5 h-5 text-primary flex-shrink-0" />
                         <span className="text-sm sm:text-base text-gray-700">{listing.bathrooms} {listing.bathrooms === 1 ? 'ванная' : listing.bathrooms < 5 ? 'ванные' : 'ванных'}</span>
                       </div>
                     )}
-                    {listing.amenities && Array.isArray(listing.amenities) && listing.amenities.length > 0 && listing.amenities.map((amenity: string) => {
+                    {listing?.amenities && Array.isArray(listing.amenities) && listing.amenities.length > 0 && listing.amenities.map((amenity: string) => {
                       const Icon = amenitiesIcons[amenity.toLowerCase()]
                       if (!Icon) return null
                       return (
@@ -490,13 +529,13 @@ export default function ListingDetailPage() {
                       )
                     })}
                   </div>
-                  {(!listing.maxGuests && (!listing.bedrooms || listing.bedrooms === 0) && (!listing.beds || listing.beds === 0) && (!listing.bathrooms || listing.bathrooms === 0) && (!listing.amenities || listing.amenities.length === 0)) && (
+                  {(!listing?.maxGuests && (!listing?.bedrooms || Number(listing.bedrooms) === 0) && (!listing?.beds || Number(listing.beds) === 0) && (!listing?.bathrooms || Number(listing.bathrooms) === 0) && (!listing?.amenities || !Array.isArray(listing.amenities) || listing.amenities.length === 0)) && (
                     <p className="text-gray-500 italic text-center py-4">Информация об удобствах скоро появится</p>
                   )}
                 </div>
 
                 {/* Map */}
-                {listing.latitude && listing.longitude && (
+                {listing?.latitude != null && listing?.longitude != null && !isNaN(Number(listing.latitude)) && !isNaN(Number(listing.longitude)) && (
                   <div>
                     <h2 className="text-xl font-semibold mb-4 text-gray-900">Местоположение</h2>
                     <div className="rounded-xl overflow-hidden border border-gray-200">
@@ -508,7 +547,7 @@ export default function ListingDetailPage() {
                 {/* Reviews */}
                 <div>
                   <h2 className="text-xl font-semibold mb-4 text-gray-900">Отзывы</h2>
-                  {listing.reviews && Array.isArray(listing.reviews) && listing.reviews.length > 0 ? (
+                  {listing?.reviews && Array.isArray(listing.reviews) && listing.reviews.length > 0 ? (
                     <div className="space-y-4">
                       {listing.reviews.map((review: any, index: number) => (
                         <div key={review.id || index} className="bg-white rounded-xl p-5 sm:p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
@@ -586,7 +625,7 @@ export default function ListingDetailPage() {
                       value={bookingDates.guests}
                       onChange={(value) => setBookingDates({ ...bookingDates, guests: value })}
                       min={1}
-                      max={listing.maxGuests || 20}
+                      max={(listing?.maxGuests != null && !isNaN(Number(listing.maxGuests))) ? Number(listing.maxGuests) : 20}
                     />
                   </div>
 

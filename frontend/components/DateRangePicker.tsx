@@ -25,7 +25,7 @@ export default function DateRangePicker({
   const [activeField, setActiveField] = useState<'checkIn' | 'checkOut' | null>(null)
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [hoverDate, setHoverDate] = useState<string | null>(null)
-  const [calendarPosition, setCalendarPosition] = useState<{ top: number; left: number } | null>(null)
+  const [calendarPosition, setCalendarPosition] = useState<{ top: number; left: number; placement: 'top' | 'bottom' } | null>(null)
   const [mounted, setMounted] = useState(false)
   const calendarRef = useRef<HTMLDivElement>(null)
   const checkInRef = useRef<HTMLButtonElement>(null)
@@ -39,7 +39,7 @@ export default function DateRangePicker({
   const minDateObj = minDate ? new Date(minDate) : today
   minDateObj.setHours(0, 0, 0, 0)
 
-  // Update calendar position for desktop
+  // Update calendar position (desktop and mobile)
   useEffect(() => {
     if (isOpen && activeField && mounted && typeof window !== 'undefined') {
       const updatePosition = () => {
@@ -47,26 +47,59 @@ export default function DateRangePicker({
         if (activeRef) {
           const rect = activeRef.getBoundingClientRect()
           const viewportWidth = window.innerWidth
-          const calendarWidth = 700 // max-w-[700px]
+          const viewportHeight = window.innerHeight
           const isMobile = viewportWidth < 768
           
-          if (!isMobile) {
-            // Desktop: fixed positioning relative to viewport
-            setCalendarPosition({
-              top: rect.bottom + 8,
-              left: Math.max(8, Math.min(rect.left, viewportWidth - calendarWidth - 8))
-            })
+          if (isMobile) {
+            // Mobile: bottom sheet - всегда снизу, но проверяем, что не перекрывает элементы выше
+            // Вычисляем примерную высоту календаря (85vh max)
+            const calendarMaxHeight = Math.min(viewportHeight * 0.85, 600)
+            const spaceBelow = viewportHeight - rect.bottom
+            const spaceAbove = rect.top
+            
+            // Если снизу места мало, но сверху есть - открываем сверху
+            if (spaceBelow < calendarMaxHeight && spaceAbove > spaceBelow && spaceAbove > 200) {
+              setCalendarPosition({
+                top: Math.max(16, rect.top - calendarMaxHeight - 8),
+                left: 0,
+                placement: 'top'
+              })
+            } else {
+              // Обычно открываем снизу
+              setCalendarPosition({
+                top: 0,
+                left: 0,
+                placement: 'bottom'
+              })
+            }
           } else {
-            setCalendarPosition(null)
+            // Desktop: fixed positioning relative to viewport
+            const calendarWidth = 700
+            const calendarHeight = 400 // примерная высота
+            const spaceBelow = viewportHeight - rect.bottom
+            const spaceAbove = rect.top
+            
+            // Проверяем, помещается ли снизу
+            if (spaceBelow >= calendarHeight || spaceBelow >= spaceAbove) {
+              // Открываем снизу
+              setCalendarPosition({
+                top: rect.bottom + 8,
+                left: Math.max(8, Math.min(rect.left, viewportWidth - calendarWidth - 8)),
+                placement: 'bottom'
+              })
+            } else {
+              // Открываем сверху
+              setCalendarPosition({
+                top: rect.top - calendarHeight - 8,
+                left: Math.max(8, Math.min(rect.left, viewportWidth - calendarWidth - 8)),
+                placement: 'top'
+              })
+            }
           }
         }
       }
       updatePosition()
-      const handleScroll = () => {
-        if (typeof window !== 'undefined' && window.innerWidth >= 768) {
-          requestAnimationFrame(updatePosition)
-        }
-      }
+      const handleScroll = () => requestAnimationFrame(updatePosition)
       const handleResize = () => requestAnimationFrame(updatePosition)
       window.addEventListener('scroll', handleScroll, true)
       window.addEventListener('resize', handleResize)
@@ -441,33 +474,42 @@ export default function DateRangePicker({
               }}
             />
           )}
-          {mounted && typeof window !== 'undefined' && (
-            (window.innerWidth >= 768 && calendarPosition ? createPortal(
-              <div
-                ref={calendarRef}
-                className="fixed z-[10001] bg-white border border-gray-200 rounded-xl shadow-xl p-6 max-w-[700px] min-w-[600px]"
-                style={{
-                  top: `${calendarPosition.top}px`,
-                  left: `${calendarPosition.left}px`
-                }}
-              >
-                {renderCalendarContent()}
-              </div>,
-              document.body
-            ) : window.innerWidth < 768 ? createPortal(
-              <div
-                ref={calendarRef}
-                className="fixed z-[9999] bg-white border-t border-gray-200 rounded-t-3xl shadow-2xl p-4 pb-4 bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto"
-                style={{ maxWidth: '100vw' }}
-              >
-                {/* Handle */}
-                <div className="flex justify-center mb-4 pb-2 border-b border-gray-100 flex-shrink-0">
-                  <div className="w-12 h-1 bg-gray-300 rounded-full" />
+          {mounted && typeof window !== 'undefined' && calendarPosition && (
+            createPortal(
+              window.innerWidth >= 768 ? (
+                // Desktop calendar
+                <div
+                  ref={calendarRef}
+                  className="fixed z-[10001] bg-white border border-gray-200 rounded-xl shadow-xl p-6 max-w-[700px] min-w-[600px]"
+                  style={{
+                    top: `${calendarPosition.top}px`,
+                    left: `${calendarPosition.left}px`,
+                    maxWidth: 'calc(100vw - 16px)'
+                  }}
+                >
+                  {renderCalendarContent()}
                 </div>
-                {renderCalendarContent()}
-              </div>,
+              ) : (
+                // Mobile calendar - всегда через Portal в body
+                <div
+                  ref={calendarRef}
+                  className={`fixed z-[9999] bg-white border-t border-gray-200 rounded-t-3xl shadow-2xl p-4 pb-4 left-0 right-0 max-h-[85vh] overflow-y-auto ${
+                    calendarPosition.placement === 'top' ? 'top-0 rounded-b-3xl border-b border-t-0' : 'bottom-0'
+                  }`}
+                  style={{ 
+                    maxWidth: '100vw',
+                    width: '100%'
+                  }}
+                >
+                  {/* Handle */}
+                  <div className="flex justify-center mb-4 pb-2 border-b border-gray-100 flex-shrink-0">
+                    <div className="w-12 h-1 bg-gray-300 rounded-full" />
+                  </div>
+                  {renderCalendarContent()}
+                </div>
+              ),
               document.body
-            ) : null)
+            )
           )}
         </>
       )}
