@@ -132,95 +132,103 @@ export default function Header() {
 
         {/* Mobile Menu - объединенное */}
         {isMenuOpen && (
-          <div className="md:hidden fixed top-16 left-0 right-0 bg-white border-b border-gray-100 shadow-lg z-[10001] max-h-[calc(100vh-4rem)] overflow-y-auto">
-            <div className="px-4 py-3 space-y-1">
-              {/* Navigation links */}
-              <Link
-                href="/smart-search"
-                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Search className="w-4 h-4" />
-                Умный поиск
-              </Link>
-              <Link
-                href="/landlord/listings/new"
-                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Home className="w-4 h-4" />
-                Разместить объявление
-              </Link>
-              
-              {/* User menu items */}
-              {isAuthenticated && (
-                <>
-                  <hr className="my-2 border-gray-100" />
-                  <Link
-                    href="/profile"
-                    className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <User className="w-4 h-4" />
-                    Профиль
-                  </Link>
-                  <Link
-                    href="/landlord"
-                    className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <Home className="w-4 h-4" />
-                    Кабинет арендодателя
-                  </Link>
-                  {(user?.role === 'admin' || user?.role === 'ADMIN' || user?.email === 'feodal.00@bk.ru') && (
+          <>
+            {/* Overlay */}
+            <div
+              className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[10000]"
+              onClick={() => setIsMenuOpen(false)}
+            />
+            {/* Menu */}
+            <div className="md:hidden fixed top-16 left-0 right-0 bg-white border-b border-gray-100 shadow-2xl z-[10001] max-h-[calc(100vh-4rem)] overflow-y-auto" style={{ maxWidth: '100vw' }}>
+              <div className="px-4 py-4 space-y-1">
+                {/* Navigation links */}
+                <Link
+                  href="/smart-search"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Search className="w-5 h-5 flex-shrink-0" />
+                  Умный поиск
+                </Link>
+                <Link
+                  href={isAuthenticated ? "/landlord/listings/new-stepper" : "/login?next=/landlord/listings/new-stepper"}
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg font-medium"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Home className="w-5 h-5 flex-shrink-0" />
+                  Разместить объявление
+                </Link>
+                
+                {/* User menu items */}
+                {isAuthenticated && (
+                  <>
+                    <hr className="my-3 border-gray-200" />
                     <Link
-                      href="/admin"
-                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
+                      href="/profile"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg font-medium"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      <Shield className="w-4 h-4" />
-                      Админ-панель
+                      <User className="w-5 h-5 flex-shrink-0" />
+                      Профиль
                     </Link>
-                  )}
-                  <hr className="my-2 border-gray-100" />
-                  <button
-                    onClick={() => {
-                      logout()
-                      setIsMenuOpen(false)
-                      router.push('/')
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors w-full text-left text-gray-700 rounded-lg"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Выйти
-                  </button>
-                </>
-              )}
-              
-              {!isAuthenticated && (
-                <>
-                  <hr className="my-2 border-gray-100" />
-                  <Link
-                    href="/login"
-                    className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Войти
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="flex items-center gap-2 px-4 py-2 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Регистрация
-                  </Link>
-                </>
-              )}
+                    <Link
+                      href="/landlord"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg font-medium"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Home className="w-5 h-5 flex-shrink-0" />
+                      Кабинет арендодателя
+                    </Link>
+                    {(user?.role === 'admin' || user?.role === 'ADMIN' || user?.email === 'feodal.00@bk.ru') && (
+                      <Link
+                        href="/admin"
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg font-medium"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <Shield className="w-5 h-5 flex-shrink-0" />
+                        Админ-панель
+                      </Link>
+                    )}
+                    <hr className="my-3 border-gray-200" />
+                    <button
+                      onClick={() => {
+                        logout()
+                        setIsMenuOpen(false)
+                        router.push('/')
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors w-full text-left text-gray-700 rounded-lg font-medium"
+                    >
+                      <LogOut className="w-5 h-5 flex-shrink-0" />
+                      Выйти
+                    </button>
+                  </>
+                )}
+                
+                {!isAuthenticated && (
+                  <>
+                    <hr className="my-3 border-gray-200" />
+                    <Link
+                      href="/login"
+                      className="flex items-center justify-center gap-2 px-4 py-3 hover:bg-gray-50 transition-colors text-gray-700 rounded-lg font-medium border border-gray-200"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Войти
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white hover:bg-primary-dark transition-colors rounded-lg font-semibold shadow-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Регистрация
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          </>
         )}
 
-        {/* Old Mobile Menu - удаляем */}
+        {/* Old Mobile Menu - удалено */}
         {false && isMenuOpen && (
           <div className="md:hidden py-3 sm:py-4 border-t border-gray-100">
             <nav className="flex flex-col gap-2 sm:gap-3">

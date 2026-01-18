@@ -378,14 +378,14 @@ export default function DateRangePicker({
       </div>
       
       {/* Close button for mobile */}
-      <div className="md:hidden mt-3 pt-3 border-t border-gray-200">
+      <div className="md:hidden mt-4 pt-4 border-t border-gray-200 flex-shrink-0">
         <button
           type="button"
           onClick={() => {
             setIsOpen(false)
             setActiveField(null)
           }}
-          className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2.5 rounded-lg transition-colors font-medium text-sm"
+          className="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-dark transition-colors font-semibold text-base shadow-md active:scale-95"
         >
           Закрыть
         </button>
@@ -434,7 +434,7 @@ export default function DateRangePicker({
           {/* Mobile overlay */}
           {mounted && typeof window !== 'undefined' && window.innerWidth < 768 && (
             <div 
-              className="fixed inset-0 bg-black/20 z-[9998]"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9998]"
               onClick={() => {
                 setIsOpen(false)
                 setActiveField(null)
@@ -454,13 +454,19 @@ export default function DateRangePicker({
                 {renderCalendarContent()}
               </div>,
               document.body
-            ) : window.innerWidth < 768 ? (
+            ) : window.innerWidth < 768 ? createPortal(
               <div
                 ref={calendarRef}
-                className="fixed z-[10001] bg-white border border-gray-200 rounded-t-2xl shadow-xl p-4 max-w-[95vw] bottom-0 left-0 right-0"
+                className="fixed z-[9999] bg-white border-t border-gray-200 rounded-t-3xl shadow-2xl p-4 pb-4 bottom-0 left-0 right-0 max-h-[85vh] overflow-y-auto"
+                style={{ maxWidth: '100vw' }}
               >
+                {/* Handle */}
+                <div className="flex justify-center mb-4 pb-2 border-b border-gray-100 flex-shrink-0">
+                  <div className="w-12 h-1 bg-gray-300 rounded-full" />
+                </div>
                 {renderCalendarContent()}
-              </div>
+              </div>,
+              document.body
             ) : null)
           )}
         </>

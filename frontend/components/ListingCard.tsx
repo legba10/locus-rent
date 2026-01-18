@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
-import { MapPin, Star, Users, Bed, Bath, Eye } from 'lucide-react'
+import { useState } from 'react'
+import { MapPin, Star, Users, Bed, Bath, Eye, Image as ImageIcon } from 'lucide-react'
 
 interface ListingCardProps {
   listing: {
@@ -26,6 +26,9 @@ interface ListingCardProps {
 }
 
 export default function ListingCard({ listing }: ListingCardProps) {
+  const [imageLoading, setImageLoading] = useState(true)
+  const [imageError, setImageError] = useState(false)
+  
   const price = listing.pricePerNight || listing.price || 0
   const address = listing.address || listing.city || 'Адрес не указан'
   // Гарантируем, что images всегда массив
@@ -46,44 +49,43 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const guests = listing.maxGuests || listing.guests
   const views = listing.views || listing.viewCount || 0
 
+  const hasImage = imageUrl && (imageUrl.startsWith('http') || imageUrl.startsWith('data:'))
+
   return (
     <Link href={`/listings/${listing.id}`}>
       <div className="bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 group w-full h-full flex flex-col">
         {/* Image */}
         <div className="relative w-full h-48 sm:h-56 md:h-64 bg-gray-100 overflow-hidden">
-          {imageUrl && imageUrl.startsWith('http') ? (
+          {/* Skeleton Loader */}
+          {imageLoading && hasImage && !imageError && (
+            <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200" />
+          )}
+          
+          {/* Image or Fallback */}
+          {hasImage && !imageError ? (
             <img
-              src={imageUrl}
+              src={imageUrl!}
               alt={listing.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement
-                target.style.display = 'none'
-                const parent = target.parentElement
-                if (parent && !parent.querySelector('.image-fallback')) {
-                  const fallback = document.createElement('div')
-                  fallback.className = 'image-fallback w-full h-full flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-50 to-gray-100'
-                  fallback.innerHTML = '<div class="text-center"><svg class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg><p class="text-sm">Нет фото</p></div>'
-                  parent.appendChild(fallback)
-                }
+              className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ${
+                imageLoading ? 'opacity-0 absolute' : 'opacity-100'
+              }`}
+              onLoad={() => setImageLoading(false)}
+              onError={() => {
+                setImageLoading(false)
+                setImageError(true)
               }}
-            />
-          ) : imageUrl && imageUrl.startsWith('data:') ? (
-            <img
-              src={imageUrl}
-              alt={listing.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-50 to-gray-100">
-              <div className="text-center">
-                <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Нет фото</p>
+              <div className="text-center px-4">
+                <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p className="text-sm font-medium">Фото скоро появится</p>
               </div>
             </div>
           )}
+          
           {listing.rating && (
-            <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1">
+            <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1 z-10">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               <span className="text-sm font-semibold">{listing.rating.toFixed(1)}</span>
             </div>

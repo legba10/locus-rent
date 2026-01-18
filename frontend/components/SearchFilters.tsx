@@ -243,38 +243,42 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
   )
 
   const content = (
-    <div className={`${isMobile ? 'flex flex-col h-full' : 'p-4 sm:p-6'} ${className}`}>
-      {/* Header */}
-      <div className={`flex items-center justify-between ${isMobile ? 'px-4 pt-4 pb-3 flex-shrink-0' : 'mb-4 sm:mb-6'}`}>
-        <div className="flex items-center gap-2">
-          <Filter className="w-5 h-5 text-primary" />
-          <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Фильтры</h3>
+    <div className={`${isMobile ? '' : 'p-4 sm:p-6'} ${className}`}>
+      {/* Header - Desktop Only */}
+      {!isMobile && (
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <div className="flex items-center gap-2">
+            <Filter className="w-5 h-5 text-primary" />
+            <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Фильтры</h3>
+          </div>
+          <div className="flex items-center gap-2">
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="text-sm text-primary hover:text-primary-dark transition-colors font-medium px-3 py-1.5 rounded-lg hover:bg-primary/10"
+              >
+                Сбросить
+              </button>
+            )}
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Закрыть"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {hasActiveFilters && !isMobile && (
-            <button
-              onClick={clearFilters}
-              className="text-sm text-primary hover:text-primary-dark transition-colors font-medium px-3 py-1.5 rounded-lg hover:bg-primary/10"
-            >
-              Сбросить
-            </button>
-          )}
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              aria-label="Закрыть"
-            >
-              <X className="w-5 h-5 text-gray-500" />
-            </button>
-          )}
-        </div>
-      </div>
+      )}
 
-      {/* Scrollable content */}
-      <div className={`${isMobile ? 'flex-1 overflow-y-auto min-h-0 px-4' : ''}`}>
-        {filtersContent}
-      </div>
+      {/* Scrollable content - Desktop Only */}
+      {!isMobile && (
+        <div>
+          {filtersContent}
+        </div>
+      )}
 
       {/* Apply Button - Desktop */}
       {!isMobile && (
@@ -310,21 +314,41 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
 
   if (isMobile) {
     return (
-      <div className="fixed inset-0 z-50 flex items-end">
+      <div className="fixed inset-0 z-[9999] flex items-end">
         {/* Overlay */}
         <div
-          className="absolute inset-0 bg-black/50"
+          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
           onClick={onClose}
         />
         {/* Bottom Sheet */}
-        <div className="relative w-full bg-white rounded-t-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
+        <div className="relative w-full bg-white rounded-t-3xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden" style={{ maxWidth: '100vw' }}>
           {/* Handle */}
           <div className="flex justify-center pt-3 pb-2 flex-shrink-0">
             <div className="w-12 h-1 bg-gray-300 rounded-full" />
           </div>
-          {content}
-          {/* Apply Button - Mobile (sticky at bottom) */}
-          <div className="px-4 pt-4 pb-4 border-t border-gray-200 bg-white flex gap-3 flex-shrink-0">
+          
+          {/* Header - Fixed */}
+          <div className="flex items-center justify-between px-4 pt-2 pb-3 flex-shrink-0 border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <Filter className="w-5 h-5 text-primary" />
+              <h3 className="text-lg font-semibold text-gray-900">Фильтры</h3>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Закрыть"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+          
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4">
+            {filtersContent}
+          </div>
+          
+          {/* Footer - Fixed */}
+          <div className="px-4 pt-3 pb-4 border-t border-gray-200 bg-white flex gap-3 flex-shrink-0">
             {hasActiveFilters && (
               <button
                 type="button"
@@ -333,7 +357,7 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
                   e.stopPropagation()
                   clearFilters()
                 }}
-                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium"
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium active:scale-95"
               >
                 Сбросить
               </button>
@@ -345,7 +369,7 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
                 e.stopPropagation()
                 handleApply()
               }}
-              className={`${hasActiveFilters ? 'flex-1' : 'w-full'} bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg`}
+              className={`${hasActiveFilters ? 'flex-1' : 'w-full'} bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg active:scale-95`}
             >
               Применить
             </button>

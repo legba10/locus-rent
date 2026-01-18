@@ -135,31 +135,31 @@ export default function SupportChat() {
         className={`fixed z-[10000] flex flex-col transition-all bg-white shadow-2xl border border-gray-100 ${
           isMinimized 
             ? 'h-16 md:bottom-6 md:right-6 md:w-96 md:rounded-2xl' 
-            : 'md:bottom-6 md:right-6 md:w-96 md:max-w-[calc(100vw-3rem)] md:rounded-2xl md:h-[600px] md:max-h-[calc(100vh-3rem)] bottom-0 left-0 right-0 w-full h-[85vh] max-h-[85vh] rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden'
+            : 'md:bottom-6 md:right-6 md:w-96 md:max-w-[calc(100vw-3rem)] md:rounded-2xl md:h-[600px] md:max-h-[calc(100vh-3rem)] bottom-0 left-0 right-0 w-full max-w-[100vw] h-[90vh] max-h-[90vh] rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden'
         }`}
       >
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-2xl flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+      {/* Header - Fixed */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-2xl flex items-center justify-between flex-shrink-0 z-10">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
             <MessageCircle className="w-5 h-5" />
           </div>
-          <div>
-            <h3 className="font-semibold">Поддержка LOCUS</h3>
-            <p className="text-xs text-blue-100">Обычно отвечаем за 15 минут</p>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-semibold truncate">Поддержка LOCUS</h3>
+            <p className="text-xs text-blue-100 truncate">Обычно отвечаем за 15 минут</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={handleMinimize}
-            className="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-lg transition-colors"
+            className="w-9 h-9 flex items-center justify-center hover:bg-white/20 rounded-lg transition-colors flex-shrink-0"
             aria-label="Свернуть"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
           <button
             onClick={handleClose}
-            className="w-8 h-8 flex items-center justify-center hover:bg-white/20 rounded-lg transition-colors"
+            className="w-9 h-9 flex items-center justify-center hover:bg-white/20 rounded-lg transition-colors flex-shrink-0"
             aria-label="Закрыть"
           >
             <X className="w-5 h-5" />
@@ -169,8 +169,8 @@ export default function SupportChat() {
 
       {!isMinimized && (
         <>
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 min-h-0 overscroll-contain">
+          {/* Messages - Scrollable */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 min-h-0 overscroll-contain" style={{ maxHeight: 'calc(90vh - 140px)' }}>
             {showUserForm ? (
               <form onSubmit={handleUserFormSubmit} className="space-y-4">
                 <div>
@@ -258,9 +258,9 @@ export default function SupportChat() {
             )}
           </div>
 
-          {/* Input */}
+          {/* Input - Fixed */}
           {!showUserForm && (
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 bg-white flex-shrink-0">
+            <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 bg-white flex-shrink-0 z-10">
               <div className="flex gap-2">
                 <input
                   type="text"
