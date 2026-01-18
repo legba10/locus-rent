@@ -94,7 +94,7 @@ export default function SearchBar() {
   return (
     <div className="max-w-5xl mx-auto w-full" id="home-search">
       <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-3 sm:p-4 md:p-6 w-full">
-        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full items-end">
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full items-stretch lg:items-end">
           {/* Location */}
           <div className="flex-1 w-full lg:min-w-0 lg:flex-shrink">
             <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
@@ -112,7 +112,7 @@ export default function SearchBar() {
           </div>
 
           {/* Dates */}
-          <div className="flex-1 w-full lg:min-w-0 lg:flex-shrink">
+          <div className="flex-1 w-full lg:min-w-0 lg:flex-shrink relative" style={{ zIndex: 1 }}>
             <DateRangePicker
               checkIn={checkIn}
               checkOut={checkOut}
@@ -123,7 +123,7 @@ export default function SearchBar() {
           </div>
 
           {/* Guests */}
-          <div className="w-full lg:w-40 lg:flex-shrink-0">
+          <div className="w-full lg:w-40 lg:flex-shrink-0 relative" style={{ zIndex: 2 }}>
             <GuestsStepper
               value={guests}
               onChange={setGuests}
@@ -133,7 +133,7 @@ export default function SearchBar() {
           </div>
 
           {/* Search Button */}
-          <div className="w-full lg:w-auto lg:flex-shrink-0">
+          <div className="w-full lg:w-auto lg:flex-shrink-0 relative z-0">
             <button
               onClick={handleSearch}
               type="button"

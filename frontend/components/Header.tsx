@@ -10,13 +10,13 @@ import Logo from './Logo'
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const [userMenuPosition, setUserMenuPosition] = useState<{ right: number; maxWidth: number } | null>(null)
+  const [userMenuPosition, setUserMenuPosition] = useState<{ right: number; top: number; maxWidth: number } | null>(null)
   const userMenuButtonRef = useRef<HTMLButtonElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   const { user, isAuthenticated, logout } = useAuthStore()
 
-  // Calculate user menu position
+  // Calculate user menu position - улучшенная логика для предотвращения обрезания
   useEffect(() => {
     if (isUserMenuOpen && userMenuButtonRef.current && typeof window !== 'undefined') {
       const updatePosition = () => {
@@ -24,29 +24,41 @@ export default function Header() {
         if (!rect) return
 
         const viewportWidth = window.innerWidth
+        const viewportHeight = window.innerHeight
         const menuWidth = 224 // w-56 = 14rem = 224px
+        const menuHeight = 200 // примерная высота меню
         const padding = 16 // 1rem
 
         // Проверяем, выходит ли меню за правый край
         const spaceRight = viewportWidth - rect.right
         const spaceLeft = rect.left
+        const spaceBelow = viewportHeight - rect.bottom
 
         let right = 0
+        let top = rect.bottom + 8
         let maxWidth = Math.min(menuWidth, viewportWidth - padding * 2)
 
+        // Проверяем правый край
         if (spaceRight >= menuWidth) {
-          // Помещается справа
+          // Помещается справа - выравниваем по левому краю кнопки
           right = viewportWidth - rect.right
         } else if (spaceLeft >= menuWidth) {
-          // Помещается слева
+          // Помещается слева - выравниваем по правому краю кнопки
           right = viewportWidth - rect.left
         } else {
-          // Не помещается, выравниваем по краю с padding
+          // Не помещается ни справа, ни слева - выравниваем по краю viewport с padding
           right = padding
           maxWidth = Math.min(menuWidth, viewportWidth - padding * 2)
         }
 
-        setUserMenuPosition({ right, maxWidth })
+        // Проверяем нижний край - если меню выходит за нижний край, открываем сверху
+        if (spaceBelow < menuHeight && rect.top >= menuHeight) {
+          top = rect.top - menuHeight - 8
+        } else {
+          top = rect.bottom + 8
+        }
+
+        setUserMenuPosition({ right, top, maxWidth })
       }
 
       updatePosition()
@@ -108,11 +120,13 @@ export default function Header() {
                     ref={userMenuRef}
                     className="fixed bg-white rounded-xl shadow-2xl border border-gray-100 py-2 z-[10001]"
                     style={{
-                      right: userMenuPosition?.right ? `${userMenuPosition.right}px` : '0',
-                      top: userMenuButtonRef.current ? `${userMenuButtonRef.current.getBoundingClientRect().bottom + 8}px` : 'auto',
-                      maxWidth: userMenuPosition?.maxWidth ? `${userMenuPosition.maxWidth}px` : 'calc(100vw - 2rem)',
+                      right: userMenuPosition?.right != null ? `${userMenuPosition.right}px` : '0',
+                      top: userMenuPosition?.top != null ? `${userMenuPosition.top}px` : (userMenuButtonRef.current ? `${userMenuButtonRef.current.getBoundingClientRect().bottom + 8}px` : 'auto'),
+                      maxWidth: userMenuPosition?.maxWidth != null ? `${userMenuPosition.maxWidth}px` : 'calc(100vw - 2rem)',
                       width: '224px',
-                      minWidth: '200px'
+                      minWidth: '200px',
+                      maxHeight: 'calc(100vh - 2rem)',
+                      overflowY: 'auto'
                     }}
                   >
                     <Link

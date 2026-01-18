@@ -32,27 +32,32 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const price = listing.pricePerNight || listing.price || 0
   const address = listing.address || listing.city || 'Адрес не указан'
   // Гарантируем, что images всегда массив - CRITICAL GUARD
+  // Обрабатываем разные форматы: массив, строка с запятыми (simple-array из TypeORM), отдельный imageUrl
   let images: string[] = []
   try {
-    if (Array.isArray(listing.images)) {
-      images = listing.images
-        .filter((img: any) => img != null && typeof img === 'string' && img.trim().length > 0)
-        .filter((url: string) => {
-          try {
-            // Базовая валидация URL - jpg, jpeg, png, webp, http, data
-            const trimmed = url.trim()
-            return trimmed.startsWith('http') || trimmed.startsWith('data:') || trimmed.startsWith('/') ||
-                   /\.(jpg|jpeg|png|webp)$/i.test(trimmed)
-          } catch {
-            return false
-          }
-        })
-    } else if (listing.images && typeof (listing.images as any) === 'string') {
-      const imgUrl = String(listing.images).trim()
-      if (imgUrl.length > 0 && (imgUrl.startsWith('http') || imgUrl.startsWith('data:') || imgUrl.startsWith('/') || /\.(jpg|jpeg|png|webp)$/i.test(imgUrl))) {
-        images = [imgUrl]
+    if (listing.images != null && listing.images !== '') {
+      if (Array.isArray(listing.images)) {
+        // Массив строк
+        images = listing.images
+          .filter((img: any) => img != null && String(img).trim().length > 0)
+          .map((url: any) => String(url).trim())
+      } else if (typeof listing.images === 'string') {
+        const imagesStr = String(listing.images).trim()
+        // Проверяем, это строка с запятыми (simple-array) или одна строка
+        if (imagesStr.includes(',')) {
+          // Разбиваем по запятым (simple-array из TypeORM)
+          images = imagesStr.split(',')
+            .map((url: string) => url.trim())
+            .filter((url: string) => url.length > 0)
+        } else if (imagesStr.length > 0) {
+          // Одна строка
+          images = [imagesStr]
+        }
       }
     }
+    
+    // Фильтруем только валидные строки (не пустые)
+    images = images.filter((url: string) => url && String(url).trim().length > 0).map((url: string) => String(url).trim())
   } catch (error) {
     console.error('Error processing images in ListingCard:', error)
     images = []
@@ -63,10 +68,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
   if (images.length > 0) {
     imageUrl = images[0]
   } else if (listing.imageUrl && typeof listing.imageUrl === 'string' && listing.imageUrl.trim().length > 0) {
-    const trimmed = listing.imageUrl.trim()
-    if (trimmed.startsWith('http') || trimmed.startsWith('data:') || trimmed.startsWith('/') || /\.(jpg|jpeg|png|webp)$/i.test(trimmed)) {
-      imageUrl = trimmed
-    }
+    imageUrl = listing.imageUrl.trim()
   }
   const guests = listing.maxGuests || listing.guests
   const views = listing.views || listing.viewCount || 0

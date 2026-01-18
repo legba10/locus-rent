@@ -427,7 +427,7 @@ export default function DateRangePicker({
   )
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className}`} style={{ zIndex: 0 }}>
       <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
         <Calendar className="w-4 h-4 text-gray-500" />
         Даты
@@ -490,15 +490,16 @@ export default function DateRangePicker({
                   {renderCalendarContent()}
                 </div>
               ) : (
-                // Mobile calendar - всегда через Portal в body
+                // Mobile calendar - всегда через Portal в body с высоким z-index чтобы не перекрываться
                 <div
                   ref={calendarRef}
-                  className={`fixed z-[9999] bg-white border-t border-gray-200 rounded-t-3xl shadow-2xl p-4 pb-4 left-0 right-0 max-h-[85vh] overflow-y-auto ${
+                  className={`fixed z-[99999] bg-white border-t border-gray-200 rounded-t-3xl shadow-2xl p-4 pb-4 left-0 right-0 max-h-[85vh] overflow-y-auto ${
                     calendarPosition.placement === 'top' ? 'top-0 rounded-b-3xl border-b border-t-0' : 'bottom-0'
                   }`}
                   style={{ 
                     maxWidth: '100vw',
-                    width: '100%'
+                    width: '100%',
+                    zIndex: 99999
                   }}
                 >
                   {/* Handle */}

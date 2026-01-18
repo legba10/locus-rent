@@ -121,34 +121,29 @@ export default function ListingDetailPage() {
   }
 
   // Гарантируем, что images всегда массив - CRITICAL GUARD
+  // Обрабатываем разные форматы: массив, строка с запятыми (simple-array из TypeORM), отдельный imageUrl
   const getImages = (listingData: any): string[] => {
     if (!listingData) return []
     let images: string[] = []
     try {
-      // Проверяем images
-      if (listingData.images) {
+      // Проверяем images - может быть массив, строка (simple-array), или строка с запятыми
+      if (listingData.images != null && listingData.images !== '') {
         if (Array.isArray(listingData.images)) {
+          // Массив строк
           images = listingData.images
-            .filter((img: any) => img != null && typeof img === 'string' && String(img).trim().length > 0)
-            .map((url: string) => String(url).trim())
-            .filter((url: string) => {
-              try {
-                // Принимаем любые URL, включая относительные пути
-                return url.length > 0 && (
-                  url.startsWith('http://') || 
-                  url.startsWith('https://') || 
-                  url.startsWith('data:') || 
-                  url.startsWith('/') ||
-                  url.startsWith('blob:')
-                )
-              } catch {
-                return false
-              }
-            })
+            .filter((img: any) => img != null && String(img).trim().length > 0)
+            .map((url: any) => String(url).trim())
         } else if (typeof listingData.images === 'string') {
-          const imgUrl = String(listingData.images).trim()
-          if (imgUrl.length > 0) {
-            images = [imgUrl]
+          const imagesStr = String(listingData.images).trim()
+          // Проверяем, это строка с запятыми (simple-array) или одна строка
+          if (imagesStr.includes(',')) {
+            // Разбиваем по запятым (simple-array из TypeORM)
+            images = imagesStr.split(',')
+              .map((url: string) => url.trim())
+              .filter((url: string) => url.length > 0)
+          } else if (imagesStr.length > 0) {
+            // Одна строка
+            images = [imagesStr]
           }
         }
       }
@@ -160,6 +155,9 @@ export default function ListingDetailPage() {
           images.unshift(imgUrl)
         }
       }
+      
+      // Фильтруем только валидные строки (не пустые)
+      images = images.filter((url: string) => url && String(url).trim().length > 0).map((url: string) => String(url).trim())
     } catch (error) {
       console.error('Error processing images:', error)
       images = []
@@ -315,7 +313,7 @@ export default function ListingDetailPage() {
           <Breadcrumbs
             items={[
               { label: 'Поиск', href: '/' },
-              { label: listing?.title || 'Объявление' }
+              { label: listing && typeof listing.title === 'string' ? listing.title : 'Объявление' }
             ]}
           />
         </div>
@@ -332,14 +330,8 @@ export default function ListingDetailPage() {
               >
                 {images.map((image: string, index: number) => {
                   const imageUrl = String(image).trim()
-                  // Более гибкая проверка - принимаем любые валидные URL
-                  const hasImage = imageUrl.length > 0 && (
-                    imageUrl.startsWith('http://') || 
-                    imageUrl.startsWith('https://') || 
-                    imageUrl.startsWith('data:') || 
-                    imageUrl.startsWith('/') ||
-                    imageUrl.startsWith('blob:')
-                  )
+                  // Принимаем любую непустую строку как потенциальный URL изображения
+                  const hasImage = imageUrl.length > 0
                   const isLoading = imageLoading[index] !== false
                   const hasError = imageErrors[index] === true
                   
@@ -363,7 +355,7 @@ export default function ListingDetailPage() {
                           <>
                             <img
                               src={imageUrl}
-                              alt={`${listing?.title || 'Объявление'} - фото ${index + 1}`}
+                              alt={`${listing && typeof listing.title === 'string' ? listing.title : 'Объявление'} - фото ${index + 1}`}
                               className={`w-full h-full object-cover transition-opacity duration-300 ${
                                 isLoading ? 'opacity-0 absolute' : 'opacity-100'
                               }`}
@@ -481,7 +473,7 @@ export default function ListingDetailPage() {
               {images[currentImageIndex] && !imageErrors[currentImageIndex] ? (
                 <img
                   src={images[currentImageIndex]}
-                  alt={`${listing?.title || 'Объявление'} - фото ${currentImageIndex + 1}`}
+                  alt={`${listing && typeof listing.title === 'string' ? listing.title : 'Объявление'} - фото ${currentImageIndex + 1}`}
                   className="max-w-full max-h-[90vh] object-contain"
                   onError={(e) => {
                     handleImageError(currentImageIndex)
@@ -513,7 +505,7 @@ export default function ListingDetailPage() {
                 {/* Header */}
                 <div>
                   <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    {listing?.title || 'Объявление'}
+                    {listing && typeof listing.title === 'string' ? listing.title : 'Объявление'}
                   </h1>
                   <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                     {listing?.rating != null && !isNaN(Number(listing.rating)) && (
@@ -580,16 +572,18 @@ export default function ListingDetailPage() {
                         <span className="text-sm sm:text-base text-gray-700">{listing.bathrooms} {listing.bathrooms === 1 ? 'ванная' : listing.bathrooms < 5 ? 'ванные' : 'ванных'}</span>
                       </div>
                     )}
-                    {listing?.amenities && Array.isArray(listing.amenities) && listing.amenities.length > 0 && listing.amenities.map((amenity: string) => {
-                      const Icon = amenitiesIcons[amenity.toLowerCase()]
-                      if (!Icon) return null
-                      return (
-                        <div key={amenity} className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition-colors">
-                          <Icon className="w-5 h-5 text-primary flex-shrink-0" />
-                          <span className="text-sm sm:text-base text-gray-700 capitalize">{amenity}</span>
-                        </div>
-                      )
-                    })}
+                    {listing?.amenities && Array.isArray(listing.amenities) && listing.amenities.length > 0 && listing.amenities
+                      .filter((amenity: any) => amenity != null && typeof amenity === 'string' && amenity.trim().length > 0)
+                      .map((amenity: string, amenityIndex: number) => {
+                        const Icon = amenitiesIcons[amenity.toLowerCase()]
+                        if (!Icon) return null
+                        return (
+                          <div key={`amenity-${amenityIndex}-${amenity}`} className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition-colors">
+                            <Icon className="w-5 h-5 text-primary flex-shrink-0" />
+                            <span className="text-sm sm:text-base text-gray-700 capitalize">{String(amenity)}</span>
+                          </div>
+                        )
+                      })}
                   </div>
                   {(!listing?.maxGuests && (!listing?.bedrooms || Number(listing.bedrooms) === 0) && (!listing?.beds || Number(listing.beds) === 0) && (!listing?.bathrooms || Number(listing.bathrooms) === 0) && (!listing?.amenities || !Array.isArray(listing.amenities) || listing.amenities.length === 0)) && (
                     <p className="text-gray-500 italic text-center py-4">Информация об удобствах скоро появится</p>
@@ -617,33 +611,46 @@ export default function ListingDetailPage() {
                             <div className="flex items-center gap-2.5">
                               <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
                                 <span className="text-primary font-semibold">
-                                  {(review.user?.firstName || review.userName || 'А')[0].toUpperCase()}
+                                  {(() => {
+                                    const firstName = review?.user?.firstName
+                                    const userName = review?.userName
+                                    const initial = (firstName || userName || 'А')[0]
+                                    return String(initial || 'А').toUpperCase()
+                                  })()}
                                 </span>
                               </div>
                               <div>
                                 <span className="font-semibold text-gray-900 block">
-                                  {review.user?.firstName || review.userName || 'Анонимный пользователь'}
+                                  {review?.user?.firstName || review?.userName || 'Анонимный пользователь' || ''}
                                 </span>
-                                {review.rating && (
+                                {review.rating != null && !isNaN(Number(review.rating)) && (
                                   <div className="flex items-center gap-1 mt-0.5">
                                     <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                                    <span className="text-xs text-gray-600">{review.rating}</span>
+                                    <span className="text-xs text-gray-600">{Number(review.rating)}</span>
                                   </div>
                                 )}
                               </div>
                             </div>
-                            {review.createdAt && (
+                            {review?.createdAt && (
                               <span className="text-xs sm:text-sm text-gray-500">
-                                {new Date(review.createdAt).toLocaleDateString('ru-RU', {
-                                  day: 'numeric',
-                                  month: 'long',
-                                  year: 'numeric'
-                                })}
+                                {(() => {
+                                  try {
+                                    const date = new Date(review.createdAt)
+                                    if (isNaN(date.getTime())) return ''
+                                    return date.toLocaleDateString('ru-RU', {
+                                      day: 'numeric',
+                                      month: 'long',
+                                      year: 'numeric'
+                                    })
+                                  } catch {
+                                    return ''
+                                  }
+                                })()}
                               </span>
                             )}
                           </div>
-                          {review.comment && review.comment.trim().length > 0 ? (
-                            <p className="text-gray-700 leading-relaxed">{review.comment}</p>
+                          {review?.comment && typeof review.comment === 'string' && review.comment.trim().length > 0 ? (
+                            <p className="text-gray-700 leading-relaxed">{String(review.comment)}</p>
                           ) : (
                             <p className="text-gray-500 italic text-sm">Отзыв без текста</p>
                           )}
