@@ -63,5 +63,5 @@ export class UpdateListingDto {
   @IsOptional()
   @IsArray()
   @IsSafeImageUrl({ each: true })
-  images?: string[]
+  images: string[] = []
 }

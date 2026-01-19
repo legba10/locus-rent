@@ -12,7 +12,7 @@ import { useConfirmDialog } from '@/components/ConfirmDialog'
 import { toast } from '@/components/Toast'
 import EmptyState from '@/components/EmptyState'
 import { ListingCardSkeleton } from '@/components/Skeleton'
-import { normalizeImageSrc, filterValidImageUrls } from '@/lib/imageUtils'
+import { normalizeImageSrc, sanitizeImages } from '@/lib/imageUtils'
 
 export default function LandlordPage() {
   const router = useRouter()
@@ -211,8 +211,8 @@ export default function LandlordPage() {
               ) : (
                 <div className="grid-responsive">
                   {listings.map((listing) => {
-                    // Фильтруем старые data:image
-                    const validImages = filterValidImageUrls(listing.images || [])
+                    // КРИТИЧНО: санитизация images с гарантией массива
+                    const validImages = sanitizeImages(listing.images)
                     const src = normalizeImageSrc(validImages[0] || listing.imageUrl)
                     
                     return (

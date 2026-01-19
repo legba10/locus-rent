@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import { listingsAPI, citiesAPI, uploadsAPI } from '@/lib/api'
-import { normalizeImageSrc, filterValidImageUrls } from '@/lib/imageUtils'
+import { normalizeImageSrc, sanitizeImages } from '@/lib/imageUtils'
 import { ArrowLeft, ArrowRight, Loader2, MapPin, Upload, CheckCircle2, FileText, Home, DollarSign, Sparkles, Camera, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from '@/components/Toast'
@@ -312,8 +312,8 @@ export default function NewListingStepperPage() {
         ...(saveAsDraft ? { status: 'draft' } : {}),
       }
 
-      // Изображения - фильтруем старые data:image перед отправкой
-      const validImages = filterValidImageUrls(images)
+      // КРИТИЧНО: санитизация images перед отправкой на сервер
+      const validImages = sanitizeImages(images)
       if (validImages.length > 0) {
         listingData.images = validImages
       } else if (saveAsDraft) {

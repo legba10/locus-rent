@@ -38,8 +38,8 @@ export class Listing {
   @Column('text')
   description: string
 
-  @Column('simple-array', { nullable: true })
-  images: string[]
+  @Column('simple-array', { nullable: true, default: [] })
+  images: string[] = []
 
   @Column({
     type: 'enum',

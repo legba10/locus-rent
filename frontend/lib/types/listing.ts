@@ -6,7 +6,7 @@ export interface Listing {
   id: string
   title: string
   description: string
-  images?: string[]
+  images: string[] // Всегда массив, никогда null/undefined
   type: ListingType
   city: string
   district?: string

@@ -22,7 +22,7 @@ export class CreateListingDto {
   @IsOptional()
   @IsArray()
   @IsSafeImageUrl({ each: true })
-  images?: string[]
+  images: string[] = []
 
   @IsEnum(ListingType)
   type: ListingType

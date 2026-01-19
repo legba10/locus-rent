@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { MapPin, Star, Users, Bed, Bath, Eye, Image as ImageIcon } from 'lucide-react'
-import { normalizeImageSrc, filterValidImageUrls } from '@/lib/imageUtils'
+import { normalizeImageSrc, sanitizeImages } from '@/lib/imageUtils'
 
 interface ListingCardProps {
   listing: {
@@ -33,8 +33,8 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const price = listing.pricePerNight || listing.price || 0
   const address = listing.address || listing.city || 'Адрес не указан'
   
-  // Фильтруем старые data:image и невалидные src
-  const validImages = filterValidImageUrls(listing.images || [])
+  // КРИТИЧНО: санитизация images с гарантией массива
+  const validImages = sanitizeImages(listing.images)
   const imageSrc = normalizeImageSrc(validImages[0] || listing.imageUrl)
   const guests = listing.maxGuests || listing.guests
   const views = listing.views || listing.viewCount || 0

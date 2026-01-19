@@ -18,7 +18,7 @@ import Breadcrumbs from '@/components/Breadcrumbs'
 import Tooltip from '@/components/Tooltip'
 import DateRangePicker from '@/components/DateRangePicker'
 import GuestsStepper from '@/components/GuestsStepper'
-import { normalizeImageSrc, filterValidImageUrls } from '@/lib/imageUtils'
+import { normalizeImageSrc, sanitizeImages } from '@/lib/imageUtils'
 
 // Lazy load MapView
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
@@ -62,7 +62,12 @@ export default function ListingDetailPage() {
       // Обрабатываем разные форматы ответа
       const listingData = response.data?.data || response.data || null
       if (listingData) {
-        setListing(listingData)
+        // КРИТИЧНО: санитизируем images перед сохранением в state
+        const sanitizedListing = {
+          ...listingData,
+          images: sanitizeImages(listingData.images),
+        }
+        setListing(sanitizedListing)
       } else {
         setError('Объявление не найдено')
         setListing(null)
@@ -121,11 +126,12 @@ export default function ListingDetailPage() {
     tv: Tv,
   }
 
-  // Фильтруем старые data:image и возвращаем только валидные http(s):// URL
+  // КРИТИЧНО: санитизация images с гарантией массива
   const getImages = (listingData: any): string[] => {
     if (!listingData) return []
 
-    const validImages = filterValidImageUrls(listingData.images || [])
+    // Используем единую функцию санитизации
+    const validImages = sanitizeImages(listingData.images)
     
     // Если есть imageUrl, добавляем его в начало (если валидный)
     if (listingData.imageUrl && typeof listingData.imageUrl === 'string') {
@@ -193,8 +199,8 @@ export default function ListingDetailPage() {
     )
   }
 
-  // Получаем images после проверки listing
-  const images = getImages(listing)
+  // КРИТИЧНО: получаем images после проверки listing, гарантируем массив
+  const images = Array.isArray(getImages(listing)) ? getImages(listing) : []
   
   // Безопасное получение цены
   const price = (listing?.pricePerNight != null && !isNaN(Number(listing.pricePerNight))) 
@@ -403,7 +409,7 @@ export default function ListingDetailPage() {
         </div>
         
         {/* Fullscreen Gallery Modal - только после mounted */}
-        {mounted && isFullscreen && images.length > 0 && (
+        {mounted && isFullscreen && Array.isArray(images) && images.length > 0 && (
           <div
             className="fixed inset-0 bg-black z-[10000] flex items-center justify-center"
             onClick={() => setIsFullscreen(false)}
@@ -444,6 +450,16 @@ export default function ListingDetailPage() {
             
             <div className="relative max-w-[90vw] max-h-[90vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
               {(() => {
+                // КРИТИЧНО: защита от выхода за границы массива
+                if (!Array.isArray(images) || currentImageIndex < 0 || currentImageIndex >= images.length) {
+                  return (
+                    <div className="text-white text-center">
+                      <ImageIcon className="w-24 h-24 mx-auto mb-3 opacity-50" />
+                      <p>Фото не найдено</p>
+                    </div>
+                  )
+                }
+                
                 const current = images[currentImageIndex]
                 const src = normalizeImageSrc(current)
                 return src !== '/placeholder-image.svg' && !imageErrors[currentImageIndex] ? (

@@ -14,8 +14,12 @@ export class ListingsService {
   ) {}
 
   async create(createListingDto: CreateListingDto, userId: string): Promise<Listing> {
+    // КРИТИЧНО: санитизация images - гарантируем массив и фильтруем data:image
+    const sanitizedImages = this.sanitizeImages(createListingDto.images || [])
+    
     const listing = this.listingsRepository.create({
       ...createListingDto,
+      images: sanitizedImages,
       owner: { id: userId } as any,
       // Если статус не указан или это не draft, ставим на модерацию
       status: createListingDto.status === ListingStatus.DRAFT 
@@ -25,11 +29,38 @@ export class ListingsService {
     return this.listingsRepository.save(listing)
   }
 
+  /**
+   * Санитизация images[] - фильтрует data:image и гарантирует массив.
+   */
+  private sanitizeImages(images: unknown[]): string[] {
+    if (!Array.isArray(images)) {
+      return []
+    }
+
+    return images
+      .filter((img): img is string => {
+        if (typeof img !== 'string') return false
+        const trimmed = img.trim()
+        if (!trimmed) return false
+        // Строго запрещаем data:image
+        if (trimmed.toLowerCase().startsWith('data:image')) return false
+        // Разрешаем только http(s):// URL
+        return trimmed.startsWith('http://') || trimmed.startsWith('https://')
+      })
+      .map((img) => img.trim())
+  }
+
   async findAll(): Promise<Listing[]> {
-    return this.listingsRepository.find({
+    const listings = await this.listingsRepository.find({
       relations: ['owner'],
       where: { status: ListingStatus.ACTIVE },
     })
+    
+    // КРИТИЧНО: санитизация images для всех объявлений перед возвратом
+    return listings.map((listing) => ({
+      ...listing,
+      images: this.sanitizeImages(listing.images || []),
+    }))
   }
 
   async findForModeration(): Promise<Listing[]> {
@@ -79,7 +110,13 @@ export class ListingsService {
       )
     }
 
-    return query.getMany()
+    const listings = await query.getMany()
+    
+    // КРИТИЧНО: санитизация images для всех объявлений перед возвратом
+    return listings.map((listing) => ({
+      ...listing,
+      images: this.sanitizeImages(listing.images || []),
+    }))
   }
 
   async findOne(id: string): Promise<Listing> {
@@ -90,22 +127,37 @@ export class ListingsService {
     if (!listing) {
       throw new NotFoundException('Объявление не найдено')
     }
+    
+    // КРИТИЧНО: санитизация images перед возвратом
+    listing.images = this.sanitizeImages(listing.images || [])
     return listing
   }
 
   async findByOwner(ownerId: string): Promise<Listing[]> {
     // Показываем ВСЕ объявления пользователя, включая на модерации, опубликованные и отклоненные
-    return this.listingsRepository.find({
+    const listings = await this.listingsRepository.find({
       where: {
         owner: { id: ownerId } as any,
       },
       relations: ['owner'],
       order: { createdAt: 'DESC' },
     })
+    
+    // КРИТИЧНО: санитизация images для всех объявлений перед возвратом
+    return listings.map((listing) => ({
+      ...listing,
+      images: this.sanitizeImages(listing.images || []),
+    }))
   }
 
   async update(id: string, updateListingDto: UpdateListingDto): Promise<Listing> {
     const listing = await this.findOne(id)
+    
+    // КРИТИЧНО: санитизация images при обновлении
+    if (updateListingDto.images !== undefined) {
+      updateListingDto.images = this.sanitizeImages(updateListingDto.images)
+    }
+    
     Object.assign(listing, updateListingDto)
     return this.listingsRepository.save(listing)
   }
