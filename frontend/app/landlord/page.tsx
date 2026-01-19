@@ -75,11 +75,11 @@ export default function LandlordPage() {
       onConfirm: async () => {
         try {
           await listingsAPI.delete(id)
-          toast('Объявление скрыто', 'success')
+          toast('Объявление удалено', 'success')
           loadData()
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error deleting listing:', error)
-          toast('Ошибка скрытия объявления', 'error')
+          toast(error.response?.data?.message || 'Ошибка удаления объявления', 'error')
         }
       },
     })

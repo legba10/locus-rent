@@ -119,23 +119,12 @@ export class CitiesService {
   }
 
   /**
-   * Инициализация популярных городов России
+   * Инициализация популярных городов России (100+ городов)
    */
   async initializePopularCities(): Promise<void> {
-    const popularCities = [
-      { name: 'Москва', latitude: 55.7558, longitude: 37.6173, region: 'Москва' },
-      { name: 'Санкт-Петербург', latitude: 59.9343, longitude: 30.3351, region: 'Ленинградская область' },
-      { name: 'Новосибирск', latitude: 55.0084, longitude: 82.9357, region: 'Новосибирская область' },
-      { name: 'Екатеринбург', latitude: 56.8431, longitude: 60.6454, region: 'Свердловская область' },
-      { name: 'Казань', latitude: 55.8304, longitude: 49.0661, region: 'Татарстан' },
-      { name: 'Нижний Новгород', latitude: 56.2965, longitude: 43.9361, region: 'Нижегородская область' },
-      { name: 'Челябинск', latitude: 55.1644, longitude: 61.4368, region: 'Челябинская область' },
-      { name: 'Самара', latitude: 53.2001, longitude: 50.15, region: 'Самарская область' },
-      { name: 'Омск', latitude: 54.9885, longitude: 73.3242, region: 'Омская область' },
-      { name: 'Ростов-на-Дону', latitude: 47.2357, longitude: 39.7015, region: 'Ростовская область' },
-    ]
+    const { RUSSIAN_CITIES } = await import('./data/russian-cities')
 
-    for (const cityData of popularCities) {
+    for (const cityData of RUSSIAN_CITIES) {
       await this.createOrUpdate({
         ...cityData,
         country: 'RU',

@@ -20,8 +20,9 @@ interface CityAutocompleteProps {
   error?: string
 }
 
+// Популярные города для показа при пустом запросе
 const POPULAR_CITIES: City[] = [
-  { id: 1, name: 'Москва', region: 'Московская область' },
+  { id: 1, name: 'Москва', region: 'Москва' },
   { id: 2, name: 'Санкт-Петербург', region: 'Ленинградская область' },
   { id: 3, name: 'Сочи', region: 'Краснодарский край' },
   { id: 4, name: 'Казань', region: 'Республика Татарстан' },
@@ -29,6 +30,12 @@ const POPULAR_CITIES: City[] = [
   { id: 6, name: 'Новосибирск', region: 'Новосибирская область' },
   { id: 7, name: 'Краснодар', region: 'Краснодарский край' },
   { id: 8, name: 'Нижний Новгород', region: 'Нижегородская область' },
+  { id: 9, name: 'Сургут', region: 'Ханты-Мансийский автономный округ - Югра' },
+  { id: 10, name: 'Нижневартовск', region: 'Ханты-Мансийский автономный округ - Югра' },
+  { id: 11, name: 'Ноябрьск', region: 'Ямало-Ненецкий автономный округ' },
+  { id: 12, name: 'Новый Уренгой', region: 'Ямало-Ненецкий автономный округ' },
+  { id: 13, name: 'Салехард', region: 'Ямало-Ненецкий автономный округ' },
+  { id: 14, name: 'Ханты-Мансийск', region: 'Ханты-Мансийский автономный округ - Югра' },
 ]
 
 export default function CityAutocomplete({
@@ -64,9 +71,15 @@ export default function CityAutocomplete({
 
     setLoading(true)
     try {
-      const response = await citiesAPI.search(query, 20)
+      const response = await citiesAPI.search(query, 15)
       const cities = response.data || []
-      setSuggestions(cities)
+      // Сортируем по релевантности: сначала точные совпадения, потом частичные
+      const sortedCities = cities.sort((a, b) => {
+        const aMatch = a.name.toLowerCase().startsWith(query.toLowerCase()) ? 0 : 1
+        const bMatch = b.name.toLowerCase().startsWith(query.toLowerCase()) ? 0 : 1
+        return aMatch - bMatch
+      })
+      setSuggestions(sortedCities.slice(0, 15))
       setHighlightedText(query)
     } catch (error) {
       console.error('City search error:', error)
@@ -156,12 +169,21 @@ export default function CityAutocomplete({
     }
   }
 
-  // Scroll selected item into view
+  // Scroll selected item into view - убрано scrollIntoView для предотвращения прыжков экрана
   useEffect(() => {
     if (selectedIndex >= 0 && suggestionsRef.current) {
       const selectedElement = suggestionsRef.current.children[selectedIndex] as HTMLElement
-      if (selectedElement) {
-        selectedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+      const container = suggestionsRef.current
+      if (selectedElement && container) {
+        // Плавная прокрутка без изменения позиции страницы
+        const containerRect = container.getBoundingClientRect()
+        const elementRect = selectedElement.getBoundingClientRect()
+        
+        if (elementRect.top < containerRect.top) {
+          container.scrollTop -= (containerRect.top - elementRect.top + 10)
+        } else if (elementRect.bottom > containerRect.bottom) {
+          container.scrollTop += (elementRect.bottom - containerRect.bottom + 10)
+        }
       }
     }
   }, [selectedIndex])

@@ -131,6 +131,10 @@ export class ListingsService {
       throw new NotFoundException('Объявление не найдено')
     }
     
+    // Инкрементируем счетчик просмотров
+    listing.views = (listing.views || 0) + 1
+    await this.listingsRepository.save(listing)
+    
     // КРИТИЧНО: санитизация images перед возвратом
     listing.images = this.sanitizeImages(listing.images || [])
     return listing
@@ -166,10 +170,11 @@ export class ListingsService {
   }
 
   async remove(id: string): Promise<void> {
-    // Мягкое удаление: помечаем объявление как REJECTED, чтобы не показывать в списках
-    const listing = await this.findOne(id)
-    listing.status = ListingStatus.REJECTED
-    await this.listingsRepository.save(listing)
+    // Реальное удаление из БД
+    const result = await this.listingsRepository.delete(id)
+    if (result.affected === 0) {
+      throw new NotFoundException('Объявление не найдено')
+    }
   }
 
   /**

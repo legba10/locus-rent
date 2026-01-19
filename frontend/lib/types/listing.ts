@@ -26,6 +26,7 @@ export interface Listing {
   revisionReason?: string
   rating?: number
   reviewsCount?: number
+  views?: number
   ownerId: string
   createdAt: string
   updatedAt: string

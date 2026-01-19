@@ -111,6 +111,9 @@ export class Listing {
   @Column('integer', { default: 0 })
   reviewsCount: number
 
+  @Column('integer', { default: 0 })
+  views: number
+
   @ManyToOne(() => User, (user) => user.listings)
   @JoinColumn({ name: 'ownerId' })
   owner: User
