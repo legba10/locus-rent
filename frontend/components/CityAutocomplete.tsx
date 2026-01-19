@@ -83,10 +83,12 @@ export default function CityAutocomplete({
     inputRef.current?.blur()
   }
 
-  // Keyboard navigation
+  // Keyboard navigation - улучшенная обработка
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Если нет подсказок, но есть текст - показываем подсказки при ArrowDown
     if (!showSuggestions || suggestions.length === 0) {
-      if (e.key === 'ArrowDown' && value.length >= 2) {
+      if (e.key === 'ArrowDown' && value.length >= 1) {
+        e.preventDefault()
         setShowSuggestions(true)
         setSelectedIndex(0)
       }
@@ -96,22 +98,38 @@ export default function CityAutocomplete({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault()
-        setSelectedIndex((prev) => (prev < suggestions.length - 1 ? prev + 1 : prev))
+        e.stopPropagation()
+        setSelectedIndex((prev) => {
+          const newIndex = prev < suggestions.length - 1 ? prev + 1 : prev
+          return newIndex
+        })
         break
       case 'ArrowUp':
         e.preventDefault()
+        e.stopPropagation()
         setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1))
         break
       case 'Enter':
         e.preventDefault()
-        if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
+        e.stopPropagation()
+        if (selectedIndex >= 0 && selectedIndex < suggestions.length && suggestions[selectedIndex]) {
           handleSelect(suggestions[selectedIndex])
+        } else if (suggestions.length > 0 && suggestions[0]) {
+          // Если ничего не выбрано, выбираем первый элемент
+          handleSelect(suggestions[0])
         }
         break
       case 'Escape':
+        e.preventDefault()
+        e.stopPropagation()
         setShowSuggestions(false)
         setSelectedIndex(-1)
         inputRef.current?.blur()
+        break
+      case 'Tab':
+        // При Tab просто закрываем подсказки
+        setShowSuggestions(false)
+        setSelectedIndex(-1)
         break
     }
   }
@@ -219,14 +237,15 @@ export default function CityAutocomplete({
       {mounted && showSuggestions && suggestions.length > 0 && dropdownPosition && typeof window !== 'undefined' && createPortal(
         <div
           ref={suggestionsRef}
-          className="fixed z-[10002] bg-white border border-gray-200 rounded-xl shadow-2xl overflow-y-auto"
+          className="fixed z-[1060] bg-white border border-gray-200 rounded-xl shadow-2xl overflow-y-auto"
           style={{
             top: `${dropdownPosition.top}px`,
             left: `${dropdownPosition.left}px`,
             width: `${dropdownPosition.width}px`,
             maxHeight: window.innerWidth < 768 ? '60vh' : '16rem',
             position: 'fixed',
-            willChange: 'transform'
+            willChange: 'transform',
+            pointerEvents: 'auto'
           }}
           onMouseDown={(e) => e.preventDefault()}
         >
@@ -256,7 +275,7 @@ export default function CityAutocomplete({
 
       {mounted && showSuggestions && !loading && suggestions.length === 0 && value.length >= 2 && dropdownPosition && typeof window !== 'undefined' && createPortal(
         <div 
-          className="fixed z-[10002] bg-white border border-gray-200 rounded-xl shadow-2xl p-4 text-center text-gray-500"
+          className="fixed z-[1060] bg-white border border-gray-200 rounded-xl shadow-2xl p-4 text-center text-gray-500"
           style={{
             top: `${dropdownPosition.top}px`,
             left: `${dropdownPosition.left}px`,

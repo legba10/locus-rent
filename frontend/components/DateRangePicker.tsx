@@ -468,7 +468,7 @@ export default function DateRangePicker({
           {/* Mobile overlay */}
           {mounted && typeof window !== 'undefined' && window.innerWidth < 768 && (
             <div 
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[9998]"
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1040] cursor-pointer"
               onClick={() => {
                 setIsOpen(false)
                 setActiveField(null)
@@ -481,7 +481,7 @@ export default function DateRangePicker({
                 // Desktop calendar
                 <div
                   ref={calendarRef}
-                  className="fixed z-[10001] bg-white border border-gray-200 rounded-xl shadow-xl p-6 max-w-[700px] min-w-[600px]"
+                  className="fixed z-[1050] bg-white border border-gray-200 rounded-xl shadow-xl p-6 max-w-[700px] min-w-[600px]"
                   style={{
                     top: `${calendarPosition.top}px`,
                     left: `${calendarPosition.left}px`,
@@ -494,11 +494,10 @@ export default function DateRangePicker({
                 // Mobile calendar - всегда fixed bottom: 0 через Portal в body
                 <div
                   ref={calendarRef}
-                  className="fixed z-[99999] bg-white border-t border-gray-200 rounded-t-3xl shadow-2xl p-4 pb-4 left-0 right-0 max-h-[60vh] overflow-y-auto bottom-0"
+                  className="fixed z-[1050] bg-white border-t border-gray-200 rounded-t-3xl shadow-2xl p-4 pb-4 left-0 right-0 max-h-[60vh] overflow-y-auto bottom-0"
                   style={{ 
                     maxWidth: '100vw',
                     width: '100%',
-                    zIndex: 99999,
                     bottom: 0
                   }}
                 >

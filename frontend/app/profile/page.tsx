@@ -119,43 +119,49 @@ export default function ProfilePage() {
           {/* Tabs - Horizontal scroll on mobile */}
           <div className="flex flex-row gap-2 sm:gap-4 mb-6 overflow-x-auto scrollbar-hide pb-2 border-b border-gray-200">
             <button
+              type="button"
               onClick={() => setActiveTab('profile')}
-              className={`tab whitespace-nowrap ${activeTab === 'profile' ? 'tab-active' : 'tab-inactive'}`}
+              className={`tab whitespace-nowrap cursor-pointer ${activeTab === 'profile' ? 'tab-active' : 'tab-inactive'}`}
             >
               <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
               Профиль
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('bookings')}
-              className={`tab whitespace-nowrap ${activeTab === 'bookings' ? 'tab-active' : 'tab-inactive'}`}
+              className={`tab whitespace-nowrap cursor-pointer ${activeTab === 'bookings' ? 'tab-active' : 'tab-inactive'}`}
             >
               <Calendar className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
               Бронирования
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('favorites')}
-              className={`tab whitespace-nowrap ${activeTab === 'favorites' ? 'tab-active' : 'tab-inactive'}`}
+              className={`tab whitespace-nowrap cursor-pointer ${activeTab === 'favorites' ? 'tab-active' : 'tab-inactive'}`}
             >
               <Heart className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
               Избранное
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('history')}
-              className={`tab whitespace-nowrap ${activeTab === 'history' ? 'tab-active' : 'tab-inactive'}`}
+              className={`tab whitespace-nowrap cursor-pointer ${activeTab === 'history' ? 'tab-active' : 'tab-inactive'}`}
             >
               <History className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
               История
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('preferences')}
-              className={`tab whitespace-nowrap ${activeTab === 'preferences' ? 'tab-active' : 'tab-inactive'}`}
+              className={`tab whitespace-nowrap cursor-pointer ${activeTab === 'preferences' ? 'tab-active' : 'tab-inactive'}`}
             >
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
               Предпочтения
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('settings')}
-              className={`tab whitespace-nowrap ${activeTab === 'settings' ? 'tab-active' : 'tab-inactive'}`}
+              className={`tab whitespace-nowrap cursor-pointer ${activeTab === 'settings' ? 'tab-active' : 'tab-inactive'}`}
             >
               <Settings className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
               Настройки

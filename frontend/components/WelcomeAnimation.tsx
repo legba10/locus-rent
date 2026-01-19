@@ -26,7 +26,7 @@ export default function WelcomeAnimation({ onComplete }: WelcomeAnimationProps) 
   if (!isVisible) return null
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-white flex items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 z-[1050] bg-white flex items-center justify-center overflow-hidden">
       <div
         className={`transform-gpu transition-all duration-600 ${
           showContent ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-90 translate-y-4'

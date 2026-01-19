@@ -62,43 +62,89 @@ export default function ListingDetailPage() {
       loadListing()
       loadReviews()
       checkCanReview()
-      // Инкремент views с защитой от накрутки
-      incrementViews()
     }
   }, [params.id, mounted, isAuthenticated, user])
 
-  // Защита от накрутки просмотров - 1 просмотр на сессию
-  const incrementViews = () => {
+  // КРИТИЧНО: Защита от накрутки просмотров - инкремент только один раз на сессию
+  useEffect(() => {
+    if (!mounted || !params.id || !listing?.id) return
     if (typeof window === 'undefined') return
-    const viewedKey = `locus_viewed_${params.id}`
+    
+    const viewedKey = `locus_viewed_${listing.id}`
     const hasViewed = sessionStorage.getItem(viewedKey)
     if (!hasViewed) {
       sessionStorage.setItem(viewedKey, 'true')
-      // Backend сам инкрементирует views при запросе, нам не нужно вызывать API отдельно
+      // Backend сам инкрементирует views при запросе findOne, нам не нужно вызывать отдельно
     }
-  }
+  }, [mounted, params.id, listing?.id])
 
   const loadListing = async () => {
     try {
       setLoading(true)
       setError('')
-      const response = await listingsAPI.getOne(params.id as string)
-      // Обрабатываем разные форматы ответа
-      const listingData = response.data?.data || response.data || null
-      if (listingData && typeof listingData === 'object') {
-        // КРИТИЧНО: санитизируем images перед сохранением в state
-        const sanitizedListing = {
-          ...listingData,
-          images: sanitizeImages(listingData.images || []),
+      
+      if (!params.id || typeof params.id !== 'string') {
+        setError('Неверный ID объявления')
+        setListing(null)
+        return
+      }
+      
+      const response = await listingsAPI.getOne(params.id)
+      
+      // КРИТИЧНО: Обрабатываем разные форматы ответа с жёсткими проверками
+      let listingData: any = null
+      
+      if (response?.data) {
+        if (typeof response.data === 'object' && response.data !== null) {
+          // Формат: { data: { ... } }
+          if ('data' in response.data && response.data.data) {
+            listingData = response.data.data
+          } 
+          // Формат: { ... } напрямую
+          else if ('id' in response.data && 'title' in response.data) {
+            listingData = response.data
+          }
         }
-        setListing(sanitizedListing)
-      } else {
+      }
+      
+      // КРИТИЧНО: Проверяем что listingData валиден
+      if (!listingData || typeof listingData !== 'object' || !listingData.id || typeof listingData.id !== 'string') {
         setError('Объявление не найдено')
         setListing(null)
+        setLoading(false)
+        return
       }
+      
+      // КРИТИЧНО: Санитизируем images перед сохранением в state - ВСЕГДА массив
+      const sanitizedListing = {
+        ...listingData,
+        // Гарантируем что images всегда массив
+        images: Array.isArray(listingData.images) 
+          ? sanitizeImages(listingData.images) 
+          : [],
+        // Гарантируем что title всегда строка
+        title: typeof listingData.title === 'string' && listingData.title.trim()
+          ? listingData.title.trim()
+          : 'Объявление без названия',
+        // Гарантируем что description всегда строка
+        description: typeof listingData.description === 'string'
+          ? listingData.description
+          : '',
+        // Гарантируем что pricePerNight всегда число
+        pricePerNight: typeof listingData.pricePerNight === 'number' && !isNaN(listingData.pricePerNight) && listingData.pricePerNight >= 0
+          ? listingData.pricePerNight
+          : (typeof listingData.price === 'number' && !isNaN(listingData.price) && listingData.price >= 0)
+            ? listingData.price
+            : 0,
+        // Гарантируем что owner всегда объект или null
+        owner: (listingData.owner && typeof listingData.owner === 'object') ? listingData.owner : null,
+      }
+      
+      setListing(sanitizedListing)
     } catch (error: any) {
       console.error('Error loading listing:', error)
-      setError(error.response?.data?.message || 'Объявление не найдено')
+      const errorMessage = error?.response?.data?.message || error?.userMessage || error?.message || 'Объявление не найдено'
+      setError(errorMessage)
       setListing(null)
     } finally {
       setLoading(false)
@@ -107,9 +153,24 @@ export default function ListingDetailPage() {
 
   const loadReviews = async () => {
     try {
+      if (!params.id || typeof params.id !== 'string') {
+        setReviews([])
+        return
+      }
+      
       setReviewsLoading(true)
-      const response = await reviewsAPI.getByListing(params.id as string)
-      const reviewsData = Array.isArray(response.data) ? response.data : response.data?.data || []
+      const response = await reviewsAPI.getByListing(params.id)
+      
+      // КРИТИЧНО: Валидация reviews - всегда массив
+      let reviewsData: any[] = []
+      if (response?.data) {
+        if (Array.isArray(response.data)) {
+          reviewsData = response.data.filter((review: any) => review && typeof review === 'object' && review.id)
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+          reviewsData = response.data.data.filter((review: any) => review && typeof review === 'object' && review.id)
+        }
+      }
+      
       setReviews(reviewsData)
     } catch (error: any) {
       console.error('Error loading reviews:', error)
@@ -269,25 +330,33 @@ export default function ListingDetailPage() {
     return <NotFound />
   }
 
-  // КРИТИЧНО: безопасная работа с images через useMemo - ВСЕГДА массив
+  // КРИТИЧНО: безопасная работа с images через useMemo - ВСЕГДА массив, никогда null/undefined
   const images = useMemo(() => {
-    if (!listing) return []
-    return sanitizeImages(listing.images || [])
+    if (!listing || typeof listing !== 'object') return []
+    if (!Array.isArray(listing.images)) return []
+    return sanitizeImages(listing.images)
   }, [listing?.images])
 
-  // КРИТИЧНО: безопасные значения с fallback
-  const safeTitle = listing?.title && typeof listing.title === 'string' 
-    ? listing.title 
+  // КРИТИЧНО: безопасные значения с fallback - ВСЕГДА валидные строки/числа
+  const safeTitle = (listing && typeof listing === 'object' && listing.title && typeof listing.title === 'string' && listing.title.trim())
+    ? listing.title.trim()
     : 'Объявление'
-  const safeDescription = listing?.description && typeof listing.description === 'string' 
-    ? listing.description.trim() 
+    
+  const safeDescription = (listing && typeof listing === 'object' && listing.description && typeof listing.description === 'string')
+    ? listing.description.trim()
     : ''
-  const safeAddress = listing?.address && typeof listing.address === 'string'
-    ? listing.address
-    : listing?.city && typeof listing.city === 'string'
-      ? listing.city
-      : 'Адрес не указан'
-  const safeOwner = listing?.owner || null
+    
+  const safeAddress = (listing && typeof listing === 'object')
+    ? (listing.address && typeof listing.address === 'string' && listing.address.trim()
+        ? listing.address.trim()
+        : (listing.city && typeof listing.city === 'string' && listing.city.trim()
+            ? listing.city.trim()
+            : 'Адрес не указан'))
+    : 'Адрес не указан'
+    
+  const safeOwner = (listing && typeof listing === 'object' && listing.owner && typeof listing.owner === 'object')
+    ? listing.owner
+    : null
   
   // Безопасное получение цены
   const price = (listing?.pricePerNight != null && !isNaN(Number(listing.pricePerNight))) 
@@ -389,6 +458,9 @@ export default function ListingDetailPage() {
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {Array.isArray(images) && images.length > 0 && images.map((image: string, index: number) => {
+                  // КРИТИЧНО: валидация каждого image перед рендером
+                  if (!image || typeof image !== 'string') return null
+                  
                   const src = normalizeImageSrc(image)
                   const hasImage = src !== '/placeholder-image.svg'
                   // imageLoading по умолчанию пустой объект {}, поэтому проверяем явно
@@ -397,11 +469,22 @@ export default function ListingDetailPage() {
                   
                   return (
                     <div
-                      key={index}
+                      key={`image-${index}-${String(src).slice(0, 20)}`}
                       className="relative flex-shrink-0 w-full md:w-auto snap-center md:snap-none cursor-pointer group"
                       onClick={() => {
-                        setCurrentImageIndex(index)
-                        setIsFullscreen(true)
+                        if (mounted && index >= 0 && index < images.length && images[index]) {
+                          setCurrentImageIndex(index)
+                          setIsFullscreen(true)
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if ((e.key === 'Enter' || e.key === ' ') && mounted && index >= 0 && index < images.length && images[index]) {
+                          e.preventDefault()
+                          setCurrentImageIndex(index)
+                          setIsFullscreen(true)
+                        }
                       }}
                     >
                       <div className="relative w-full h-full">
@@ -453,18 +536,20 @@ export default function ListingDetailPage() {
               </div>
               
               {/* Navigation Arrows - Desktop Only */}
-              {images.length > 1 && (
+                  {images.length > 1 && (
                 <>
                   <button
+                    type="button"
                     onClick={() => scrollGallery('left')}
-                    className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-colors z-10"
+                    className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-colors z-10 cursor-pointer"
                     aria-label="Предыдущее фото"
                   >
                     <ChevronLeft className="w-6 h-6 text-gray-900" />
                   </button>
                   <button
+                    type="button"
                     onClick={() => scrollGallery('right')}
-                    className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-colors z-10"
+                    className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white transition-colors z-10 cursor-pointer"
                     aria-label="Следующее фото"
                   >
                     <ChevronRight className="w-6 h-6 text-gray-900" />
@@ -492,12 +577,13 @@ export default function ListingDetailPage() {
         {/* Fullscreen Gallery Modal - только после mounted */}
         {mounted && isFullscreen && Array.isArray(images) && images.length > 0 && (
           <div
-            className="fixed inset-0 bg-black z-[10000] flex items-center justify-center"
+            className="fixed inset-0 bg-black z-[1050] flex items-center justify-center"
             onClick={() => setIsFullscreen(false)}
           >
             <button
+              type="button"
               onClick={() => setIsFullscreen(false)}
-              className="absolute top-4 right-4 text-white p-3 hover:bg-white/20 rounded-full transition-colors z-10"
+              className="absolute top-4 right-4 text-white p-3 hover:bg-white/20 rounded-full transition-colors z-10 cursor-pointer"
               aria-label="Закрыть"
             >
               <X className="w-6 h-6" />
@@ -505,11 +591,12 @@ export default function ListingDetailPage() {
             
             {currentImageIndex > 0 && (
               <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation()
                   setCurrentImageIndex(prev => Math.max(0, prev - 1))
                 }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-3 hover:bg-white/20 rounded-full transition-colors z-10"
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white p-3 hover:bg-white/20 rounded-full transition-colors z-10 cursor-pointer"
                 aria-label="Предыдущее фото"
               >
                 <ChevronLeft className="w-8 h-8" />
@@ -518,11 +605,12 @@ export default function ListingDetailPage() {
             
             {currentImageIndex < images.length - 1 && (
               <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation()
                   setCurrentImageIndex(prev => Math.min(images.length - 1, prev + 1))
                 }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-3 hover:bg-white/20 rounded-full transition-colors z-10"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white p-3 hover:bg-white/20 rounded-full transition-colors z-10 cursor-pointer"
                 aria-label="Следующее фото"
               >
                 <ChevronRight className="w-8 h-8" />
@@ -531,33 +619,51 @@ export default function ListingDetailPage() {
             
             <div className="relative max-w-[90vw] max-h-[90vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
               {(() => {
-                // КРИТИЧНО: защита от выхода за границы массива
-                if (!images || !Array.isArray(images) || currentImageIndex < 0 || currentImageIndex >= images.length || !images[currentImageIndex]) {
+                // КРИТИЧНО: защита от выхода за границы массива - жёсткие проверки
+                if (!mounted) return null
+                if (!images || !Array.isArray(images) || images.length === 0) {
                   return (
-                    <div className="text-white text-center">
+                    <div className="text-white text-center p-8">
                       <ImageIcon className="w-24 h-24 mx-auto mb-3 opacity-50" />
                       <p>Фото не найдено</p>
                     </div>
                   )
                 }
+                if (currentImageIndex < 0 || currentImageIndex >= images.length) {
+                  // Корректируем индекс если вышли за границы
+                  const safeIndex = Math.max(0, Math.min(currentImageIndex, images.length - 1))
+                  setCurrentImageIndex(safeIndex)
+                  return null
+                }
                 
                 const current = images[currentImageIndex]
+                if (!current || typeof current !== 'string') {
+                  return (
+                    <div className="text-white text-center p-8">
+                      <ImageIcon className="w-24 h-24 mx-auto mb-3 opacity-50" />
+                      <p>Ошибка загрузки фото</p>
+                    </div>
+                  )
+                }
+                
                 const src = normalizeImageSrc(current)
-                return src !== '/placeholder-image.svg' && !imageErrors[currentImageIndex] ? (
-                <img
-                  src={src}
-                  alt={`${safeTitle} - фото ${currentImageIndex + 1}`}
-                  className="max-w-full max-h-[90vh] object-contain"
-                  onError={(e) => {
-                    handleImageError(currentImageIndex)
-                    ;(e.currentTarget as HTMLImageElement).src = '/placeholder-image.svg'
-                  }}
-                />
+                const hasError = imageErrors[currentImageIndex] === true
+                
+                return src !== '/placeholder-image.svg' && !hasError ? (
+                  <img
+                    src={src}
+                    alt={`${safeTitle} - фото ${currentImageIndex + 1}`}
+                    className="max-w-full max-h-[90vh] object-contain"
+                    onError={(e) => {
+                      handleImageError(currentImageIndex)
+                      ;(e.currentTarget as HTMLImageElement).src = '/placeholder-image.svg'
+                    }}
+                  />
                 ) : (
-                <div className="text-white text-center">
-                  <ImageIcon className="w-24 h-24 mx-auto mb-3 opacity-50" />
-                  <p>Фото не загружается</p>
-                </div>
+                  <div className="text-white text-center p-8">
+                    <ImageIcon className="w-24 h-24 mx-auto mb-3 opacity-50" />
+                    <p>Фото не загружается</p>
+                  </div>
                 )
               })()}
             </div>
@@ -621,50 +727,60 @@ export default function ListingDetailPage() {
                 <div>
                   <h2 className="text-xl font-semibold mb-4 text-gray-900">Удобства</h2>
                   <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                    {listing?.maxGuests != null && Number(listing.maxGuests) > 0 && (
+                    {/* КРИТИЧНО: все проверки с валидацией типов */}
+                    {listing && typeof listing === 'object' && listing.maxGuests != null && !isNaN(Number(listing.maxGuests)) && Number(listing.maxGuests) > 0 && (
                       <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition-colors">
                         <Users className="w-5 h-5 text-primary flex-shrink-0" />
-                        <span className="text-sm sm:text-base text-gray-700">До {listing.maxGuests} {listing.maxGuests === 1 ? 'гостя' : 'гостей'}</span>
+                        <span className="text-sm sm:text-base text-gray-700">До {Number(listing.maxGuests)} {Number(listing.maxGuests) === 1 ? 'гостя' : 'гостей'}</span>
                       </div>
                     )}
-                    {listing?.bedrooms != null && Number(listing.bedrooms) > 0 && (
+                    {listing && typeof listing === 'object' && listing.bedrooms != null && !isNaN(Number(listing.bedrooms)) && Number(listing.bedrooms) > 0 && (
                       <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition-colors">
                         <Bed className="w-5 h-5 text-primary flex-shrink-0" />
-                        <span className="text-sm sm:text-base text-gray-700">{listing.bedrooms} {listing.bedrooms === 1 ? 'спальня' : listing.bedrooms < 5 ? 'спальни' : 'спален'}</span>
+                        <span className="text-sm sm:text-base text-gray-700">{Number(listing.bedrooms)} {Number(listing.bedrooms) === 1 ? 'спальня' : Number(listing.bedrooms) < 5 ? 'спальни' : 'спален'}</span>
                       </div>
                     )}
-                    {listing?.beds != null && Number(listing.beds) > 0 && (
+                    {listing && typeof listing === 'object' && listing.beds != null && !isNaN(Number(listing.beds)) && Number(listing.beds) > 0 && (
                       <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition-colors">
                         <Bed className="w-5 h-5 text-primary flex-shrink-0" />
-                        <span className="text-sm sm:text-base text-gray-700">{listing.beds} {listing.beds === 1 ? 'кровать' : listing.beds < 5 ? 'кровати' : 'кроватей'}</span>
+                        <span className="text-sm sm:text-base text-gray-700">{Number(listing.beds)} {Number(listing.beds) === 1 ? 'кровать' : Number(listing.beds) < 5 ? 'кровати' : 'кроватей'}</span>
                       </div>
                     )}
-                    {listing?.bathrooms != null && Number(listing.bathrooms) > 0 && (
+                    {listing && typeof listing === 'object' && listing.bathrooms != null && !isNaN(Number(listing.bathrooms)) && Number(listing.bathrooms) > 0 && (
                       <div className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition-colors">
                         <Bath className="w-5 h-5 text-primary flex-shrink-0" />
-                        <span className="text-sm sm:text-base text-gray-700">{listing.bathrooms} {listing.bathrooms === 1 ? 'ванная' : listing.bathrooms < 5 ? 'ванные' : 'ванных'}</span>
+                        <span className="text-sm sm:text-base text-gray-700">{Number(listing.bathrooms)} {Number(listing.bathrooms) === 1 ? 'ванная' : Number(listing.bathrooms) < 5 ? 'ванные' : 'ванных'}</span>
                       </div>
                     )}
-                    {listing?.amenities && Array.isArray(listing.amenities) && listing.amenities.length > 0 && listing.amenities
+                    {listing && typeof listing === 'object' && listing.amenities && Array.isArray(listing.amenities) && listing.amenities.length > 0 && listing.amenities
                       .filter((amenity: any) => amenity != null && typeof amenity === 'string' && amenity.trim().length > 0)
                       .map((amenity: string, amenityIndex: number) => {
                         const Icon = amenitiesIcons[amenity.toLowerCase()]
                         if (!Icon) return null
                         return (
-                          <div key={`amenity-${amenityIndex}-${amenity}`} className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition-colors">
+                          <div key={`amenity-${amenityIndex}-${String(amenity)}`} className="flex items-center gap-2.5 p-3 bg-white rounded-lg border border-gray-200 hover:border-primary transition-colors">
                             <Icon className="w-5 h-5 text-primary flex-shrink-0" />
                             <span className="text-sm sm:text-base text-gray-700 capitalize">{String(amenity)}</span>
                           </div>
                         )
                       })}
                   </div>
-                  {(!listing?.maxGuests && (!listing?.bedrooms || Number(listing.bedrooms) === 0) && (!listing?.beds || Number(listing.beds) === 0) && (!listing?.bathrooms || Number(listing.bathrooms) === 0) && (!listing?.amenities || !Array.isArray(listing.amenities) || listing.amenities.length === 0)) && (
+                  {(!listing || typeof listing !== 'object' || 
+                    (!listing.maxGuests || Number(listing.maxGuests) === 0) &&
+                    (!listing.bedrooms || Number(listing.bedrooms) === 0) &&
+                    (!listing.beds || Number(listing.beds) === 0) &&
+                    (!listing.bathrooms || Number(listing.bathrooms) === 0) &&
+                    (!listing.amenities || !Array.isArray(listing.amenities) || listing.amenities.length === 0)) && (
                     <p className="text-gray-500 italic text-center py-4">Информация об удобствах скоро появится</p>
                   )}
                 </div>
 
                 {/* Map */}
-                {listing?.latitude != null && listing?.longitude != null && !isNaN(Number(listing.latitude)) && !isNaN(Number(listing.longitude)) && (
+                {listing && typeof listing === 'object' && 
+                 listing.latitude != null && listing.longitude != null && 
+                 !isNaN(Number(listing.latitude)) && !isNaN(Number(listing.longitude)) && 
+                 Number(listing.latitude) >= -90 && Number(listing.latitude) <= 90 &&
+                 Number(listing.longitude) >= -180 && Number(listing.longitude) <= 180 && (
                   <div>
                     <h2 className="text-xl font-semibold mb-4 text-gray-900">Местоположение</h2>
                     <div className="rounded-xl overflow-hidden border border-gray-200">
@@ -679,8 +795,9 @@ export default function ListingDetailPage() {
                     <h2 className="text-xl font-semibold text-gray-900">Отзывы</h2>
                     {canReview && (
                       <button
+                        type="button"
                         onClick={() => setShowReviewForm(!showReviewForm)}
-                        className="btn btn-sm btn-primary"
+                        className="btn btn-sm btn-primary cursor-pointer"
                       >
                         {showReviewForm ? 'Отмена' : 'Оставить отзыв'}
                       </button>
@@ -727,9 +844,10 @@ export default function ListingDetailPage() {
                         </div>
                         <div className="flex gap-3">
                           <button
+                            type="button"
                             onClick={handleSubmitReview}
                             disabled={reviewSubmitting}
-                            className="btn btn-primary"
+                            className="btn btn-primary cursor-pointer disabled:cursor-not-allowed"
                           >
                             {reviewSubmitting ? (
                               <>
@@ -741,12 +859,13 @@ export default function ListingDetailPage() {
                             )}
                           </button>
                           <button
+                            type="button"
                             onClick={() => {
                               setShowReviewForm(false)
                               setReviewComment('')
                               setReviewRating(5)
                             }}
-                            className="btn btn-secondary"
+                            className="btn btn-secondary cursor-pointer"
                           >
                             Отмена
                           </button>
@@ -759,59 +878,77 @@ export default function ListingDetailPage() {
                     <div className="flex items-center justify-center py-8">
                       <Loader2 className="w-8 h-8 animate-spin text-primary" />
                     </div>
-                  ) : reviews && reviews.length > 0 ? (
+                  ) : reviews && Array.isArray(reviews) && reviews.length > 0 ? (
                     <div className="space-y-4">
-                      {Array.isArray(reviews) && reviews.length > 0 && reviews.map((review: any, index: number) => (
-                        <div key={review.id || index} className="bg-white rounded-xl p-5 sm:p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                            <div className="flex items-center gap-2.5">
-                              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
-                                <span className="text-primary font-semibold">
-                                  {(() => {
-                                    const firstName = review?.user?.firstName
-                                    const userName = review?.userName
-                                    const initial = (firstName || userName || 'А')[0]
-                                    return String(initial || 'А').toUpperCase()
-                                  })()}
-                                </span>
+                      {reviews.map((review: any, index: number) => {
+                        // КРИТИЧНО: валидация review перед рендером
+                        if (!review || typeof review !== 'object' || !review.id || typeof review.id !== 'string') {
+                          return null
+                        }
+                        
+                        // Безопасные значения для review
+                        const safeRating = (review.rating != null && !isNaN(Number(review.rating)) && Number(review.rating) >= 1 && Number(review.rating) <= 5)
+                          ? Number(review.rating)
+                          : null
+                        const safeUserName = (review?.user?.firstName && typeof review.user.firstName === 'string')
+                          ? review.user.firstName.trim()
+                          : (review?.userName && typeof review.userName === 'string')
+                            ? review.userName.trim()
+                            : 'Анонимный пользователь'
+                        const safeComment = (review?.comment && typeof review.comment === 'string' && review.comment.trim().length > 0)
+                          ? review.comment.trim()
+                          : ''
+                        const safeDate = review?.createdAt
+                          ? (() => {
+                              try {
+                                const date = new Date(review.createdAt)
+                                if (!isNaN(date.getTime())) {
+                                  return date.toLocaleDateString('ru-RU', {
+                                    day: 'numeric',
+                                    month: 'long',
+                                    year: 'numeric'
+                                  })
+                                }
+                              } catch {}
+                              return ''
+                            })()
+                          : ''
+                        
+                        return (
+                          <div key={`review-${review.id}-${index}`} className="bg-white rounded-xl p-5 sm:p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+                                  <span className="text-primary font-semibold">
+                                    {safeUserName[0]?.toUpperCase() || 'А'}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="font-semibold text-gray-900 block">
+                                    {safeUserName}
+                                  </span>
+                                  {safeRating && (
+                                    <div className="flex items-center gap-1 mt-0.5">
+                                      <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                                      <span className="text-xs text-gray-600">{safeRating}</span>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                              <div>
-                                <span className="font-semibold text-gray-900 block">
-                                  {review?.user?.firstName || review?.userName || 'Анонимный пользователь' || ''}
+                              {safeDate && (
+                                <span className="text-xs sm:text-sm text-gray-500">
+                                  {safeDate}
                                 </span>
-                                {review.rating != null && !isNaN(Number(review.rating)) && (
-                                  <div className="flex items-center gap-1 mt-0.5">
-                                    <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                                    <span className="text-xs text-gray-600">{Number(review.rating)}</span>
-                                  </div>
-                                )}
-                              </div>
+                              )}
                             </div>
-                            {review?.createdAt && (
-                              <span className="text-xs sm:text-sm text-gray-500">
-                                {(() => {
-                                  try {
-                                    const date = new Date(review.createdAt)
-                                    if (isNaN(date.getTime())) return ''
-                                    return date.toLocaleDateString('ru-RU', {
-                                      day: 'numeric',
-                                      month: 'long',
-                                      year: 'numeric'
-                                    })
-                                  } catch {
-                                    return ''
-                                  }
-                                })()}
-                              </span>
+                            {safeComment ? (
+                              <p className="text-gray-700 leading-relaxed whitespace-pre-line">{safeComment}</p>
+                            ) : (
+                              <p className="text-gray-500 italic text-sm">Отзыв без текста</p>
                             )}
                           </div>
-                          {review?.comment && typeof review.comment === 'string' && review.comment.trim().length > 0 ? (
-                            <p className="text-gray-700 leading-relaxed">{String(review.comment)}</p>
-                          ) : (
-                            <p className="text-gray-500 italic text-sm">Отзыв без текста</p>
-                          )}
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   ) : (
                     <div className="bg-gray-50 rounded-xl p-8 sm:p-12 border border-gray-200 text-center">
@@ -854,7 +991,9 @@ export default function ListingDetailPage() {
                       value={bookingDates.guests}
                       onChange={(value) => setBookingDates({ ...bookingDates, guests: value })}
                       min={1}
-                      max={(listing?.maxGuests != null && !isNaN(Number(listing.maxGuests))) ? Number(listing.maxGuests) : 20}
+                      max={listing && typeof listing === 'object' && listing.maxGuests != null && !isNaN(Number(listing.maxGuests)) && Number(listing.maxGuests) > 0 
+                        ? Number(listing.maxGuests) 
+                        : 20}
                     />
                   </div>
 
@@ -865,9 +1004,10 @@ export default function ListingDetailPage() {
                   )}
 
                   <button
+                    type="button"
                     onClick={handleBooking}
                     disabled={bookingLoading}
-                    className="w-full bg-primary text-white py-4 rounded-lg hover:bg-primary-dark transition-all font-semibold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transform hover:scale-[1.02] active:scale-[0.98]"
+                    className="w-full bg-primary text-white py-4 rounded-lg hover:bg-primary-dark transition-all font-semibold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                   >
                     {bookingLoading ? (
                       <>

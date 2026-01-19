@@ -179,14 +179,16 @@ export default function LandlordPage() {
           {/* Tabs - Horizontal on all screens */}
           <div className="flex flex-row gap-2 sm:gap-4 mb-6 overflow-x-auto scrollbar-hide pb-2">
             <button
+              type="button"
               onClick={() => setActiveTab('listings')}
-              className={`tab whitespace-nowrap ${activeTab === 'listings' ? 'tab-active' : 'tab-inactive'}`}
+              className={`tab whitespace-nowrap cursor-pointer ${activeTab === 'listings' ? 'tab-active' : 'tab-inactive'}`}
             >
               Мои объявления
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab('bookings')}
-              className={`tab whitespace-nowrap ${activeTab === 'bookings' ? 'tab-active' : 'tab-inactive'}`}
+              className={`tab whitespace-nowrap cursor-pointer ${activeTab === 'bookings' ? 'tab-active' : 'tab-inactive'}`}
             >
               Бронирования
             </button>
@@ -296,20 +298,23 @@ export default function LandlordPage() {
                         {/* Actions */}
                         <div className="flex flex-wrap gap-2 mt-4">
                           <button
+                            type="button"
                             onClick={() => handleToggleVisibility(listing)}
-                            className="btn btn-sm btn-secondary flex-1 min-w-0"
+                            className="btn btn-sm btn-secondary flex-1 min-w-0 cursor-pointer"
                           >
                             {listing.status === 'active' ? 'Скрыть' : 'Показать'}
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleDuplicateListing(listing.id)}
-                            className="btn btn-sm btn-secondary flex-1 min-w-0"
+                            className="btn btn-sm btn-secondary flex-1 min-w-0 cursor-pointer"
                           >
                             Копировать
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleDeleteListing(listing.id)}
-                            className="btn btn-sm bg-red-50 hover:bg-red-100 text-red-700 flex-1 min-w-0"
+                            className="btn btn-sm bg-red-50 hover:bg-red-100 text-red-700 flex-1 min-w-0 cursor-pointer"
                           >
                             Удалить
                           </button>

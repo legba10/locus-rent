@@ -145,8 +145,9 @@ export default function AdminPage() {
         {/* Tabs */}
         <div className="flex flex-row gap-2 sm:gap-4 mb-6 overflow-x-auto scrollbar-hide pb-2">
           <button
+            type="button"
             onClick={() => setActiveTab('moderation')}
-            className={`tab whitespace-nowrap ${activeTab === 'moderation' ? 'tab-active' : 'tab-inactive'}`}
+            className={`tab whitespace-nowrap cursor-pointer ${activeTab === 'moderation' ? 'tab-active' : 'tab-inactive'}`}
           >
             <FileText className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
             Модерация
@@ -157,8 +158,9 @@ export default function AdminPage() {
             )}
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('support')}
-            className={`tab whitespace-nowrap ${activeTab === 'support' ? 'tab-active' : 'tab-inactive'}`}
+            className={`tab whitespace-nowrap cursor-pointer ${activeTab === 'support' ? 'tab-active' : 'tab-inactive'}`}
           >
             <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
             Поддержка
@@ -169,15 +171,17 @@ export default function AdminPage() {
             )}
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('admins')}
-            className={`tab whitespace-nowrap ${activeTab === 'admins' ? 'tab-active' : 'tab-inactive'}`}
+            className={`tab whitespace-nowrap cursor-pointer ${activeTab === 'admins' ? 'tab-active' : 'tab-inactive'}`}
           >
             <Shield className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
             Администраторы
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('stats')}
-            className={`tab whitespace-nowrap ${activeTab === 'stats' ? 'tab-active' : 'tab-inactive'}`}
+            className={`tab whitespace-nowrap cursor-pointer ${activeTab === 'stats' ? 'tab-active' : 'tab-inactive'}`}
           >
             <Users className="w-4 h-4 sm:w-5 sm:h-5 inline mr-1 sm:mr-2" />
             Статистика
@@ -309,22 +313,25 @@ export default function AdminPage() {
                                 {/* Кнопки модерации */}
                                 <div className="flex flex-wrap gap-2 pt-2">
                                   <button
+                                    type="button"
                                     onClick={() => handleModerateListing(listing.id, 'approved')}
-                                    className="btn btn-sm bg-green-600 hover:bg-green-700 text-white"
+                                    className="btn btn-sm bg-green-600 hover:bg-green-700 text-white cursor-pointer"
                                   >
                                     <CheckCircle2 className="w-4 h-4" />
                                     Одобрить
                                   </button>
                                   <button
+                                    type="button"
                                     onClick={() => openModerationModal(listing, 'reject')}
-                                    className="btn btn-sm bg-red-600 hover:bg-red-700 text-white"
+                                    className="btn btn-sm bg-red-600 hover:bg-red-700 text-white cursor-pointer"
                                   >
                                     <X className="w-4 h-4" />
                                     Отклонить
                                   </button>
                                   <button
+                                    type="button"
                                     onClick={() => openModerationModal(listing, 'revision')}
-                                    className="btn btn-sm bg-orange-600 hover:bg-orange-700 text-white"
+                                    className="btn btn-sm bg-orange-600 hover:bg-orange-700 text-white cursor-pointer"
                                   >
                                     <Wrench className="w-4 h-4" />
                                     На доработку
@@ -341,7 +348,7 @@ export default function AdminPage() {
 
                 {/* Модальное окно для причины отклонения/доработки */}
                 {selectedListing && moderationAction && (
-                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1050] p-4 cursor-pointer" onClick={closeModerationModal}>
                     <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6">
                       <h3 className="heading-2 mb-4">
                         {moderationAction === 'reject' ? 'Отклонить объявление' : 'Отправить на доработку'}
@@ -361,29 +368,54 @@ export default function AdminPage() {
                           required
                         />
                       </div>
-                      <div className="flex gap-3 justify-end">
-                        <button
-                          onClick={closeModerationModal}
-                          className="btn btn-secondary"
-                        >
-                          Отмена
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (!revisionReason.trim()) {
-                              toast('Укажите причину', 'warning')
-                              return
-                            }
-                            handleModerateListing(
-                              selectedListing.id,
-                              moderationAction === 'reject' ? 'rejected' : 'needs_revision',
-                              revisionReason.trim()
-                            )
-                          }}
-                          className={`btn ${moderationAction === 'reject' ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-600 hover:bg-orange-700'} text-white`}
-                        >
-                          {moderationAction === 'reject' ? 'Отклонить' : 'Отправить на доработку'}
-                        </button>
+                      <div 
+                        className="bg-white rounded-xl shadow-xl p-6 max-w-2xl w-full"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <h3 className="heading-2 mb-4">
+                          {moderationAction === 'reject' ? 'Отклонить объявление' : 'Отправить на доработку'}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-4">
+                          Объявление: <strong>{selectedListing.title}</strong>
+                        </p>
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            {moderationAction === 'reject' ? 'Причина отклонения' : 'Причина доработки'} <span className="text-red-500">*</span>
+                          </label>
+                          <textarea
+                            value={revisionReason}
+                            onChange={(e) => setRevisionReason(e.target.value)}
+                            placeholder={moderationAction === 'reject' ? 'Укажите причину отклонения объявления...' : 'Укажите, что нужно исправить в объявлении...'}
+                            className="input w-full h-32 resize-none"
+                            required
+                          />
+                        </div>
+                        <div className="flex gap-3 justify-end">
+                          <button
+                            type="button"
+                            onClick={closeModerationModal}
+                            className="btn btn-secondary cursor-pointer"
+                          >
+                            Отмена
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!revisionReason.trim()) {
+                                toast('Укажите причину', 'warning')
+                                return
+                              }
+                              handleModerateListing(
+                                selectedListing.id,
+                                moderationAction === 'reject' ? 'rejected' : 'needs_revision',
+                                revisionReason.trim()
+                              )
+                            }}
+                            className={`btn ${moderationAction === 'reject' ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-600 hover:bg-orange-700'} text-white cursor-pointer`}
+                          >
+                            {moderationAction === 'reject' ? 'Отклонить' : 'Отправить на доработку'}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -463,11 +495,12 @@ export default function AdminPage() {
                       placeholder="email@example.com или +7 (999) 123-45-67"
                       className="input flex-1"
                     />
-                    <button
-                      onClick={handlePromoteToAdmin}
-                      disabled={promoteLoading || !promoteEmail.trim()}
-                      className="btn btn-primary"
-                    >
+                  <button
+                    type="button"
+                    onClick={handlePromoteToAdmin}
+                    disabled={promoteLoading || !promoteEmail.trim()}
+                    className="btn btn-primary cursor-pointer disabled:cursor-not-allowed"
+                  >
                       {promoteLoading ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />

@@ -169,7 +169,7 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
                 key={type.value}
                 type="button"
                 onClick={() => setPropertyType(type.value)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
                   propertyType === type.value
                     ? 'bg-primary text-white shadow-sm'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -192,7 +192,7 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
                 key={option.value}
                 type="button"
                 onClick={() => setRating(option.value)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 cursor-pointer ${
                   rating === option.value
                     ? 'bg-primary text-white shadow-sm'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -223,7 +223,7 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
                         key={amenity.id}
                         type="button"
                         onClick={() => toggleAmenity(amenity.id)}
-                        className={`p-3 rounded-lg border-2 transition-all text-left ${
+                        className={`p-3 rounded-lg border-2 transition-all text-left cursor-pointer ${
                           isSelected
                             ? 'border-primary bg-primary/10 text-primary'
                             : 'border-gray-200 hover:border-gray-300 text-gray-700 bg-white'
@@ -256,16 +256,18 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
           <div className="flex items-center gap-2">
             {hasActiveFilters && (
               <button
+                type="button"
                 onClick={clearFilters}
-                className="text-sm text-primary hover:text-primary-dark transition-colors font-medium px-3 py-1.5 rounded-lg hover:bg-primary/10"
+                className="text-sm text-primary hover:text-primary-dark transition-colors font-medium px-3 py-1.5 rounded-lg hover:bg-primary/10 cursor-pointer"
               >
                 Сбросить
               </button>
             )}
             {onClose && (
               <button
+                type="button"
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
                 aria-label="Закрыть"
               >
                 <X className="w-5 h-5 text-gray-500" />
@@ -293,7 +295,7 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
                 e.stopPropagation()
                 clearFilters()
               }}
-              className="px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium"
+              className="px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium cursor-pointer"
             >
               Сбросить
             </button>
@@ -305,7 +307,7 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
               e.stopPropagation()
               handleApply()
             }}
-            className={`${hasActiveFilters ? 'flex-1' : 'w-full'} bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg`}
+            className={`${hasActiveFilters ? 'flex-1' : 'w-full'} bg-primary text-white px-6 py-2.5 rounded-lg hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg cursor-pointer`}
           >
             Применить фильтры
           </button>
@@ -316,10 +318,10 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
 
   if (isMobile) {
     return (
-      <div className="fixed inset-0 z-[9999] flex items-end">
+      <div className="fixed inset-0 z-[1040] flex items-end">
         {/* Overlay */}
         <div
-          className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-pointer"
           onClick={onClose}
         />
         {/* Bottom Sheet */}
@@ -359,7 +361,7 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
                   e.stopPropagation()
                   clearFilters()
                 }}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium active:scale-95"
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium active:scale-95 cursor-pointer"
               >
                 Сбросить
               </button>
@@ -371,7 +373,7 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
                 e.stopPropagation()
                 handleApply()
               }}
-              className={`${hasActiveFilters ? 'flex-1' : 'w-full'} bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg active:scale-95`}
+              className={`${hasActiveFilters ? 'flex-1' : 'w-full'} bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg active:scale-95 cursor-pointer`}
             >
               Применить
             </button>

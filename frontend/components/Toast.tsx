@@ -57,7 +57,7 @@ export default function ToastContainer() {
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md w-full">
+    <div className="fixed top-4 right-4 z-[1070] space-y-2 max-w-md w-full">
       {toasts.map((toast) => {
         const Icon = icons[toast.type]
         return (
@@ -70,8 +70,9 @@ export default function ToastContainer() {
               <p className="text-sm font-medium">{toast.message}</p>
             </div>
             <button
+              type="button"
               onClick={() => removeToast(toast.id)}
-              className="flex-shrink-0 text-current opacity-60 hover:opacity-100 transition-opacity"
+              className="flex-shrink-0 text-current opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>

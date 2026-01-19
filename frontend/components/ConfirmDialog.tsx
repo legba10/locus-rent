@@ -92,8 +92,14 @@ export default function ConfirmDialog() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div className={`bg-white rounded-2xl shadow-xl border-2 max-w-md w-full ${variantColors[dialog.variant]}`}>
+    <div 
+      className="fixed inset-0 z-[1040] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in cursor-pointer" 
+      onClick={handleCancel}
+    >
+      <div 
+        className={`bg-white rounded-2xl shadow-xl border-2 max-w-md w-full ${variantColors[dialog.variant]}`}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-6">
           <div className="flex items-start gap-4">
             <div className="flex-shrink-0">
@@ -104,22 +110,25 @@ export default function ConfirmDialog() {
               <p className="text-sm">{dialog.message}</p>
             </div>
             <button
+              type="button"
               onClick={handleCancel}
-              className="flex-shrink-0 text-current opacity-60 hover:opacity-100 transition-opacity"
+              className="flex-shrink-0 text-current opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
           <div className="flex gap-3 mt-6">
             <button
+              type="button"
               onClick={handleCancel}
-              className="flex-1 px-4 py-2 bg-white border border-current rounded-lg hover:bg-opacity-20 transition-colors font-medium"
+              className="flex-1 px-4 py-2 bg-white border border-current rounded-lg hover:bg-opacity-20 transition-colors font-medium cursor-pointer"
             >
               {dialog.cancelText}
             </button>
             <button
+              type="button"
               onClick={handleConfirm}
-              className={`flex-1 px-4 py-2 ${buttonColors[dialog.variant]} text-white rounded-lg transition-colors font-medium`}
+              className={`flex-1 px-4 py-2 ${buttonColors[dialog.variant]} text-white rounded-lg transition-colors font-medium cursor-pointer`}
             >
               {dialog.confirmText}
             </button>

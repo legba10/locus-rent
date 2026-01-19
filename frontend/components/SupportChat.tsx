@@ -108,8 +108,9 @@ export default function SupportChat() {
   if (!isOpen) {
     return (
       <button
+        type="button"
         onClick={handleOpen}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center z-50 hover:scale-110 active:scale-95"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-lg hover:shadow-xl transition-all flex items-center justify-center z-[1030] hover:scale-110 active:scale-95 cursor-pointer"
         aria-label="Открыть чат поддержки"
       >
         <MessageCircle className="w-6 h-6" />
@@ -127,12 +128,12 @@ export default function SupportChat() {
       {/* Overlay */}
       {!isMinimized && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[1040] cursor-pointer"
           onClick={handleClose}
         />
       )}
       <div
-        className={`fixed z-[10000] flex flex-col transition-all bg-white shadow-2xl border border-gray-100 ${
+        className={`fixed z-[1050] flex flex-col transition-all bg-white shadow-2xl border border-gray-100 ${
           isMinimized 
             ? 'h-16 md:bottom-6 md:right-6 md:w-96 md:rounded-2xl' 
             : 'md:bottom-6 md:right-6 md:w-96 md:max-w-[calc(100vw-3rem)] md:rounded-2xl md:h-[600px] md:max-h-[calc(100vh-3rem)] bottom-0 left-0 right-0 w-full max-w-[100vw] h-[90vh] max-h-[90vh] rounded-t-2xl md:rounded-2xl flex flex-col overflow-hidden'

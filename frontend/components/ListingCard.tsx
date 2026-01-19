@@ -42,7 +42,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const hasImage = imageSrc !== '/placeholder-image.svg' && !imageError
 
   return (
-    <Link href={`/listings/${listing.id}`}>
+    <Link href={`/listings/${listing.id}`} className="block w-full h-full">
       <div className="bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 group w-full h-full flex flex-col">
         {/* Image */}
         <div className="relative w-full h-48 sm:h-56 md:h-64 bg-gray-100 overflow-hidden">

@@ -78,7 +78,7 @@ export default function Header() {
   }, [isUserMenuOpen])
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-gray-100/50 sticky top-0 z-50 shadow-sm">
+    <header className="bg-white/80 backdrop-blur-md border-b border-gray-100/50 sticky top-0 z-[1020] shadow-sm">
       <div className="container mx-auto px-3 sm:px-4">
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Logo */}
@@ -191,8 +191,9 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center gap-2">
             <button
+              type="button"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-600 hover:text-gray-900 transition-colors p-2 -mr-2"
+              className="text-gray-600 hover:text-gray-900 transition-colors p-2 -mr-2 cursor-pointer"
               aria-label="Меню"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -205,11 +206,11 @@ export default function Header() {
           <>
             {/* Overlay */}
             <div
-              className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[10000]"
+              className="md:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[1040]"
               onClick={() => setIsMenuOpen(false)}
             />
             {/* Menu */}
-            <div className="md:hidden fixed top-16 left-0 right-0 bg-white border-b border-gray-100 shadow-2xl z-[10001] max-h-[calc(100vh-4rem)] overflow-y-auto" style={{ maxWidth: '100vw' }}>
+            <div className="md:hidden fixed top-16 left-0 right-0 bg-white border-b border-gray-100 shadow-2xl z-[1050] max-h-[calc(100vh-4rem)] overflow-y-auto" style={{ maxWidth: '100vw' }}>
               <div className="px-4 py-4 space-y-1">
                 {/* Navigation links */}
                 <Link

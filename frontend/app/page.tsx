@@ -74,59 +74,62 @@ export default function Home() {
         <Header />
         
         {/* Hero Section - Поиск как главный элемент */}
-        <section className="relative bg-gradient-to-br from-blue-50/30 via-white to-blue-50/30 py-8 sm:py-12 md:py-20 px-3 sm:px-4 w-full overflow-x-hidden">
+        <section className="relative bg-gradient-to-br from-blue-50/30 via-white to-blue-50/30 py-8 sm:py-12 md:py-16 px-3 sm:px-4 w-full overflow-x-hidden">
           <div className="container mx-auto max-w-5xl relative z-10 w-full">
-            <div className="text-center mb-6 sm:mb-8 md:mb-12">
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 md:mb-6 leading-tight px-2">
-                Аренда жилья без посредников
+            <div className="text-center mb-6 sm:mb-8 md:mb-10">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight px-2">
+                Найти жильё для аренды
               </h1>
-              <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-2">
-                Прямое общение с владельцами. Минимальная комиссия. Полный контроль условий
+              <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-2">
+                Прямое общение с владельцами без посредников
               </p>
             </div>
 
             {/* Поисковая панель - главный элемент */}
-            <div className="max-w-4xl mx-auto w-full">
+            <div className="max-w-4xl mx-auto w-full mb-4 sm:mb-6">
               <SearchBar />
             </div>
             
             {/* Умный поиск - UI-акцент */}
-            <div className="max-w-4xl mx-auto mt-4 sm:mt-6">
-              <div className="bg-white/80 backdrop-blur-sm border border-primary/20 rounded-xl px-4 sm:px-6 py-3 sm:py-4 shadow-sm">
+            <div className="max-w-4xl mx-auto">
+              <Link 
+                href="/smart-search"
+                className="block bg-white/80 backdrop-blur-sm border border-primary/20 rounded-xl px-4 sm:px-6 py-3 sm:py-4 shadow-sm hover:border-primary/40 hover:shadow-md transition-all cursor-pointer"
+              >
                 <div className="flex items-center gap-2 sm:gap-3">
                   <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
                   <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                    <span className="font-semibold text-primary">Умный поиск</span> — мы помогаем быстрее находить подходящее жильё
+                    <span className="font-semibold text-primary">Умный поиск</span> — найдём идеальный вариант автоматически
                   </p>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
         </section>
 
-        {/* Блок доверия/выгоды */}
-        <section className="py-8 sm:py-12 md:py-16 px-4 bg-gray-50 w-full">
+        {/* Блок преимуществ */}
+        <section className="py-10 sm:py-12 md:py-14 px-4 bg-white w-full">
           <div className="container-custom max-w-6xl">
-            <h2 className="heading-2 mb-6 sm:mb-8 text-center">Преимущества LOCUS</h2>
+            <h2 className="heading-2 mb-6 sm:mb-8 text-center">Почему выбирают LOCUS</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
               {[
                 { 
                   icon: Zap, 
                   title: 'Минимальная комиссия', 
-                  desc: 'Экономьте до 5000 ₽ с каждого бронирования по сравнению с конкурентами' 
+                  desc: 'Прозрачные условия и низкие тарифы' 
                 },
                 { 
                   icon: Shield, 
                   title: 'Прямое общение', 
-                  desc: 'Общайтесь с владельцами напрямую, без посредников и скрытых комиссий' 
+                  desc: 'Связывайтесь с владельцами напрямую без посредников' 
                 },
                 { 
                   icon: Heart, 
-                  title: 'Вы контролируете всё', 
-                  desc: 'Самостоятельно управляйте ценами, календарём и условиями аренды' 
+                  title: 'Удобное управление', 
+                  desc: 'Контролируйте цены, календарь и условия бронирования' 
                 },
               ].map((item, i) => (
-                <div key={i} className="card card-hover">
+                <div key={`advantage-${i}`} className="card card-hover">
                   <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
                     <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
@@ -147,15 +150,13 @@ export default function Home() {
                 'Москва', 'Санкт-Петербург', 'Сочи', 'Казань', 'Екатеринбург', 'Краснодар',
                 'Новосибирск', 'Нижний Новгород', 'Ростов-на-Дону', 'Уфа', 'Воронеж', 'Красноярск',
               ].map((city) => (
-                <button
+                <Link
                   key={city}
-                  onClick={() => {
-                    router.push(`/search?city=${encodeURIComponent(city)}`)
-                  }}
-                  className="btn btn-secondary text-sm sm:text-base h-10 sm:h-11 flex items-center justify-center whitespace-nowrap"
+                  href={`/search?city=${encodeURIComponent(city)}`}
+                  className="btn btn-secondary text-sm sm:text-base h-10 sm:h-11 flex items-center justify-center whitespace-nowrap cursor-pointer"
                 >
                   {city}
-                </button>
+                </Link>
               ))}
             </div>
           </div>
@@ -171,7 +172,7 @@ export default function Home() {
                 { icon: Calendar, title: 'Сравните варианты', desc: 'Изучите предложения, сравните цены, удобства и расположение' },
                 { icon: CheckCircle2, title: 'Бронируйте напрямую', desc: 'Свяжитесь с владельцем и забронируйте без посредников' },
               ].map((step, i) => (
-                <div key={i} className="card">
+                <div key={`step-${i}`} className="card">
                   <div className="flex items-start gap-3 sm:gap-4">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <step.icon className="w-5 h-5 text-primary" />
@@ -188,105 +189,47 @@ export default function Home() {
         </section>
 
 
-        {/* Сравнение с конкурентами - Справка */}
-        <section className="py-12 md:py-16 px-4 bg-white">
-          <div className="container mx-auto max-w-4xl">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-6 sm:mb-8 text-center px-2">
-              Сравнение с конкурентами
-            </h2>
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left font-semibold text-gray-900">Платформа</th>
-                      <th className="px-4 py-3 text-center font-semibold text-gray-900">Комиссия</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    <tr className="bg-blue-50/50">
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-primary">LOCUS</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-center font-medium text-primary">Минимальная</td>
-                    </tr>
-                    <tr>
-                      <td className="px-4 py-4 text-gray-700">Суточно.ру</td>
-                      <td className="px-4 py-4 text-center text-gray-600">15–20%</td>
-                    </tr>
-                    <tr>
-                      <td className="px-4 py-4 text-gray-700">Авито</td>
-                      <td className="px-4 py-4 text-center text-gray-600">15–25%</td>
-                    </tr>
-                    <tr>
-                      <td className="px-4 py-4 text-gray-700">Циан</td>
-                      <td className="px-4 py-4 text-center text-gray-600">До 20%</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div className="bg-gray-50 px-4 py-4 border-t border-gray-200">
-                <p className="text-sm sm:text-base text-center text-gray-700 font-medium mb-2">
-                  До 5 000 ₽ экономии с одного бронирования
-                </p>
-                <p className="text-xs sm:text-sm text-center text-gray-600">
-                  На примере средней брони 30 000 ₽
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Блок для арендодателей */}
         <section className="py-12 md:py-16 px-4 bg-gray-50">
           <div className="container mx-auto max-w-4xl">
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 md:p-12">
-              <div className="text-center mb-8">
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-4 px-2">
-                  Сдаёте жильё? Зарабатывайте больше
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 md:p-8">
+              <div className="text-center mb-6">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-3 px-2">
+                  Сдаёте жильё?
                 </h2>
-                <p className="text-sm sm:text-base text-gray-700 max-w-2xl mx-auto px-2">
-                  Размещение объявлений бесплатно. Комиссия только с подтверждённых бронирований. Прямое общение с гостями без посредников.
+                <p className="text-sm sm:text-base text-gray-600 max-w-xl mx-auto px-2 mb-6">
+                  Размещение бесплатно. Комиссия только с бронирований. Прямое общение с гостями.
                 </p>
-              </div>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (isAuthenticated) {
-                      router.push('/landlord/listings/new-stepper')
-                    } else {
-                      router.push('/register?next=/landlord/listings/new-stepper')
-                    }
-                  }}
-                  className="inline-flex items-center gap-2 bg-primary text-white px-8 py-3 rounded-xl hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg"
+                <Link
+                  href={isAuthenticated ? '/landlord/listings/new-stepper' : '/register?next=/landlord/listings/new-stepper'}
+                  className="inline-flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg cursor-pointer"
                 >
                   <HomeIcon className="w-5 h-5" />
                   Разместить объявление
-                </button>
+                </Link>
               </div>
             </div>
           </div>
         </section>
 
         {/* Доступные варианты */}
-        <main className="container mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-16 w-full overflow-x-hidden">
+        <section className="container mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-14 w-full overflow-x-hidden">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
             <div>
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                 {listings.length > 0 ? 'Доступные варианты' : 'Начните поиск'}
               </h2>
               <p className="text-sm sm:text-base text-gray-600">
-                {listings.length > 0 ? `${listings.length} объявлений найдено` : 'Используйте поиск выше, чтобы найти жильё'}
+                {listings.length > 0 ? `${listings.length} ${listings.length === 1 ? 'объявление' : listings.length < 5 ? 'объявления' : 'объявлений'}` : 'Используйте поиск выше, чтобы найти жильё'}
               </p>
             </div>
             {listings.length > 0 && (
               <div className="flex gap-2 bg-gray-100 rounded-lg p-1">
                 <button
+                  type="button"
                   onClick={() => setViewMode('list')}
-                  className={`px-4 py-2 rounded-md transition-all font-medium ${
+                  className={`px-4 py-2 rounded-md transition-all font-medium cursor-pointer ${
                     viewMode === 'list'
                       ? 'bg-white text-primary shadow-sm'
                       : 'text-gray-600 hover:text-gray-900'
@@ -295,8 +238,9 @@ export default function Home() {
                   Список
                 </button>
                 <button
+                  type="button"
                   onClick={() => setViewMode('map')}
-                  className={`px-4 py-2 rounded-md transition-all font-medium ${
+                  className={`px-4 py-2 rounded-md transition-all font-medium cursor-pointer ${
                     viewMode === 'map'
                       ? 'bg-white text-primary shadow-sm'
                       : 'text-gray-600 hover:text-gray-900'
@@ -338,28 +282,28 @@ export default function Home() {
               )}
             </>
           )}
-        </main>
+        </section>
 
         {/* Footer */}
-        <footer className="bg-gray-50 border-t border-gray-200 mt-20">
-          <div className="container mx-auto px-4 py-12">
+        <footer className="bg-gray-50 border-t border-gray-200 mt-12 sm:mt-16 md:mt-20">
+          <div className="container mx-auto px-4 py-8 sm:py-10 md:py-12">
             <div className="text-center">
               <Logo size="md" showText={true} className="justify-center mb-4" />
               <p className="text-sm sm:text-base text-gray-600 mb-6 max-w-2xl mx-auto px-2">
                 LOCUS — платформа для аренды жилья без посредников. Минимальная комиссия, прямое общение, полный контроль
               </p>
-              <div className="flex justify-center gap-6 text-sm text-gray-600">
-                <Link href="/smart-search" className="hover:text-primary transition-colors">
+              <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-sm text-gray-600">
+                <Link href="/smart-search" className="hover:text-primary transition-colors cursor-pointer">
                   Умный поиск
                 </Link>
-                <Link href="/register" className="hover:text-primary transition-colors">
+                <Link href="/register" className="hover:text-primary transition-colors cursor-pointer">
                   Разместить объявление
                 </Link>
-                <Link href="/login" className="hover:text-primary transition-colors">
+                <Link href="/login" className="hover:text-primary transition-colors cursor-pointer">
                   Войти
                 </Link>
               </div>
-              <p className="text-gray-500 text-sm mt-8">
+              <p className="text-gray-500 text-sm mt-6 sm:mt-8">
                 © {new Date().getFullYear()} LOCUS. Все права защищены.
               </p>
             </div>
