@@ -1,6 +1,7 @@
 import { IsOptional, IsString, IsNumber, IsEnum, IsArray, IsBoolean } from 'class-validator'
 import { CreateListingDto } from './create-listing.dto'
 import { ListingStatus, ListingType } from '../entities/listing.entity'
+import { IsSafeImageUrl } from '../../common/validators/is-safe-image-url.validator'
 
 export class UpdateListingDto {
   @IsOptional()
@@ -61,5 +62,6 @@ export class UpdateListingDto {
 
   @IsOptional()
   @IsArray()
+  @IsSafeImageUrl({ each: true })
   images?: string[]
 }

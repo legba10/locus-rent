@@ -12,6 +12,7 @@ import { AdminModule } from './admin/admin.module'
 import { TelegramModule } from './telegram/telegram.module'
 import { RecommendationModule } from './recommendation/recommendation.module'
 import { SupportModule } from './support/support.module'
+import { UploadsModule } from './uploads/uploads.module'
 
 @Module({
   imports: [
@@ -96,6 +97,7 @@ import { SupportModule } from './support/support.module'
     TelegramModule,
     RecommendationModule,
     SupportModule,
+    UploadsModule,
   ],
 })
 export class AppModule {}

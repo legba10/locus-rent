@@ -122,6 +122,19 @@ export const listingsAPI = {
     api.get<{ data: Listing[] }>('/listings/my'),
 }
 
+export const uploadsAPI = {
+  uploadImages: (files: File[]): Promise<AxiosResponse<{ images: string[] }>> => {
+    const form = new FormData()
+    for (const file of files) form.append('files', file)
+    return api.post<{ images: string[] }>('/uploads/images', form, {
+      headers: {
+        // Let axios set multipart boundary automatically
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  },
+}
+
 export const bookingsAPI = {
   getAll: () => api.get('/bookings'),
   getOne: (id: string) => api.get(`/bookings/${id}`),

@@ -10,6 +10,7 @@ import {
   Max,
 } from 'class-validator'
 import { ListingStatus, ListingType } from '../entities/listing.entity'
+import { IsSafeImageUrl } from '../../common/validators/is-safe-image-url.validator'
 
 export class CreateListingDto {
   @IsString()
@@ -20,7 +21,7 @@ export class CreateListingDto {
 
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
+  @IsSafeImageUrl({ each: true })
   images?: string[]
 
   @IsEnum(ListingType)

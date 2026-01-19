@@ -3,6 +3,7 @@ import { ValidationPipe, Logger } from '@nestjs/common'
 import { AppModule } from './app.module'
 import { DataSource } from 'typeorm'
 import * as express from 'express'
+import * as path from 'path'
 import { UsersService } from './users/users.service'
 import { UserRole } from './users/entities/user.entity'
 import * as bcrypt from 'bcrypt'
@@ -98,6 +99,18 @@ async function bootstrap() {
     // Body size limits for file uploads
     app.use(express.json({ limit: '50mb' }))
     app.use(express.urlencoded({ extended: true, limit: '50mb' }))
+
+    // Static uploads (URL-only image architecture)
+    // Files are stored under backend/uploads and served as /uploads/*
+    const uploadsDir = path.join(process.cwd(), 'uploads')
+    app.use(
+      '/uploads',
+      express.static(uploadsDir, {
+        maxAge: '30d',
+        etag: true,
+        immutable: true,
+      })
+    )
 
     // Global prefix
     app.setGlobalPrefix('api')

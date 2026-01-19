@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
-import { listingsAPI, citiesAPI } from '@/lib/api'
+import { listingsAPI, citiesAPI, uploadsAPI } from '@/lib/api'
 import { ArrowLeft, ArrowRight, Loader2, MapPin, Upload, CheckCircle2, FileText, Home, DollarSign, Sparkles, Camera, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from '@/components/Toast'
@@ -42,12 +42,13 @@ export default function NewListingStepperPage() {
     amenities: [] as string[],
   })
   const [images, setImages] = useState<string[]>([])
+  const [localPreviews, setLocalPreviews] = useState<string[]>([])
   const [citySuggestions, setCitySuggestions] = useState<any[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [imageUrl, setImageUrl] = useState('')
   const [fileError, setFileError] = useState('')
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isDragging, setIsDragging] = useState(false)
+  const [uploadingImages, setUploadingImages] = useState(false)
 
   const DRAFT_STORAGE_KEY = 'locus_new_listing_draft'
 
@@ -112,26 +113,23 @@ export default function NewListingStepperPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleAddImage = () => {
-    const url = imageUrl.trim()
-    if (!url) return
-    if (images.length >= 10) {
-      toast('Можно добавить не более 10 фотографий', 'warning')
-      return
-    }
-    setImages((prev) => [...prev, url])
-    setImageUrl('')
-    setFileError('')
-  }
-
   const handleRemoveImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index))
+    setLocalPreviews((prev) => {
+      const copy = [...prev]
+      const removed = copy[index]
+      if (removed && removed.startsWith('blob:')) {
+        try { URL.revokeObjectURL(removed) } catch {}
+      }
+      copy.splice(index, 1)
+      return copy
+    })
     if (errors.images) {
       setErrors({ ...errors, images: '' })
     }
   }
 
-  const handleFileUpload = (files: FileList | null) => {
+  const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return
 
     const remainingSlots = 10 - images.length
@@ -140,31 +138,48 @@ export default function NewListingStepperPage() {
       return
     }
 
-    const filesToAdd = Array.from(files).slice(0, remainingSlots)
-    filesToAdd.forEach((file) => {
-      if (!file.type.startsWith('image/')) {
-        setFileError('Загружайте только изображения')
-        return
+    const filesToUpload = Array.from(files).slice(0, remainingSlots)
+
+    // Front: строго запрещаем base64. Для превью используем blob: URL, а хранение/отправка — только URL с сервера.
+    const previews = filesToUpload.map((f) => URL.createObjectURL(f))
+    setLocalPreviews((prev) => [...prev, ...previews])
+    setUploadingImages(true)
+
+    try {
+      const resp = await uploadsAPI.uploadImages(filesToUpload)
+      const urls = resp.data?.images || []
+      if (!Array.isArray(urls) || urls.length === 0) {
+        throw new Error('Upload returned empty images array')
       }
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        const result = event.target?.result
-        if (typeof result === 'string') {
-          setImages((prev) => {
-            if (prev.length >= 10) return prev
-            return [...prev, result]
-          })
-          setFileError('')
-          if (errors.images) {
-            setErrors({ ...errors, images: '' })
+
+      setImages((prev) => {
+        const next = [...prev, ...urls].slice(0, 10)
+        return next
+      })
+      setFileError('')
+      if (errors.images) setErrors({ ...errors, images: '' })
+    } catch (e: any) {
+      console.error('Image upload failed:', e)
+      const msg =
+        e?.userMessage ||
+        e?.response?.data?.message ||
+        'Ошибка загрузки изображения'
+      setFileError(msg)
+      toast(msg, 'error')
+
+      // Remove added previews if upload failed
+      setLocalPreviews((prev) => {
+        const next = prev.slice(0, prev.length - previews.length)
+        for (const p of previews) {
+          if (p && p.startsWith('blob:')) {
+            try { URL.revokeObjectURL(p) } catch {}
           }
         }
-      }
-      reader.onerror = () => {
-        setFileError('Ошибка загрузки файла')
-      }
-      reader.readAsDataURL(file)
-    })
+        return next
+      })
+    } finally {
+      setUploadingImages(false)
+    }
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -774,7 +789,7 @@ export default function NewListingStepperPage() {
                         {isDragging ? 'Отпустите файлы здесь' : 'Перетащите фотографии сюда или выберите файлы'}
                       </p>
                       <p className="text-sm text-gray-500">
-                        Можно загрузить файлы или вставить URL. Для публикации нужно минимум одно фото, всего можно добавить до 10 фотографий.
+                        Загрузите файлы. Для публикации нужно минимум одно фото, всего можно добавить до 10 фотографий.
                       </p>
                       <div className="flex flex-col sm:flex-row gap-3 mt-2">
                         <input
@@ -787,23 +802,12 @@ export default function NewListingStepperPage() {
                           }}
                           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm cursor-pointer file:mr-3 file:px-3 file:py-2 file:border-0 file:rounded-md file:bg-primary file:text-white file:text-sm file:cursor-pointer"
                         />
-                        <input
-                          type="url"
-                          value={imageUrl}
-                          onChange={(e) => setImageUrl(e.target.value)}
-                          placeholder="https://example.com/photo.jpg"
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddImage}
-                          className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors text-sm font-medium"
-                        >
-                          Добавить фото
-                        </button>
                       </div>
                       {(fileError || errors.images) && (
                         <p className="text-xs text-red-600">{fileError || errors.images}</p>
+                      )}
+                      {uploadingImages && (
+                        <p className="text-xs text-gray-500">Загрузка фотографий…</p>
                       )}
                       {images.length === 0 && !errors.images && (
                         <p className="text-xs text-gray-400">
@@ -814,14 +818,21 @@ export default function NewListingStepperPage() {
                   </div>
                 </div>
 
-                {images.length > 0 && (
+                {(localPreviews.length > 0 || images.length > 0) && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {images.map((img, index) => (
                       <div
                         key={index}
                         className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden group"
                       >
-                        <img src={img} alt={`Фото ${index + 1}`} className="w-full h-full object-cover" />
+                        <img
+                          src={img}
+                          alt={`Фото ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            ;(e.currentTarget as HTMLImageElement).src = '/placeholder-image.svg'
+                          }}
+                        />
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(index)}
@@ -829,6 +840,22 @@ export default function NewListingStepperPage() {
                         >
                           Удалить
                         </button>
+                      </div>
+                    ))}
+                    {/* Local previews while uploading (blob:) */}
+                    {localPreviews.slice(images.length).map((src, idx) => (
+                      <div
+                        key={`preview-${idx}-${src}`}
+                        className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden"
+                      >
+                        <img
+                          src={src}
+                          alt="Загружается…"
+                          className="w-full h-full object-cover opacity-80"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                          <span className="text-white text-xs font-medium">Загрузка…</span>
+                        </div>
                       </div>
                     ))}
                   </div>

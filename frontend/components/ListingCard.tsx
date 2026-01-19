@@ -45,7 +45,6 @@ export default function ListingCard({ listing }: ListingCardProps) {
 
   const validated = validateImageSrc(candidateSrc)
   if (!validated.ok && typeof window !== 'undefined' && candidateSrc?.trim().startsWith('data:image')) {
-    // важно: ловим обрезанные data:image/*;base64 без payload, чтобы не получать ERR_INVALID_URL
     console.error('Invalid data:image src in ListingCard:', { reason: validated.reason, src: candidateSrc })
   }
 

@@ -125,38 +125,38 @@ export default function ListingDetailPage() {
   // TypeScript безопасная обработка: только проверка массива
   const getImages = (listingData: any): string[] => {
     if (!listingData) return []
-    
-    let images: string[] = []
-    
-    // Проверяем images - может быть массив (string[]) или строка (simple-array из TypeORM)
-    if (Array.isArray(listingData.images) && listingData.images.length > 0) {
-      // Массив строк - фильтруем валидные
-      images = listingData.images
-        .filter((img: any): img is string => img != null && typeof img === 'string' && img.trim().length > 0)
-        .map((url: string) => url.trim())
+
+    // Строго фильтруем: только валидные URL (http/https/relative/blob), data:image запрещены
+    const candidates: string[] = []
+
+    if (Array.isArray(listingData.images)) {
+      for (const img of listingData.images) {
+        const validated = validateImageSrc(img)
+        if (validated.ok) candidates.push(validated.src)
+        else if (typeof img === 'string' && img.trim().startsWith('data:image') && typeof window !== 'undefined') {
+          console.error('Invalid data:image in listing.images', { reason: validated.reason, src: img })
+        }
+      }
     } else if (typeof listingData.images === 'string' && listingData.images.trim().length > 0) {
-      // Строка (simple-array из TypeORM) - может быть с запятыми или одна строка
-      const imagesStr = listingData.images.trim()
-      if (imagesStr.includes(',')) {
-        // Разбиваем по запятым
-        images = imagesStr.split(',')
-          .map((url: string) => url.trim())
-          .filter((url: string) => url.length > 0)
-      } else {
-        // Одна строка
-        images = [imagesStr]
+      const parts = listingData.images.split(',').map((p: string) => p.trim()).filter(Boolean)
+      for (const part of parts) {
+        const validated = validateImageSrc(part)
+        if (validated.ok) candidates.push(validated.src)
+        else if (part.startsWith('data:image') && typeof window !== 'undefined') {
+          console.error('Invalid data:image in listing.images string', { reason: validated.reason, src: part })
+        }
       }
     }
-    
-    // Добавляем imageUrl если он есть и валиден
+
     if (listingData.imageUrl && typeof listingData.imageUrl === 'string') {
-      const imgUrl = listingData.imageUrl.trim()
-      if (imgUrl.length > 0 && !images.includes(imgUrl)) {
-        images.unshift(imgUrl)
+      const validated = validateImageSrc(listingData.imageUrl)
+      if (validated.ok && !candidates.includes(validated.src)) candidates.unshift(validated.src)
+      else if (!validated.ok && listingData.imageUrl.trim().startsWith('data:image') && typeof window !== 'undefined') {
+        console.error('Invalid data:image in listing.imageUrl', { reason: validated.reason, src: listingData.imageUrl })
       }
     }
-    
-    return images
+
+    return candidates
   }
 
   if (!mounted || loading) {
