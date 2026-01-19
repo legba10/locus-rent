@@ -68,18 +68,21 @@ export default function LandlordPage() {
   const handleDeleteListing = async (id: string) => {
     confirmDialog.show({
       title: 'Удалить объявление?',
-      message: 'Объявление будет скрыто и перестанет отображаться пользователям.',
+      message: 'Объявление будет полностью удалено и его нельзя будет восстановить.',
       confirmText: 'Удалить',
       cancelText: 'Отмена',
       variant: 'danger',
       onConfirm: async () => {
         try {
           await listingsAPI.delete(id)
-          toast('Объявление удалено', 'success')
-          loadData()
+          toast('Объявление успешно удалено', 'success')
+          // Обновляем список объявлений - удаляем из state оптимистично
+          setListings((prev) => prev.filter((listing) => listing.id !== id))
+          // Также перезагружаем данные для синхронизации
+          await loadData()
         } catch (error: any) {
           console.error('Error deleting listing:', error)
-          toast(error.response?.data?.message || 'Ошибка удаления объявления', 'error')
+          toast(error.response?.data?.message || error.userMessage || 'Ошибка удаления объявления', 'error')
         }
       },
     })
@@ -259,6 +262,10 @@ export default function LandlordPage() {
                                 ? 'bg-yellow-50 text-yellow-700 border border-yellow-100'
                                 : listing.status === 'moderation'
                                 ? 'bg-blue-50 text-blue-700 border border-blue-100'
+                                : listing.status === 'needs_revision'
+                                ? 'bg-orange-50 text-orange-700 border border-orange-100'
+                                : listing.status === 'rejected'
+                                ? 'bg-red-50 text-red-700 border border-red-100'
                                 : 'bg-gray-50 text-gray-500 border border-gray-100'
                             }`}
                           >
@@ -266,8 +273,14 @@ export default function LandlordPage() {
                             {listing.status === 'draft' && 'Черновик'}
                             {listing.status === 'hidden' && 'Скрыто'}
                             {listing.status === 'moderation' && 'На модерации'}
+                            {listing.status === 'needs_revision' && 'На доработке'}
                             {listing.status === 'rejected' && 'Отклонено'}
                           </span>
+                          {listing.status === 'needs_revision' && listing.revisionReason && (
+                            <div className="mt-2 p-2 bg-orange-50 border border-orange-200 rounded-md text-xs text-orange-800">
+                              <strong>Причина:</strong> {listing.revisionReason}
+                            </div>
+                          )}
                         </div>
                         
                         {/* Price and Actions */}

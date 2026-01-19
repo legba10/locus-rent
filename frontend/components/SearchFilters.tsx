@@ -111,6 +111,8 @@ export default function SearchFilters({ onClose, className = '', isMobile = fals
       e.stopPropagation()
     }
     
+    // КРИТИЧНО: НЕ вызываем scrollIntoView или window.scroll - фильтры не должны менять позицию экрана
+    
     const filters = {
       priceMin: priceMin || undefined,
       priceMax: priceMax || undefined,

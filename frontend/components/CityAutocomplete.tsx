@@ -1,15 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { MapPin, Loader2 } from 'lucide-react'
-import { citiesAPI } from '@/lib/api'
-
-interface City {
-  id: number
-  name: string
-  region?: string
-}
+import { useCitySearch, City } from '@/lib/hooks/useCitySearch'
 
 interface CityAutocompleteProps {
   value: string
@@ -20,24 +14,6 @@ interface CityAutocompleteProps {
   error?: string
 }
 
-// Популярные города для показа при пустом запросе
-const POPULAR_CITIES: City[] = [
-  { id: 1, name: 'Москва', region: 'Москва' },
-  { id: 2, name: 'Санкт-Петербург', region: 'Ленинградская область' },
-  { id: 3, name: 'Сочи', region: 'Краснодарский край' },
-  { id: 4, name: 'Казань', region: 'Республика Татарстан' },
-  { id: 5, name: 'Екатеринбург', region: 'Свердловская область' },
-  { id: 6, name: 'Новосибирск', region: 'Новосибирская область' },
-  { id: 7, name: 'Краснодар', region: 'Краснодарский край' },
-  { id: 8, name: 'Нижний Новгород', region: 'Нижегородская область' },
-  { id: 9, name: 'Сургут', region: 'Ханты-Мансийский автономный округ - Югра' },
-  { id: 10, name: 'Нижневартовск', region: 'Ханты-Мансийский автономный округ - Югра' },
-  { id: 11, name: 'Ноябрьск', region: 'Ямало-Ненецкий автономный округ' },
-  { id: 12, name: 'Новый Уренгой', region: 'Ямало-Ненецкий автономный округ' },
-  { id: 13, name: 'Салехард', region: 'Ямало-Ненецкий автономный округ' },
-  { id: 14, name: 'Ханты-Мансийск', region: 'Ханты-Мансийский автономный округ - Югра' },
-]
-
 export default function CityAutocomplete({
   value,
   onChange,
@@ -46,81 +22,34 @@ export default function CityAutocomplete({
   className = '',
   error,
 }: CityAutocompleteProps) {
-  const [suggestions, setSuggestions] = useState<City[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [highlightedText, setHighlightedText] = useState('')
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null)
   const [mounted, setMounted] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
-  const debounceTimerRef = useRef<NodeJS.Timeout>()
+  
+  // Используем единый hook для поиска городов
+  const { suggestions, loading, search, initPopular } = useCitySearch()
 
   useEffect(() => {
     setMounted(true)
-  }, [])
-
-  // Debounced search function
-  const searchCities = useCallback(async (query: string) => {
-    if (query.length < 1) {
-      setSuggestions(POPULAR_CITIES.slice(0, 10))
-      setHighlightedText('')
-      return
-    }
-
-    if (query.length === 1) {
-      // При одном символе показываем популярные города, которые начинаются с этой буквы
-      const filtered = POPULAR_CITIES.filter(city => 
-        city.name.toLowerCase().startsWith(query.toLowerCase())
-      )
-      setSuggestions(filtered.length > 0 ? filtered : POPULAR_CITIES.slice(0, 10))
-      setHighlightedText('')
-      return
-    }
-
-    setLoading(true)
-    try {
-      const response = await citiesAPI.search(query, 15)
-      const cities = response.data || []
-      
-      // Если API вернул результаты, сортируем по релевантности
-      if (cities.length > 0) {
-        const sortedCities = (cities as City[]).sort((a: City, b: City) => {
-          const aStarts = a.name.toLowerCase().startsWith(query.toLowerCase()) ? 0 : 1
-          const bStarts = b.name.toLowerCase().startsWith(query.toLowerCase()) ? 0 : 1
-          if (aStarts !== bStarts) return aStarts - bStarts
-          return a.name.localeCompare(b.name, 'ru')
-        })
-        setSuggestions(sortedCities.slice(0, 15))
-      } else {
-        // Если нет результатов из API, показываем популярные
-        setSuggestions(POPULAR_CITIES.slice(0, 10))
-      }
-      setHighlightedText(query)
-    } catch (error) {
-      console.error('City search error:', error)
-      // При ошибке показываем популярные города
-      setSuggestions(POPULAR_CITIES.slice(0, 10))
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+    initPopular()
+  }, [initPopular])
 
   // Handle input change with debounce
   const handleInputChange = (newValue: string) => {
     onChange(newValue)
     setSelectedIndex(-1)
-
-    // Clear previous timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current)
+    
+    if (newValue.length >= 1) {
+      setHighlightedText(newValue.trim())
+      search(newValue)
+    } else {
+      setHighlightedText('')
+      initPopular()
     }
-
-    // Set new timer
-    debounceTimerRef.current = setTimeout(() => {
-      searchCities(newValue)
-    }, 250)
   }
 
   // Highlight matching text
@@ -244,8 +173,8 @@ export default function CityAutocomplete({
 
   // Show popular cities on focus if input is empty
   const handleFocus = () => {
-    if (value.length < 2) {
-      setSuggestions(POPULAR_CITIES)
+    if (value.length < 1) {
+      initPopular()
     }
     setShowSuggestions(true)
   }

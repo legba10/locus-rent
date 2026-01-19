@@ -77,10 +77,10 @@ export default function Home() {
         <section className="relative bg-gradient-to-br from-blue-50/30 via-white to-blue-50/30 py-8 sm:py-12 md:py-20 px-3 sm:px-4 w-full overflow-x-hidden">
           <div className="container mx-auto max-w-5xl relative z-10 w-full">
             <div className="text-center mb-6 sm:mb-8 md:mb-12">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 md:mb-6 leading-tight px-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 md:mb-6 leading-tight px-2">
                 Аренда жилья без посредников
               </h1>
-              <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto px-2">
+              <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-2">
                 Прямое общение с владельцами. Минимальная комиссия. Полный контроль условий
               </p>
             </div>
@@ -191,7 +191,7 @@ export default function Home() {
         {/* Сравнение с конкурентами - Справка */}
         <section className="py-12 md:py-16 px-4 bg-white">
           <div className="container mx-auto max-w-4xl">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-900 mb-6 sm:mb-8 text-center px-2">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 mb-6 sm:mb-8 text-center px-2">
               Сравнение с конкурентами
             </h2>
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -244,10 +244,10 @@ export default function Home() {
           <div className="container mx-auto max-w-4xl">
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 md:p-12">
               <div className="text-center mb-8">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4 px-2">
+                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-4 px-2">
                   Сдаёте жильё? Зарабатывайте больше
                 </h2>
-                <p className="text-base sm:text-lg text-gray-700 max-w-2xl mx-auto px-2">
+                <p className="text-sm sm:text-base text-gray-700 max-w-2xl mx-auto px-2">
                   Размещение объявлений бесплатно. Комиссия только с подтверждённых бронирований. Прямое общение с гостями без посредников.
                 </p>
               </div>
@@ -275,10 +275,10 @@ export default function Home() {
         <main className="container mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-16 w-full overflow-x-hidden">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
                 {listings.length > 0 ? 'Доступные варианты' : 'Начните поиск'}
               </h2>
-              <p className="text-gray-600">
+              <p className="text-sm sm:text-base text-gray-600">
                 {listings.length > 0 ? `${listings.length} объявлений найдено` : 'Используйте поиск выше, чтобы найти жильё'}
               </p>
             </div>

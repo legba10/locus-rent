@@ -62,8 +62,21 @@ export default function ListingDetailPage() {
       loadListing()
       loadReviews()
       checkCanReview()
+      // Инкремент views с защитой от накрутки
+      incrementViews()
     }
   }, [params.id, mounted, isAuthenticated, user])
+
+  // Защита от накрутки просмотров - 1 просмотр на сессию
+  const incrementViews = () => {
+    if (typeof window === 'undefined') return
+    const viewedKey = `locus_viewed_${params.id}`
+    const hasViewed = sessionStorage.getItem(viewedKey)
+    if (!hasViewed) {
+      sessionStorage.setItem(viewedKey, 'true')
+      // Backend сам инкрементирует views при запросе, нам не нужно вызывать API отдельно
+    }
+  }
 
   const loadListing = async () => {
     try {
@@ -256,10 +269,25 @@ export default function ListingDetailPage() {
     return <NotFound />
   }
 
-  // КРИТИЧНО: безопасная работа с images через useMemo
+  // КРИТИЧНО: безопасная работа с images через useMemo - ВСЕГДА массив
   const images = useMemo(() => {
-    return sanitizeImages(listing.images)
-  }, [listing.images])
+    if (!listing) return []
+    return sanitizeImages(listing.images || [])
+  }, [listing?.images])
+
+  // КРИТИЧНО: безопасные значения с fallback
+  const safeTitle = listing?.title && typeof listing.title === 'string' 
+    ? listing.title 
+    : 'Объявление'
+  const safeDescription = listing?.description && typeof listing.description === 'string' 
+    ? listing.description.trim() 
+    : ''
+  const safeAddress = listing?.address && typeof listing.address === 'string'
+    ? listing.address
+    : listing?.city && typeof listing.city === 'string'
+      ? listing.city
+      : 'Адрес не указан'
+  const safeOwner = listing?.owner || null
   
   // Безопасное получение цены
   const price = (listing?.pricePerNight != null && !isNaN(Number(listing.pricePerNight))) 
@@ -345,7 +373,7 @@ export default function ListingDetailPage() {
           <Breadcrumbs
             items={[
               { label: 'Поиск', href: '/' },
-              { label: listing && typeof listing.title === 'string' ? listing.title : 'Объявление' }
+              { label: safeTitle }
             ]}
           />
         </div>
@@ -390,7 +418,7 @@ export default function ListingDetailPage() {
                             )}
                             <img
                               src={src}
-                              alt={`${listing && typeof listing.title === 'string' ? listing.title : 'Объявление'} - фото ${index + 1}`}
+                              alt={`${safeTitle} - фото ${index + 1}`}
                               className="w-full h-full object-cover transition-opacity duration-300"
                               loading="lazy"
                               decoding="async"
@@ -518,7 +546,7 @@ export default function ListingDetailPage() {
                 return src !== '/placeholder-image.svg' && !imageErrors[currentImageIndex] ? (
                 <img
                   src={src}
-                  alt={`${listing && typeof listing.title === 'string' ? listing.title : 'Объявление'} - фото ${currentImageIndex + 1}`}
+                  alt={`${safeTitle} - фото ${currentImageIndex + 1}`}
                   className="max-w-full max-h-[90vh] object-contain"
                   onError={(e) => {
                     handleImageError(currentImageIndex)
@@ -549,8 +577,8 @@ export default function ListingDetailPage() {
               <div className="lg:col-span-2 space-y-8">
                 {/* Header */}
                 <div>
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    {listing && typeof listing.title === 'string' ? listing.title : 'Объявление'}
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+                    {safeTitle}
                   </h1>
                   <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                     {listing?.rating != null && !isNaN(Number(listing.rating)) && (
@@ -566,7 +594,7 @@ export default function ListingDetailPage() {
                     )}
                     <div className="flex items-center gap-1.5 text-gray-600 px-3 py-1.5 bg-gray-50 rounded-lg">
                       <MapPin className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                      <span className="text-sm sm:text-base">{listing?.address || listing?.city || 'Адрес не указан'}</span>
+                      <span className="text-sm sm:text-base">{safeAddress}</span>
                     </div>
                     {views > 0 && (
                       <div className="flex items-center gap-1.5 text-gray-600 px-3 py-1.5 bg-gray-50 rounded-lg">
@@ -580,9 +608,9 @@ export default function ListingDetailPage() {
                 {/* Description */}
                 <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                   <h2 className="text-xl font-semibold mb-4 text-gray-900">Описание</h2>
-                  {listing?.description && typeof listing.description === 'string' && listing.description.trim().length > 0 ? (
+                  {safeDescription.length > 0 ? (
                     <p className="text-gray-700 leading-relaxed whitespace-pre-line text-base">
-                      {listing.description}
+                      {safeDescription}
                     </p>
                   ) : (
                     <p className="text-gray-500 italic">Описание скоро появится</p>

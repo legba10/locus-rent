@@ -65,7 +65,13 @@ export default function AdminPage() {
 
   const handleModerateListing = async (id: string, status: 'approved' | 'rejected' | 'needs_revision', reason?: string) => {
     try {
-      await adminAPI.moderateListing(id, status, reason)
+      // Для needs_revision причина обязательна
+      if (status === 'needs_revision' && !reason?.trim()) {
+        toast('Укажите причину доработки', 'warning')
+        return
+      }
+      
+      await adminAPI.moderateListing(id, status, reason?.trim())
       const messages = {
         approved: 'Объявление одобрено',
         rejected: 'Объявление отклонено',
@@ -77,7 +83,7 @@ export default function AdminPage() {
       setRevisionReason('')
       loadData()
     } catch (error: any) {
-      toast(error.userMessage || 'Ошибка модерации', 'error')
+      toast(error.userMessage || error.response?.data?.message || 'Ошибка модерации', 'error')
     }
   }
 
