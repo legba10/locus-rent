@@ -66,7 +66,10 @@ export class ListingsService {
   async findForModeration(): Promise<Listing[]> {
     return this.listingsRepository.find({
       relations: ['owner'],
-      where: { status: ListingStatus.MODERATION },
+      where: [
+        { status: ListingStatus.MODERATION },
+        { status: ListingStatus.PENDING_MODERATION },
+      ],
       order: { createdAt: 'DESC' },
     })
   }

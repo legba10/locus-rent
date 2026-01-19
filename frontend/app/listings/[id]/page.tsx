@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import Header from '@/components/Header'
-import { listingsAPI, bookingsAPI } from '@/lib/api'
+import { listingsAPI, bookingsAPI, reviewsAPI } from '@/lib/api'
 import { useAuthStore } from '@/lib/store'
 import { 
   MapPin, Star, Users, Bed, Bath, Calendar, 
@@ -19,6 +19,7 @@ import Tooltip from '@/components/Tooltip'
 import DateRangePicker from '@/components/DateRangePicker'
 import GuestsStepper from '@/components/GuestsStepper'
 import { normalizeImageSrc, sanitizeImages } from '@/lib/imageUtils'
+import NotFound from '@/app/not-found'
 
 // Lazy load MapView
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
@@ -42,6 +43,14 @@ export default function ListingDetailPage() {
   const galleryRef = useRef<HTMLDivElement>(null)
   const [imageLoading, setImageLoading] = useState<Record<number, boolean>>({})
   const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({})
+  const [reviews, setReviews] = useState<any[]>([])
+  const [reviewsLoading, setReviewsLoading] = useState(false)
+  const [canReview, setCanReview] = useState(false)
+  const [showReviewForm, setShowReviewForm] = useState(false)
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewComment, setReviewComment] = useState('')
+  const [reviewSubmitting, setReviewSubmitting] = useState(false)
+  const { user } = useAuthStore()
 
   // Fix hydration error - mount check
   useEffect(() => {
@@ -51,8 +60,10 @@ export default function ListingDetailPage() {
   useEffect(() => {
     if (mounted && params.id) {
       loadListing()
+      loadReviews()
+      checkCanReview()
     }
-  }, [params.id, mounted])
+  }, [params.id, mounted, isAuthenticated, user])
 
   const loadListing = async () => {
     try {
@@ -78,6 +89,85 @@ export default function ListingDetailPage() {
       setListing(null)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadReviews = async () => {
+    try {
+      setReviewsLoading(true)
+      const response = await reviewsAPI.getByListing(params.id as string)
+      const reviewsData = Array.isArray(response.data) ? response.data : response.data?.data || []
+      setReviews(reviewsData)
+    } catch (error: any) {
+      console.error('Error loading reviews:', error)
+      setReviews([])
+    } finally {
+      setReviewsLoading(false)
+    }
+  }
+
+  const checkCanReview = async () => {
+    if (!isAuthenticated || !user || !params.id) {
+      setCanReview(false)
+      return
+    }
+    try {
+      // Проверяем, есть ли бронирование у пользователя для этого объявления
+      const bookingsResponse = await bookingsAPI.getAll()
+      const bookings = Array.isArray(bookingsResponse.data) 
+        ? bookingsResponse.data 
+        : bookingsResponse.data?.data || []
+      
+      const hasBooking = bookings.some((booking: any) => 
+        booking.listingId === params.id && 
+        booking.userId === user.id &&
+        booking.status === 'confirmed'
+      )
+
+      // Проверяем, не оставил ли уже отзыв
+      const reviewsResponse = await reviewsAPI.getByListing(params.id as string)
+      const existingReviews = Array.isArray(reviewsResponse.data) 
+        ? reviewsResponse.data 
+        : reviewsResponse.data?.data || []
+      
+      const hasReview = existingReviews.some((review: any) => review.userId === user.id)
+
+      setCanReview(hasBooking && !hasReview)
+    } catch (error: any) {
+      console.error('Error checking can review:', error)
+      setCanReview(false)
+    }
+  }
+
+  const handleSubmitReview = async () => {
+    if (!isAuthenticated) {
+      router.push('/login')
+      return
+    }
+
+    if (!reviewRating || reviewRating < 1 || reviewRating > 5) {
+      toast('Выберите рейтинг от 1 до 5', 'warning')
+      return
+    }
+
+    try {
+      setReviewSubmitting(true)
+      await reviewsAPI.create({
+        listingId: params.id as string,
+        rating: reviewRating,
+        comment: reviewComment.trim() || undefined,
+      })
+      toast('Отзыв успешно добавлен!', 'success')
+      setReviewRating(5)
+      setReviewComment('')
+      setShowReviewForm(false)
+      setCanReview(false)
+      loadReviews()
+      loadListing() // Обновляем рейтинг объявления
+    } catch (error: any) {
+      toast(error.response?.data?.message || 'Ошибка при добавлении отзыва', 'error')
+    } finally {
+      setReviewSubmitting(false)
     }
   }
 
@@ -126,23 +216,6 @@ export default function ListingDetailPage() {
     tv: Tv,
   }
 
-  // КРИТИЧНО: санитизация images с гарантией массива
-  const getImages = (listingData: any): string[] => {
-    if (!listingData) return []
-
-    // Используем единую функцию санитизации
-    const validImages = sanitizeImages(listingData.images)
-    
-    // Если есть imageUrl, добавляем его в начало (если валидный)
-    if (listingData.imageUrl && typeof listingData.imageUrl === 'string') {
-      const normalized = normalizeImageSrc(listingData.imageUrl)
-      if (normalized !== '/placeholder-image.svg' && !validImages.includes(normalized)) {
-        validImages.unshift(normalized)
-      }
-    }
-
-    return validImages
-  }
 
   if (!mounted || loading) {
     return (
@@ -178,29 +251,15 @@ export default function ListingDetailPage() {
     )
   }
 
-  // Защита от null/undefined
-  if (!listing) {
-    return (
-      <div className="min-h-screen bg-white">
-        <Header />
-        <div className="container mx-auto px-4 py-20">
-          <div className="text-center max-w-md mx-auto">
-            <div className="mb-6">
-              <Home className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Объявление не найдено</h1>
-            <p className="text-gray-600 mb-6">К сожалению, запрашиваемое объявление отсутствует</p>
-            <Link href="/" className="inline-block bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors font-medium">
-              Вернуться на главную
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
+  // КРИТИЧНО: Ранние guards - защита от битых данных
+  if (!listing || typeof listing !== 'object') {
+    return <NotFound />
   }
 
-  // КРИТИЧНО: получаем images после проверки listing, гарантируем массив
-  const images = Array.isArray(getImages(listing)) ? getImages(listing) : []
+  // КРИТИЧНО: безопасная работа с images через useMemo
+  const images = useMemo(() => {
+    return sanitizeImages(listing.images)
+  }, [listing.images])
   
   // Безопасное получение цены
   const price = (listing?.pricePerNight != null && !isNaN(Number(listing.pricePerNight))) 
@@ -239,10 +298,7 @@ export default function ListingDetailPage() {
 
   // Keyboard navigation for fullscreen gallery - только после mounted
   useEffect(() => {
-    if (!mounted || !isFullscreen || !listing) return
-
-    const images = getImages(listing)
-    if (images.length === 0) return
+    if (!mounted || !isFullscreen || !listing || images.length === 0) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -256,14 +312,11 @@ export default function ListingDetailPage() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [mounted, isFullscreen, currentImageIndex, listing])
+  }, [mounted, isFullscreen, currentImageIndex, listing, images.length])
 
   // Update current image index when clicking on gallery images - только после mounted
   useEffect(() => {
-    if (!mounted || !galleryRef.current || !listing) return
-
-    const images = getImages(listing)
-    if (images.length === 0) return
+    if (!mounted || !galleryRef.current || !listing || images.length === 0) return
 
     const handleScroll = () => {
       if (!galleryRef.current) return
@@ -280,7 +333,7 @@ export default function ListingDetailPage() {
         galleryRef.current.removeEventListener('scroll', handleScroll)
       }
     }
-  }, [mounted, currentImageIndex, listing])
+  }, [mounted, currentImageIndex, listing, images.length])
 
   return (
     <div className="min-h-screen bg-white">
@@ -451,7 +504,7 @@ export default function ListingDetailPage() {
             <div className="relative max-w-[90vw] max-h-[90vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
               {(() => {
                 // КРИТИЧНО: защита от выхода за границы массива
-                if (!Array.isArray(images) || currentImageIndex < 0 || currentImageIndex >= images.length) {
+                if (!images || !Array.isArray(images) || currentImageIndex < 0 || currentImageIndex >= images.length || !images[currentImageIndex]) {
                   return (
                     <div className="text-white text-center">
                       <ImageIcon className="w-24 h-24 mx-auto mb-3 opacity-50" />
@@ -594,10 +647,93 @@ export default function ListingDetailPage() {
 
                 {/* Reviews */}
                 <div>
-                  <h2 className="text-xl font-semibold mb-4 text-gray-900">Отзывы</h2>
-                  {listing?.reviews && Array.isArray(listing.reviews) && listing.reviews.length > 0 ? (
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold text-gray-900">Отзывы</h2>
+                    {canReview && (
+                      <button
+                        onClick={() => setShowReviewForm(!showReviewForm)}
+                        className="btn btn-sm btn-primary"
+                      >
+                        {showReviewForm ? 'Отмена' : 'Оставить отзыв'}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Форма добавления отзыва */}
+                  {showReviewForm && canReview && (
+                    <div className="bg-white rounded-xl p-6 border-2 border-primary/20 mb-6">
+                      <h3 className="text-lg font-semibold mb-4 text-gray-900">Ваш отзыв</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Рейтинг <span className="text-red-500">*</span>
+                          </label>
+                          <div className="flex gap-2">
+                            {[1, 2, 3, 4, 5].map((rating) => (
+                              <button
+                                key={rating}
+                                type="button"
+                                onClick={() => setReviewRating(rating)}
+                                className={`p-2 rounded-lg transition-colors ${
+                                  reviewRating >= rating
+                                    ? 'bg-yellow-100 text-yellow-600'
+                                    : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                                }`}
+                              >
+                                <Star className={`w-6 h-6 ${reviewRating >= rating ? 'fill-current' : ''}`} />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Комментарий
+                          </label>
+                          <textarea
+                            value={reviewComment}
+                            onChange={(e) => setReviewComment(e.target.value)}
+                            placeholder="Расскажите о вашем опыте..."
+                            className="input w-full h-32 resize-none"
+                            rows={4}
+                          />
+                        </div>
+                        <div className="flex gap-3">
+                          <button
+                            onClick={handleSubmitReview}
+                            disabled={reviewSubmitting}
+                            className="btn btn-primary"
+                          >
+                            {reviewSubmitting ? (
+                              <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Отправка...
+                              </>
+                            ) : (
+                              'Отправить отзыв'
+                            )}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowReviewForm(false)
+                              setReviewComment('')
+                              setReviewRating(5)
+                            }}
+                            className="btn btn-secondary"
+                          >
+                            Отмена
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {reviewsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    </div>
+                  ) : reviews && reviews.length > 0 ? (
                     <div className="space-y-4">
-                      {listing.reviews.map((review: any, index: number) => (
+                      {reviews.map((review: any, index: number) => (
                         <div key={review.id || index} className="bg-white rounded-xl p-5 sm:p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
                             <div className="flex items-center gap-2.5">
@@ -653,7 +789,11 @@ export default function ListingDetailPage() {
                     <div className="bg-gray-50 rounded-xl p-8 sm:p-12 border border-gray-200 text-center">
                       <Star className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                       <p className="text-gray-600 font-medium mb-1">Отзывов пока нет</p>
-                      <p className="text-sm text-gray-500">Будьте первым, кто оставит отзыв!</p>
+                      <p className="text-sm text-gray-500">
+                        {canReview 
+                          ? 'Будьте первым, кто оставит отзыв!' 
+                          : 'Отзывы могут оставлять только гости после бронирования'}
+                      </p>
                     </div>
                   )}
                 </div>

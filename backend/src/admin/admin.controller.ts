@@ -21,8 +21,8 @@ export class AdminController {
   }
 
   @Patch('listings/:id/moderate')
-  moderateListing(@Param('id') id: string, @Body() body: { status: string }) {
-    return this.adminService.moderateListing(id, body.status)
+  moderateListing(@Param('id') id: string, @Body() body: { status: string; revisionReason?: string }) {
+    return this.adminService.moderateListing(id, body.status, body.revisionReason)
   }
 
   @Get('users')

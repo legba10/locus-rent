@@ -1,16 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Review } from './entities/review.entity'
 import { CreateReviewDto } from './dto/create-review.dto'
 import { ListingsService } from '../listings/listings.service'
+import { BookingsService } from '../bookings/bookings.service'
 
 @Injectable()
 export class ReviewsService {
   constructor(
     @InjectRepository(Review)
     private reviewsRepository: Repository<Review>,
-    private listingsService: ListingsService
+    private listingsService: ListingsService,
+    private bookingsService: BookingsService
   ) {}
 
   async create(createReviewDto: CreateReviewDto, userId: string): Promise<Review> {
@@ -18,6 +20,30 @@ export class ReviewsService {
     
     if (!listing) {
       throw new NotFoundException('Объявление не найдено')
+    }
+
+    // Проверяем, есть ли бронирование у пользователя для этого объявления
+    const bookings = await this.bookingsService.findByUser(userId)
+    const hasBooking = bookings.some(
+      (booking) => 
+        booking.listingId === createReviewDto.listingId && 
+        booking.status === 'confirmed'
+    )
+
+    if (!hasBooking) {
+      throw new BadRequestException('Отзыв можно оставить только после бронирования')
+    }
+
+    // Проверяем, не оставил ли уже отзыв
+    const existingReview = await this.reviewsRepository.findOne({
+      where: {
+        listingId: createReviewDto.listingId,
+        userId: userId,
+      },
+    })
+
+    if (existingReview) {
+      throw new BadRequestException('Вы уже оставили отзыв для этого объявления')
     }
 
     const review = this.reviewsRepository.create({

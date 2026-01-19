@@ -75,8 +75,12 @@ export class AdminService {
     return this.listingsService.findForModeration()
   }
 
-  async moderateListing(id: string, status: string) {
-    return this.listingsService.update(id, { status } as any)
+  async moderateListing(id: string, status: string, revisionReason?: string) {
+    const updateData: any = { status }
+    if (revisionReason) {
+      updateData.revisionReason = revisionReason
+    }
+    return this.listingsService.update(id, updateData)
   }
 
   async getAllUsers() {

@@ -21,10 +21,13 @@ export enum ListingType {
 
 export enum ListingStatus {
   DRAFT = 'draft',
-  MODERATION = 'moderation',
-  ACTIVE = 'active',
-  HIDDEN = 'hidden',
+  PENDING_MODERATION = 'pending_moderation',
+  MODERATION = 'moderation', // Для обратной совместимости
+  APPROVED = 'approved',
+  ACTIVE = 'active', // Для обратной совместимости
+  NEEDS_REVISION = 'needs_revision',
   REJECTED = 'rejected',
+  HIDDEN = 'hidden',
 }
 
 @Entity('listings')
@@ -98,6 +101,9 @@ export class Listing {
     default: ListingStatus.DRAFT,
   })
   status: ListingStatus
+
+  @Column('text', { nullable: true })
+  revisionReason: string
 
   @Column('decimal', { precision: 3, scale: 2, nullable: true })
   rating: number

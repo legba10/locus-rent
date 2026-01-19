@@ -4,11 +4,13 @@ import { ReviewsService } from './reviews.service'
 import { ReviewsController } from './reviews.controller'
 import { Review } from './entities/review.entity'
 import { ListingsModule } from '../listings/listings.module'
+import { BookingsModule } from '../bookings/bookings.module'
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Review]),
     ListingsModule,
+    BookingsModule,
   ],
   controllers: [ReviewsController],
   providers: [ReviewsService],

@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
-import { Shield, MessageSquare, FileText, Users, CheckCircle2, X, Loader2, UserPlus, Mail, Phone, Calendar } from 'lucide-react'
+import { Shield, MessageSquare, FileText, Users, CheckCircle2, X, Loader2, UserPlus, Mail, Phone, Calendar, MapPin, Eye, Bed, Bath, Users as UsersIcon, Wrench } from 'lucide-react'
 import { adminAPI, supportAPI } from '@/lib/api'
 import { useAuthStore } from '@/lib/store'
 import { toast } from '@/components/Toast'
+import { sanitizeImages, normalizeImageSrc } from '@/lib/imageUtils'
 
 export default function AdminPage() {
   const router = useRouter()
@@ -19,6 +20,9 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true)
   const [promoteEmail, setPromoteEmail] = useState('')
   const [promoteLoading, setPromoteLoading] = useState(false)
+  const [selectedListing, setSelectedListing] = useState<any>(null)
+  const [moderationAction, setModerationAction] = useState<'approve' | 'reject' | 'revision' | null>(null)
+  const [revisionReason, setRevisionReason] = useState('')
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -59,14 +63,34 @@ export default function AdminPage() {
     }
   }
 
-  const handleModerateListing = async (id: string, status: 'active' | 'rejected') => {
+  const handleModerateListing = async (id: string, status: 'approved' | 'rejected' | 'needs_revision', reason?: string) => {
     try {
-      await adminAPI.moderateListing(id, status)
-      toast(status === 'active' ? 'Объявление одобрено' : 'Объявление отклонено', 'success')
+      await adminAPI.moderateListing(id, status, reason)
+      const messages = {
+        approved: 'Объявление одобрено',
+        rejected: 'Объявление отклонено',
+        needs_revision: 'Объявление отправлено на доработку'
+      }
+      toast(messages[status], 'success')
+      setSelectedListing(null)
+      setModerationAction(null)
+      setRevisionReason('')
       loadData()
     } catch (error: any) {
       toast(error.userMessage || 'Ошибка модерации', 'error')
     }
+  }
+
+  const openModerationModal = (listing: any, action: 'approve' | 'reject' | 'revision') => {
+    setSelectedListing(listing)
+    setModerationAction(action)
+    setRevisionReason('')
+  }
+
+  const closeModerationModal = () => {
+    setSelectedListing(null)
+    setModerationAction(null)
+    setRevisionReason('')
   }
 
   const handleUpdateSupportStatus = async (id: string, status: string) => {
@@ -162,50 +186,203 @@ export default function AdminPage() {
         ) : (
           <>
             {activeTab === 'moderation' && (
-              <div className="card">
-                <h2 className="heading-2 mb-4">
-                  Объявления на модерации ({listings.length})
-                </h2>
-                {listings.length === 0 ? (
-                  <p className="text-caption text-center py-8">Нет объявлений на модерации</p>
-                ) : (
-                  <div className="space-y-4">
-                    {listings.map((listing) => (
-                      <div key={listing.id} className="card">
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="heading-3 mb-2">{listing.title}</h3>
-                            <p className="text-caption mb-2 line-clamp-2">{listing.description}</p>
-                            <div className="flex flex-wrap gap-2 text-caption">
-                              <span>{listing.city}</span>
-                              <span>•</span>
-                              <span>{listing.pricePerNight} ₽/ночь</span>
-                              <span>•</span>
-                              <span>{new Date(listing.createdAt).toLocaleDateString('ru-RU')}</span>
+              <>
+                <div className="card">
+                  <h2 className="heading-2 mb-4">
+                    Объявления на модерации ({listings.length})
+                  </h2>
+                  {listings.length === 0 ? (
+                    <p className="text-caption text-center py-8">Нет объявлений на модерации</p>
+                  ) : (
+                    <div className="space-y-6">
+                      {listings.map((listing) => {
+                        const images = sanitizeImages(listing.images)
+                        const mainImage = normalizeImageSrc(images[0])
+                        return (
+                          <div key={listing.id} className="card border-2 border-gray-200">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                              {/* Фото */}
+                              <div className="lg:col-span-1">
+                                {images.length > 0 ? (
+                                  <div className="grid grid-cols-2 gap-2">
+                                    {images.slice(0, 4).map((img, idx) => (
+                                      <div key={idx} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+                                        <img
+                                          src={normalizeImageSrc(img)}
+                                          alt={`${listing.title} - фото ${idx + 1}`}
+                                          className="w-full h-full object-cover"
+                                          onError={(e) => {
+                                            ;(e.currentTarget as HTMLImageElement).src = '/placeholder-image.svg'
+                                          }}
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="aspect-square rounded-lg bg-gray-100 flex items-center justify-center">
+                                    <FileText className="w-12 h-12 text-gray-400" />
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Информация */}
+                              <div className="lg:col-span-2 space-y-4">
+                                <div>
+                                  <h3 className="heading-3 mb-2">{listing.title || 'Без названия'}</h3>
+                                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                                    <div className="flex items-center gap-1.5 text-gray-600">
+                                      <MapPin className="w-4 h-4" />
+                                      <span className="text-sm">{listing.city || 'Город не указан'}</span>
+                                      {listing.address && <span className="text-sm">• {listing.address}</span>}
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-gray-600">
+                                      <span className="text-lg font-bold text-primary">{listing.pricePerNight || 0} ₽</span>
+                                      <span className="text-sm">/ночь</span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Описание */}
+                                <div>
+                                  <h4 className="font-semibold text-gray-900 mb-1">Описание</h4>
+                                  <p className="text-sm text-gray-700 line-clamp-3">{listing.description || 'Описание отсутствует'}</p>
+                                </div>
+
+                                {/* Характеристики */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                  {listing.maxGuests && (
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <UsersIcon className="w-4 h-4 text-primary" />
+                                      <span>До {listing.maxGuests} гостей</span>
+                                    </div>
+                                  )}
+                                  {listing.bedrooms > 0 && (
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <Bed className="w-4 h-4 text-primary" />
+                                      <span>{listing.bedrooms} спален</span>
+                                    </div>
+                                  )}
+                                  {listing.beds > 0 && (
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <Bed className="w-4 h-4 text-primary" />
+                                      <span>{listing.beds} кроватей</span>
+                                    </div>
+                                  )}
+                                  {listing.bathrooms > 0 && (
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <Bath className="w-4 h-4 text-primary" />
+                                      <span>{listing.bathrooms} ванных</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Владелец и дата */}
+                                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 pt-2 border-t border-gray-200">
+                                  <div>
+                                    <span className="font-medium">Владелец:</span>{' '}
+                                    {listing.owner?.email || listing.ownerId || 'Не указан'}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Создано:</span>{' '}
+                                    {new Date(listing.createdAt).toLocaleDateString('ru-RU', {
+                                      day: 'numeric',
+                                      month: 'long',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </div>
+                                  {listing.revisionReason && (
+                                    <div className="w-full">
+                                      <span className="font-medium text-orange-600">Причина доработки:</span>{' '}
+                                      <span className="text-orange-700">{listing.revisionReason}</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Кнопки модерации */}
+                                <div className="flex flex-wrap gap-2 pt-2">
+                                  <button
+                                    onClick={() => handleModerateListing(listing.id, 'approved')}
+                                    className="btn btn-sm bg-green-600 hover:bg-green-700 text-white"
+                                  >
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    Одобрить
+                                  </button>
+                                  <button
+                                    onClick={() => openModerationModal(listing, 'reject')}
+                                    className="btn btn-sm bg-red-600 hover:bg-red-700 text-white"
+                                  >
+                                    <X className="w-4 h-4" />
+                                    Отклонить
+                                  </button>
+                                  <button
+                                    onClick={() => openModerationModal(listing, 'revision')}
+                                    className="btn btn-sm bg-orange-600 hover:bg-orange-700 text-white"
+                                  >
+                                    <Wrench className="w-4 h-4" />
+                                    На доработку
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex gap-2 sm:flex-col sm:w-auto w-full">
-                            <button
-                              onClick={() => handleModerateListing(listing.id, 'active')}
-                              className="btn btn-sm bg-green-600 hover:bg-green-700 text-white flex-1 sm:flex-none"
-                            >
-                              <CheckCircle2 className="w-4 h-4" />
-                              Одобрить
-                            </button>
-                            <button
-                              onClick={() => handleModerateListing(listing.id, 'rejected')}
-                              className="btn btn-sm bg-red-600 hover:bg-red-700 text-white flex-1 sm:flex-none"
-                            >
-                              <X className="w-4 h-4" />
-                              Отклонить
-                            </button>
-                          </div>
-                        </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Модальное окно для причины отклонения/доработки */}
+                {selectedListing && moderationAction && (
+                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6">
+                      <h3 className="heading-2 mb-4">
+                        {moderationAction === 'reject' ? 'Отклонить объявление' : 'Отправить на доработку'}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Объявление: <strong>{selectedListing.title}</strong>
+                      </p>
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {moderationAction === 'reject' ? 'Причина отклонения' : 'Причина доработки'} <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                          value={revisionReason}
+                          onChange={(e) => setRevisionReason(e.target.value)}
+                          placeholder={moderationAction === 'reject' ? 'Укажите причину отклонения объявления...' : 'Укажите, что нужно исправить в объявлении...'}
+                          className="input w-full h-32 resize-none"
+                          required
+                        />
                       </div>
-                    ))}
+                      <div className="flex gap-3 justify-end">
+                        <button
+                          onClick={closeModerationModal}
+                          className="btn btn-secondary"
+                        >
+                          Отмена
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (!revisionReason.trim()) {
+                              toast('Укажите причину', 'warning')
+                              return
+                            }
+                            handleModerateListing(
+                              selectedListing.id,
+                              moderationAction === 'reject' ? 'rejected' : 'needs_revision',
+                              revisionReason.trim()
+                            )
+                          }}
+                          className={`btn ${moderationAction === 'reject' ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-600 hover:bg-orange-700'} text-white`}
+                        >
+                          {moderationAction === 'reject' ? 'Отклонить' : 'Отправить на доработку'}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
-              </div>
+              </>
             )}
 
             {activeTab === 'support' && (

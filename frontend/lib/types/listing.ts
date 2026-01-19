@@ -1,6 +1,6 @@
 export type ListingType = 'apartment' | 'house' | 'studio' | 'room' | 'apartment_complex'
 
-export type ListingStatus = 'draft' | 'moderation' | 'active' | 'hidden' | 'rejected'
+export type ListingStatus = 'draft' | 'pending_moderation' | 'moderation' | 'approved' | 'active' | 'needs_revision' | 'rejected' | 'hidden'
 
 export interface Listing {
   id: string
@@ -23,6 +23,7 @@ export interface Listing {
   amenities?: string[]
   houseRules?: string
   status: ListingStatus
+  revisionReason?: string
   rating?: number
   reviewsCount?: number
   ownerId: string

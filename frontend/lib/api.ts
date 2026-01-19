@@ -224,8 +224,8 @@ export const supportAPI = {
 export const adminAPI = {
   getStats: () => api.get('/admin/stats'),
   getListingsForModeration: () => api.get('/admin/listings/moderation'),
-  moderateListing: (id: string, status: string) =>
-    api.patch(`/admin/listings/${id}/moderate`, { status }),
+  moderateListing: (id: string, status: string, revisionReason?: string) =>
+    api.patch(`/admin/listings/${id}/moderate`, { status, revisionReason }),
   getAllUsers: () => api.get('/admin/users'),
   blockUser: (id: string) => api.patch(`/admin/users/${id}/block`),
   promoteToAdmin: (emailOrPhone: string) =>
