@@ -12,7 +12,7 @@ import { useConfirmDialog } from '@/components/ConfirmDialog'
 import { toast } from '@/components/Toast'
 import EmptyState from '@/components/EmptyState'
 import { ListingCardSkeleton } from '@/components/Skeleton'
-import { validateImageSrc } from '@/lib/imageSrc'
+import { normalizeImageSrc, filterValidImageUrls } from '@/lib/imageUtils'
 
 export default function LandlordPage() {
   const router = useRouter()
@@ -211,39 +211,25 @@ export default function LandlordPage() {
               ) : (
                 <div className="grid-responsive">
                   {listings.map((listing) => {
-                    // Гарантируем, что images всегда массив
-                    const images: string[] = Array.isArray(listing.images)
-                      ? listing.images.filter((img: any): img is string => img != null && typeof img === 'string' && img.trim().length > 0)
-                      : []
-                    const firstCandidate = images.length > 0 ? images[0] : null
-                    const validated = validateImageSrc(firstCandidate)
-                    if (!validated.ok && typeof window !== 'undefined' && String(firstCandidate || '').trim().startsWith('data:image')) {
-                      console.error('Invalid data:image src in LandlordPage listing tile:', { reason: validated.reason, src: firstCandidate })
-                    }
-                    const src = validated.ok ? validated.src : null
+                    // Фильтруем старые data:image
+                    const validImages = filterValidImageUrls(listing.images || [])
+                    const src = normalizeImageSrc(validImages[0] || listing.imageUrl)
                     
                     return (
                       <div key={listing.id} className="card card-hover overflow-hidden">
                       {/* Image */}
                       <div className="relative w-full h-48 bg-gray-100 -m-4 sm:-m-6 mb-4 sm:mb-6">
-                        {src ? (
-                          <img
-                            src={src}
-                            alt={listing.title || 'Объявление'}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              console.error('Image load error in LandlordPage listing tile:', src)
-                            }}
-                          />
-                        ) : (
-                          <img
-                            src="/placeholder-image.svg"
-                            alt="Фото скоро появится"
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        )}
+                        <img
+                          src={src}
+                          alt={listing.title || 'Объявление'}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                          onError={(e) => {
+                            console.error('Image load error in LandlordPage listing tile:', src)
+                            ;(e.currentTarget as HTMLImageElement).src = '/placeholder-image.svg'
+                          }}
+                        />
                         <div className="absolute top-3 right-3">
                           <Link
                             href={`/listings/${listing.id}`}

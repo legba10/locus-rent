@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { MapPin, Star, Users, Bed, Bath, Eye, Image as ImageIcon } from 'lucide-react'
-import { validateImageSrc } from '@/lib/imageSrc'
+import { normalizeImageSrc, filterValidImageUrls } from '@/lib/imageUtils'
 
 interface ListingCardProps {
   listing: {
@@ -32,27 +32,14 @@ export default function ListingCard({ listing }: ListingCardProps) {
   
   const price = listing.pricePerNight || listing.price || 0
   const address = listing.address || listing.city || 'Адрес не указан'
-  // Гарантируем, что images всегда массив - CRITICAL GUARD
-  // TypeScript безопасная обработка: только проверка массива, без сравнения со строками
-  const images: string[] = Array.isArray(listing.images) && listing.images.length > 0
-    ? listing.images.filter((img): img is string => img != null && typeof img === 'string' && img.trim().length > 0).map(url => url.trim())
-    : []
   
-  // Проверяем также imageUrl - безопасно
-  let candidateSrc: string | null = null
-  if (images.length > 0) candidateSrc = images[0]
-  else if (listing.imageUrl && typeof listing.imageUrl === 'string') candidateSrc = listing.imageUrl
-
-  const validated = validateImageSrc(candidateSrc)
-  if (!validated.ok && typeof window !== 'undefined' && candidateSrc?.trim().startsWith('data:image')) {
-    console.error('Invalid data:image src in ListingCard:', { reason: validated.reason, src: candidateSrc })
-  }
-
-  const imageSrc = validated.ok ? validated.src : null
+  // Фильтруем старые data:image и невалидные src
+  const validImages = filterValidImageUrls(listing.images || [])
+  const imageSrc = normalizeImageSrc(validImages[0] || listing.imageUrl)
   const guests = listing.maxGuests || listing.guests
   const views = listing.views || listing.viewCount || 0
 
-  const hasImage = imageSrc != null && !imageError
+  const hasImage = imageSrc !== '/placeholder-image.svg' && !imageError
 
   return (
     <Link href={`/listings/${listing.id}`}>
@@ -66,7 +53,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
                 <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 z-0" />
               )}
               <img
-                src={imageSrc!}
+                src={imageSrc}
                 alt={listing.title || 'Объявление'}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 loading="lazy"
@@ -79,6 +66,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
                   console.error('Image load error in ListingCard:', imageSrc)
                   setImageLoading(false)
                   setImageError(true)
+                  ;(e.currentTarget as HTMLImageElement).src = '/placeholder-image.svg'
                 }}
               />
             </>

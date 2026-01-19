@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/Header'
 import { listingsAPI, citiesAPI, uploadsAPI } from '@/lib/api'
+import { normalizeImageSrc, filterValidImageUrls } from '@/lib/imageUtils'
 import { ArrowLeft, ArrowRight, Loader2, MapPin, Upload, CheckCircle2, FileText, Home, DollarSign, Sparkles, Camera, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from '@/components/Toast'
@@ -146,8 +147,13 @@ export default function NewListingStepperPage() {
     setUploadingImages(true)
 
     try {
-      const resp = await uploadsAPI.uploadImages(filesToUpload)
-      const urls = resp.data?.images || []
+      // Get userId from auth store
+      const { user } = useAuthStore.getState()
+      if (!user?.id) {
+        throw new Error('Пользователь не авторизован')
+      }
+
+      const { images: urls } = await uploadsAPI.uploadImages(filesToUpload, user.id)
       if (!Array.isArray(urls) || urls.length === 0) {
         throw new Error('Upload returned empty images array')
       }
@@ -306,12 +312,12 @@ export default function NewListingStepperPage() {
         ...(saveAsDraft ? { status: 'draft' } : {}),
       }
 
-      // Изображения - для черновика можно без фото, для публикации обязательно
-      if (images.length > 0) {
-        listingData.images = images
+      // Изображения - фильтруем старые data:image перед отправкой
+      const validImages = filterValidImageUrls(images)
+      if (validImages.length > 0) {
+        listingData.images = validImages
       } else if (saveAsDraft) {
-        // Для черновика можно отправить пустой массив или не отправлять вообще
-        // Бэкенд должен принимать пустой массив для черновиков
+        // Для черновика можно отправить пустой массив
         listingData.images = []
       }
 
@@ -820,28 +826,33 @@ export default function NewListingStepperPage() {
 
                 {(localPreviews.length > 0 || images.length > 0) && (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {images.map((img, index) => (
-                      <div
-                        key={index}
-                        className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden group"
-                      >
-                        <img
-                          src={img}
-                          alt={`Фото ${index + 1}`}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            ;(e.currentTarget as HTMLImageElement).src = '/placeholder-image.svg'
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImage(index)}
-                          className="absolute top-2 right-2 px-2 py-1 rounded-full bg-black/60 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    {images.map((img, index) => {
+                      const src = normalizeImageSrc(img)
+                      return (
+                        <div
+                          key={index}
+                          className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden group"
                         >
-                          Удалить
-                        </button>
-                      </div>
-                    ))}
+                          <img
+                            src={src}
+                            alt={`Фото ${index + 1}`}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                            onError={(e) => {
+                              ;(e.currentTarget as HTMLImageElement).src = '/placeholder-image.svg'
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(index)}
+                            className="absolute top-2 right-2 px-2 py-1 rounded-full bg-black/60 text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            Удалить
+                          </button>
+                        </div>
+                      )
+                    })}
                     {/* Local previews while uploading (blob:) */}
                     {localPreviews.slice(images.length).map((src, idx) => (
                       <div
@@ -1010,15 +1021,22 @@ export default function NewListingStepperPage() {
                       </div>
                       {images.length > 0 ? (
                         <div className="grid grid-cols-3 gap-2 mt-3">
-                          {images.slice(0, 6).map((img, index) => (
+                          {images.slice(0, 6).map((img, index) => {
+                            const src = normalizeImageSrc(img)
+                            return (
                             <div
                               key={index}
                               className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group"
                             >
                               <img 
-                                src={img} 
+                                src={src} 
                                 alt={`Фото ${index + 1}`} 
                                 className="w-full h-full object-cover"
+                                loading="lazy"
+                                decoding="async"
+                                onError={(e) => {
+                                  ;(e.currentTarget as HTMLImageElement).src = '/placeholder-image.svg'
+                                }}
                               />
                               {index === 5 && images.length > 6 && (
                                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -1028,7 +1046,8 @@ export default function NewListingStepperPage() {
                                 </div>
                               )}
                             </div>
-                          ))}
+                            )
+                          })}
                         </div>
                       ) : (
                         <p className="text-sm text-gray-500 mt-2">

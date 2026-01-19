@@ -123,15 +123,48 @@ export const listingsAPI = {
 }
 
 export const uploadsAPI = {
-  uploadImages: (files: File[]): Promise<AxiosResponse<{ images: string[] }>> => {
-    const form = new FormData()
-    for (const file of files) form.append('files', file)
-    return api.post<{ images: string[] }>('/uploads/images', form, {
-      headers: {
-        // Let axios set multipart boundary automatically
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+  /**
+   * Upload images to Supabase Storage.
+   * Returns array of public URLs (http(s):// only).
+   * data:image is completely forbidden.
+   */
+  uploadImages: async (files: File[], userId: string): Promise<{ images: string[] }> => {
+    const { supabase, LISTINGS_BUCKET } = await import('./supabase')
+    const urls: string[] = []
+
+    for (const file of files) {
+      // Generate unique path: listings/{userId}/{timestamp}-{random}.{ext}
+      const ext = file.name.split('.').pop() || 'jpg'
+      const timestamp = Date.now()
+      const random = Math.random().toString(36).substring(2, 9)
+      const path = `listings/${userId}/${timestamp}-${random}.${ext}`
+
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from(LISTINGS_BUCKET)
+        .upload(path, file, {
+          upsert: false,
+          contentType: file.type,
+        })
+
+      if (uploadError) {
+        console.error('Supabase upload error:', uploadError)
+        throw new Error(`Ошибка загрузки: ${uploadError.message}`)
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from(LISTINGS_BUCKET)
+        .getPublicUrl(uploadData.path)
+
+      if (!urlData?.publicUrl) {
+        throw new Error('Не удалось получить public URL')
+      }
+
+      urls.push(urlData.publicUrl)
+    }
+
+    return { images: urls }
   },
 }
 

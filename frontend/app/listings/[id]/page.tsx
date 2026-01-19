@@ -18,7 +18,7 @@ import Breadcrumbs from '@/components/Breadcrumbs'
 import Tooltip from '@/components/Tooltip'
 import DateRangePicker from '@/components/DateRangePicker'
 import GuestsStepper from '@/components/GuestsStepper'
-import { validateImageSrc } from '@/lib/imageSrc'
+import { normalizeImageSrc, filterValidImageUrls } from '@/lib/imageUtils'
 
 // Lazy load MapView
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
@@ -121,42 +121,21 @@ export default function ListingDetailPage() {
     tv: Tv,
   }
 
-  // Гарантируем, что images всегда массив - CRITICAL GUARD
-  // TypeScript безопасная обработка: только проверка массива
+  // Фильтруем старые data:image и возвращаем только валидные http(s):// URL
   const getImages = (listingData: any): string[] => {
     if (!listingData) return []
 
-    // Строго фильтруем: только валидные URL (http/https/relative/blob), data:image запрещены
-    const candidates: string[] = []
-
-    if (Array.isArray(listingData.images)) {
-      for (const img of listingData.images) {
-        const validated = validateImageSrc(img)
-        if (validated.ok) candidates.push(validated.src)
-        else if (typeof img === 'string' && img.trim().startsWith('data:image') && typeof window !== 'undefined') {
-          console.error('Invalid data:image in listing.images', { reason: validated.reason, src: img })
-        }
-      }
-    } else if (typeof listingData.images === 'string' && listingData.images.trim().length > 0) {
-      const parts = listingData.images.split(',').map((p: string) => p.trim()).filter(Boolean)
-      for (const part of parts) {
-        const validated = validateImageSrc(part)
-        if (validated.ok) candidates.push(validated.src)
-        else if (part.startsWith('data:image') && typeof window !== 'undefined') {
-          console.error('Invalid data:image in listing.images string', { reason: validated.reason, src: part })
-        }
-      }
-    }
-
+    const validImages = filterValidImageUrls(listingData.images || [])
+    
+    // Если есть imageUrl, добавляем его в начало (если валидный)
     if (listingData.imageUrl && typeof listingData.imageUrl === 'string') {
-      const validated = validateImageSrc(listingData.imageUrl)
-      if (validated.ok && !candidates.includes(validated.src)) candidates.unshift(validated.src)
-      else if (!validated.ok && listingData.imageUrl.trim().startsWith('data:image') && typeof window !== 'undefined') {
-        console.error('Invalid data:image in listing.imageUrl', { reason: validated.reason, src: listingData.imageUrl })
+      const normalized = normalizeImageSrc(listingData.imageUrl)
+      if (normalized !== '/placeholder-image.svg' && !validImages.includes(normalized)) {
+        validImages.unshift(normalized)
       }
     }
 
-    return candidates
+    return validImages
   }
 
   if (!mounted || loading) {
@@ -323,13 +302,8 @@ export default function ListingDetailPage() {
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {images.map((image: string, index: number) => {
-                  const imageUrl = String(image).trim()
-                  const validated = validateImageSrc(imageUrl)
-                  if (!validated.ok && typeof window !== 'undefined' && imageUrl.startsWith('data:image')) {
-                    console.error('Invalid data:image src in ListingDetailPage gallery:', { reason: validated.reason, src: imageUrl })
-                  }
-                  const src = validated.ok ? validated.src : null
-                  const hasImage = src != null
+                  const src = normalizeImageSrc(image)
+                  const hasImage = src !== '/placeholder-image.svg'
                   // imageLoading по умолчанию пустой объект {}, поэтому проверяем явно
                   const isLoading = imageLoading[index] === undefined || imageLoading[index] === true
                   const hasError = imageErrors[index] === true
@@ -356,7 +330,7 @@ export default function ListingDetailPage() {
                               <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 z-0" />
                             )}
                             <img
-                              src={src!}
+                              src={src}
                               alt={`${listing && typeof listing.title === 'string' ? listing.title : 'Объявление'} - фото ${index + 1}`}
                               className="w-full h-full object-cover transition-opacity duration-300"
                               loading="lazy"
@@ -368,6 +342,7 @@ export default function ListingDetailPage() {
                               onError={(e) => {
                                 handleImageError(index)
                                 console.error('Image load error:', src)
+                                ;(e.currentTarget as HTMLImageElement).src = '/placeholder-image.svg'
                               }}
                             />
                             {/* Fullscreen Icon on Hover */}
@@ -470,17 +445,15 @@ export default function ListingDetailPage() {
             <div className="relative max-w-[90vw] max-h-[90vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
               {(() => {
                 const current = images[currentImageIndex]
-                const validated = validateImageSrc(current)
-                if (!validated.ok && typeof window !== 'undefined' && String(current || '').trim().startsWith('data:image')) {
-                  console.error('Invalid data:image src in ListingDetailPage fullscreen:', { reason: validated.reason, src: current })
-                }
-                return validated.ok && !imageErrors[currentImageIndex] ? (
+                const src = normalizeImageSrc(current)
+                return src !== '/placeholder-image.svg' && !imageErrors[currentImageIndex] ? (
                 <img
-                  src={validated.src}
+                  src={src}
                   alt={`${listing && typeof listing.title === 'string' ? listing.title : 'Объявление'} - фото ${currentImageIndex + 1}`}
                   className="max-w-full max-h-[90vh] object-contain"
                   onError={(e) => {
                     handleImageError(currentImageIndex)
+                    ;(e.currentTarget as HTMLImageElement).src = '/placeholder-image.svg'
                   }}
                 />
                 ) : (
