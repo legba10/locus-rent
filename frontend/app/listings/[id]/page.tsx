@@ -18,6 +18,7 @@ import Breadcrumbs from '@/components/Breadcrumbs'
 import Tooltip from '@/components/Tooltip'
 import DateRangePicker from '@/components/DateRangePicker'
 import GuestsStepper from '@/components/GuestsStepper'
+import { validateImageSrc } from '@/lib/imageSrc'
 
 // Lazy load MapView
 const MapView = dynamic(() => import('@/components/MapView'), { ssr: false })
@@ -216,17 +217,6 @@ export default function ListingDetailPage() {
   // Получаем images после проверки listing
   const images = getImages(listing)
   
-  // Debug: логируем для отладки (убрать в продакшене)
-  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-    console.log('Listing images debug:', {
-      hasListing: !!listing,
-      imagesRaw: listing?.images,
-      imagesProcessed: images,
-      imagesCount: images.length,
-      imageUrl: listing?.imageUrl
-    })
-  }
-  
   // Безопасное получение цены
   const price = (listing?.pricePerNight != null && !isNaN(Number(listing.pricePerNight))) 
     ? Number(listing.pricePerNight) 
@@ -334,8 +324,12 @@ export default function ListingDetailPage() {
               >
                 {images.map((image: string, index: number) => {
                   const imageUrl = String(image).trim()
-                  // Принимаем любую непустую строку как потенциальный URL изображения
-                  const hasImage = imageUrl.length > 0
+                  const validated = validateImageSrc(imageUrl)
+                  if (!validated.ok && typeof window !== 'undefined' && imageUrl.startsWith('data:image')) {
+                    console.error('Invalid data:image src in ListingDetailPage gallery:', { reason: validated.reason, src: imageUrl })
+                  }
+                  const src = validated.ok ? validated.src : null
+                  const hasImage = src != null
                   // imageLoading по умолчанию пустой объект {}, поэтому проверяем явно
                   const isLoading = imageLoading[index] === undefined || imageLoading[index] === true
                   const hasError = imageErrors[index] === true
@@ -362,7 +356,7 @@ export default function ListingDetailPage() {
                               <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 z-0" />
                             )}
                             <img
-                              src={imageUrl}
+                              src={src!}
                               alt={`${listing && typeof listing.title === 'string' ? listing.title : 'Объявление'} - фото ${index + 1}`}
                               className="w-full h-full object-cover transition-opacity duration-300"
                               loading="lazy"
@@ -373,10 +367,7 @@ export default function ListingDetailPage() {
                               }}
                               onError={(e) => {
                                 handleImageError(index)
-                                console.error('Image load error:', imageUrl)
-                                // Скрываем битое изображение
-                                const target = e.target as HTMLImageElement
-                                target.style.display = 'none'
+                                console.error('Image load error:', src)
                               }}
                             />
                             {/* Fullscreen Icon on Hover */}
@@ -385,12 +376,13 @@ export default function ListingDetailPage() {
                             </div>
                           </>
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-                            <div className="text-center px-4">
-                              <ImageIcon className="w-16 h-16 mx-auto mb-2 opacity-50 text-gray-400" />
-                              <p className="text-sm font-medium text-gray-500">Фото скоро появится</p>
-                            </div>
-                          </div>
+                          <img
+                            src="/placeholder-image.svg"
+                            alt="Фото скоро появится"
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                          />
                         )}
                       </div>
                     </div>
@@ -476,23 +468,28 @@ export default function ListingDetailPage() {
             )}
             
             <div className="relative max-w-[90vw] max-h-[90vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-              {images[currentImageIndex] && !imageErrors[currentImageIndex] ? (
+              {(() => {
+                const current = images[currentImageIndex]
+                const validated = validateImageSrc(current)
+                if (!validated.ok && typeof window !== 'undefined' && String(current || '').trim().startsWith('data:image')) {
+                  console.error('Invalid data:image src in ListingDetailPage fullscreen:', { reason: validated.reason, src: current })
+                }
+                return validated.ok && !imageErrors[currentImageIndex] ? (
                 <img
-                  src={images[currentImageIndex]}
+                  src={validated.src}
                   alt={`${listing && typeof listing.title === 'string' ? listing.title : 'Объявление'} - фото ${currentImageIndex + 1}`}
                   className="max-w-full max-h-[90vh] object-contain"
                   onError={(e) => {
                     handleImageError(currentImageIndex)
-                    const target = e.target as HTMLImageElement
-                    target.style.display = 'none'
                   }}
                 />
-              ) : (
+                ) : (
                 <div className="text-white text-center">
                   <ImageIcon className="w-24 h-24 mx-auto mb-3 opacity-50" />
                   <p>Фото не загружается</p>
                 </div>
-              )}
+                )
+              })()}
             </div>
             
             {images.length > 1 && (

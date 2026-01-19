@@ -166,29 +166,39 @@ export default function CityAutocomplete({
     }
   }, [selectedIndex])
 
-  // Update dropdown position - только один раз при открытии, без обновлений при скролле
+  // Update dropdown position - фиксируем под инпутом и ограничиваем по viewport
   useEffect(() => {
     if (showSuggestions && inputRef.current && mounted && typeof window !== 'undefined') {
       const rect = inputRef.current.getBoundingClientRect()
       const viewportWidth = window.innerWidth
-      const isMobile = viewportWidth < 768
-      
-      // Fixed positioning relative to viewport
+      const viewportHeight = window.innerHeight
+
       const left = Math.max(8, Math.min(rect.left, viewportWidth - rect.width - 8))
       const width = Math.min(rect.width, viewportWidth - 16)
-      const top = rect.bottom + 4
-      
+      const maxHeightPx = Math.floor(viewportHeight * 0.6)
+
+      // всегда под инпутом, но если не влезает — прижимаем вверх так, чтобы dropdown оставался в пределах экрана
+      const preferredTop = rect.bottom + 4
+      const top = Math.min(preferredTop, Math.max(8, viewportHeight - maxHeightPx - 8))
+
       setDropdownPosition({ top, left, width })
-      
-      // Блокируем скролл страницы при открытом dropdown на мобильных
-      if (isMobile) {
-        document.body.style.overflow = 'hidden'
-        return () => {
-          document.body.style.overflow = ''
-        }
-      }
     } else {
       setDropdownPosition(null)
+    }
+  }, [showSuggestions, mounted])
+
+  // Lock body scroll while dropdown is open on mobile
+  useEffect(() => {
+    if (!mounted || typeof window === 'undefined') return
+    const isMobile = window.innerWidth < 768
+    if (!isMobile) return
+
+    if (showSuggestions) {
+      const prevOverflow = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => {
+        document.body.style.overflow = prevOverflow
+      }
     }
   }, [showSuggestions, mounted])
 
@@ -210,7 +220,13 @@ export default function CityAutocomplete({
 
   return (
     <div className={`relative w-full ${className}`} style={{ zIndex: 1 }}>
-      <div className="relative w-full">
+      {/* Без position:absolute в форме: иконки через flex layout */}
+      <div
+        className={`w-full border rounded-lg bg-white transition-all flex items-center gap-2 px-3 sm:px-4 ${
+          error ? 'border-red-300 focus-within:ring-2 focus-within:ring-red-500' : 'border-gray-200 focus-within:ring-2 focus-within:ring-primary'
+        }`}
+      >
+        <MapPin className="w-5 h-5 text-gray-400 flex-shrink-0" />
         <input
           ref={inputRef}
           type="text"
@@ -220,13 +236,10 @@ export default function CityAutocomplete({
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholder={placeholder}
-          className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 pl-9 sm:pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm sm:text-base h-[44px] sm:h-[48px] ${
-            error ? 'border-red-300 focus:ring-red-500' : 'border-gray-200'
-          }`}
+          className="flex-1 bg-transparent outline-none text-sm sm:text-base min-h-[44px] sm:min-h-[48px] py-2.5 sm:py-3"
         />
-        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
         {loading && (
-          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 animate-spin" />
+          <Loader2 className="w-5 h-5 text-gray-400 animate-spin flex-shrink-0" />
         )}
       </div>
 

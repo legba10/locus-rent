@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { MapPin, Star, Users, Bed, Bath, Eye, Image as ImageIcon } from 'lucide-react'
+import { validateImageSrc } from '@/lib/imageSrc'
 
 interface ListingCardProps {
   listing: {
@@ -38,17 +39,21 @@ export default function ListingCard({ listing }: ListingCardProps) {
     : []
   
   // Проверяем также imageUrl - безопасно
-  let imageUrl: string | null = null
-  if (images.length > 0) {
-    imageUrl = images[0]
-  } else if (listing.imageUrl && typeof listing.imageUrl === 'string' && listing.imageUrl.trim().length > 0) {
-    imageUrl = listing.imageUrl.trim()
+  let candidateSrc: string | null = null
+  if (images.length > 0) candidateSrc = images[0]
+  else if (listing.imageUrl && typeof listing.imageUrl === 'string') candidateSrc = listing.imageUrl
+
+  const validated = validateImageSrc(candidateSrc)
+  if (!validated.ok && typeof window !== 'undefined' && candidateSrc?.trim().startsWith('data:image')) {
+    // важно: ловим обрезанные data:image/*;base64 без payload, чтобы не получать ERR_INVALID_URL
+    console.error('Invalid data:image src in ListingCard:', { reason: validated.reason, src: candidateSrc })
   }
+
+  const imageSrc = validated.ok ? validated.src : null
   const guests = listing.maxGuests || listing.guests
   const views = listing.views || listing.viewCount || 0
 
-  // Принимаем любую непустую строку как потенциальный URL изображения
-  const hasImage = imageUrl != null && imageUrl.length > 0
+  const hasImage = imageSrc != null && !imageError
 
   return (
     <Link href={`/listings/${listing.id}`}>
@@ -56,13 +61,13 @@ export default function ListingCard({ listing }: ListingCardProps) {
         {/* Image */}
         <div className="relative w-full h-48 sm:h-56 md:h-64 bg-gray-100 overflow-hidden">
           {/* Image or Fallback */}
-          {hasImage && !imageError ? (
+          {hasImage ? (
             <>
               {imageLoading && (
                 <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 z-0" />
               )}
               <img
-                src={imageUrl!}
+                src={imageSrc!}
                 alt={listing.title || 'Объявление'}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 loading="lazy"
@@ -72,22 +77,20 @@ export default function ListingCard({ listing }: ListingCardProps) {
                   setImageError(false)
                 }}
                 onError={(e) => {
-                  console.error('Image load error in ListingCard:', imageUrl)
+                  console.error('Image load error in ListingCard:', imageSrc)
                   setImageLoading(false)
                   setImageError(true)
-                  // Скрываем битое изображение
-                  const target = e.target as HTMLImageElement
-                  target.style.display = 'none'
                 }}
               />
             </>
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gradient-to-br from-gray-50 to-gray-100">
-              <div className="text-center px-4">
-                <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p className="text-sm font-medium">Фото скоро появится</p>
-              </div>
-            </div>
+            <img
+              src="/placeholder-image.svg"
+              alt="Фото скоро появится"
+              className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
           )}
           
           {listing.rating && (

@@ -12,6 +12,7 @@ import { useConfirmDialog } from '@/components/ConfirmDialog'
 import { toast } from '@/components/Toast'
 import EmptyState from '@/components/EmptyState'
 import { ListingCardSkeleton } from '@/components/Skeleton'
+import { validateImageSrc } from '@/lib/imageSrc'
 
 export default function LandlordPage() {
   const router = useRouter()
@@ -211,34 +212,37 @@ export default function LandlordPage() {
                 <div className="grid-responsive">
                   {listings.map((listing) => {
                     // Гарантируем, что images всегда массив
-                    const images = Array.isArray(listing.images) ? listing.images : (listing.images ? [listing.images] : [])
+                    const images: string[] = Array.isArray(listing.images)
+                      ? listing.images.filter((img: any): img is string => img != null && typeof img === 'string' && img.trim().length > 0)
+                      : []
+                    const firstCandidate = images.length > 0 ? images[0] : null
+                    const validated = validateImageSrc(firstCandidate)
+                    if (!validated.ok && typeof window !== 'undefined' && String(firstCandidate || '').trim().startsWith('data:image')) {
+                      console.error('Invalid data:image src in LandlordPage listing tile:', { reason: validated.reason, src: firstCandidate })
+                    }
+                    const src = validated.ok ? validated.src : null
                     
                     return (
                       <div key={listing.id} className="card card-hover overflow-hidden">
                       {/* Image */}
                       <div className="relative w-full h-48 bg-gray-100 -m-4 sm:-m-6 mb-4 sm:mb-6">
-                        {images[0] ? (
+                        {src ? (
                           <img
-                            src={images[0]}
+                            src={src}
                             alt={listing.title || 'Объявление'}
                             className="w-full h-full object-cover"
                             onError={(e) => {
-                              // Fallback при ошибке загрузки изображения
-                              const target = e.target as HTMLImageElement
-                              target.style.display = 'none'
-                              const parent = target.parentElement
-                              if (parent && !parent.querySelector('.image-fallback')) {
-                                const fallback = document.createElement('div')
-                                fallback.className = 'image-fallback w-full h-full flex items-center justify-center text-gray-400'
-                                fallback.innerHTML = '<svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>'
-                                parent.appendChild(fallback)
-                              }
+                              console.error('Image load error in LandlordPage listing tile:', src)
                             }}
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">
-                            <Home className="w-12 h-12" />
-                          </div>
+                          <img
+                            src="/placeholder-image.svg"
+                            alt="Фото скоро появится"
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                            decoding="async"
+                          />
                         )}
                         <div className="absolute top-3 right-3">
                           <Link

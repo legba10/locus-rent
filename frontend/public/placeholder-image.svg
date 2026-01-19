@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f3f4f6"/>
+      <stop offset="1" stop-color="#e5e7eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" rx="32" fill="url(#bg)"/>
+  <g fill="none" stroke="#9ca3af" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" transform="translate(0,0)">
+    <rect x="470" y="240" width="260" height="195" rx="24"/>
+    <circle cx="535" cy="305" r="22"/>
+    <path d="M510 415l70-70a22 22 0 0 1 32 0l55 55"/>
+    <path d="M600 400l35-35a22 22 0 0 1 32 0l45 45"/>
+  </g>
+  <text x="600" y="520" text-anchor="middle" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="28" fill="#6b7280">
+    Фото скоро появится
+  </text>
+</svg>
+
