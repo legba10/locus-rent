@@ -72,11 +72,11 @@ export default function ListingDetailPage() {
       const response = await listingsAPI.getOne(params.id as string)
       // Обрабатываем разные форматы ответа
       const listingData = response.data?.data || response.data || null
-      if (listingData) {
+      if (listingData && typeof listingData === 'object') {
         // КРИТИЧНО: санитизируем images перед сохранением в state
         const sanitizedListing = {
           ...listingData,
-          images: sanitizeImages(listingData.images),
+          images: sanitizeImages(listingData.images || []),
         }
         setListing(sanitizedListing)
       } else {
@@ -360,7 +360,7 @@ export default function ListingDetailPage() {
                 className="flex overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-2 md:gap-2 h-[300px] sm:h-[400px] md:h-[500px] scrollbar-hide"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
-                {images.map((image: string, index: number) => {
+                {Array.isArray(images) && images.length > 0 && images.map((image: string, index: number) => {
                   const src = normalizeImageSrc(image)
                   const hasImage = src !== '/placeholder-image.svg'
                   // imageLoading по умолчанию пустой объект {}, поэтому проверяем явно
@@ -733,7 +733,7 @@ export default function ListingDetailPage() {
                     </div>
                   ) : reviews && reviews.length > 0 ? (
                     <div className="space-y-4">
-                      {reviews.map((review: any, index: number) => (
+                      {Array.isArray(reviews) && reviews.length > 0 && reviews.map((review: any, index: number) => (
                         <div key={review.id || index} className="bg-white rounded-xl p-5 sm:p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
                             <div className="flex items-center gap-2.5">

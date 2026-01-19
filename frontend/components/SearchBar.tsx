@@ -95,7 +95,7 @@ export default function SearchBar() {
     <div className="max-w-5xl mx-auto w-full" id="home-search">
       <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-3 sm:p-4 md:p-6 w-full">
         {/* Mobile: строгий vertical layout, Desktop: horizontal */}
-        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full md:gap-4">
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 w-full md:gap-4 items-end">
           {/* Location */}
           <div className="flex-1 w-full lg:min-w-0 lg:flex-shrink">
             <label className="flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">

@@ -63,8 +63,18 @@ export default function CityAutocomplete({
 
   // Debounced search function
   const searchCities = useCallback(async (query: string) => {
-    if (query.length < 2) {
-      setSuggestions(POPULAR_CITIES)
+    if (query.length < 1) {
+      setSuggestions(POPULAR_CITIES.slice(0, 10))
+      setHighlightedText('')
+      return
+    }
+
+    if (query.length === 1) {
+      // При одном символе показываем популярные города, которые начинаются с этой буквы
+      const filtered = POPULAR_CITIES.filter(city => 
+        city.name.toLowerCase().startsWith(query.toLowerCase())
+      )
+      setSuggestions(filtered.length > 0 ? filtered : POPULAR_CITIES.slice(0, 10))
       setHighlightedText('')
       return
     }
@@ -73,17 +83,25 @@ export default function CityAutocomplete({
     try {
       const response = await citiesAPI.search(query, 15)
       const cities = response.data || []
-      // Сортируем по релевантности: сначала точные совпадения, потом частичные
-      const sortedCities = cities.sort((a, b) => {
-        const aMatch = a.name.toLowerCase().startsWith(query.toLowerCase()) ? 0 : 1
-        const bMatch = b.name.toLowerCase().startsWith(query.toLowerCase()) ? 0 : 1
-        return aMatch - bMatch
-      })
-      setSuggestions(sortedCities.slice(0, 15))
+      
+      // Если API вернул результаты, сортируем по релевантности
+      if (cities.length > 0) {
+        const sortedCities = (cities as City[]).sort((a: City, b: City) => {
+          const aStarts = a.name.toLowerCase().startsWith(query.toLowerCase()) ? 0 : 1
+          const bStarts = b.name.toLowerCase().startsWith(query.toLowerCase()) ? 0 : 1
+          if (aStarts !== bStarts) return aStarts - bStarts
+          return a.name.localeCompare(b.name, 'ru')
+        })
+        setSuggestions(sortedCities.slice(0, 15))
+      } else {
+        // Если нет результатов из API, показываем популярные
+        setSuggestions(POPULAR_CITIES.slice(0, 10))
+      }
       setHighlightedText(query)
     } catch (error) {
       console.error('City search error:', error)
-      setSuggestions([])
+      // При ошибке показываем популярные города
+      setSuggestions(POPULAR_CITIES.slice(0, 10))
     } finally {
       setLoading(false)
     }
@@ -278,8 +296,10 @@ export default function CityAutocomplete({
             left: `${dropdownPosition.left}px`,
             width: `${dropdownPosition.width}px`,
             maxHeight: window.innerWidth < 768 ? '60vh' : '16rem',
-            position: 'fixed'
+            position: 'fixed',
+            willChange: 'transform'
           }}
+          onMouseDown={(e) => e.preventDefault()}
         >
           {suggestions.map((city, index) => (
             <button
