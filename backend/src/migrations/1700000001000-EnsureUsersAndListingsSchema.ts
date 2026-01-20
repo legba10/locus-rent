@@ -13,10 +13,26 @@ import { MigrationInterface, QueryRunner } from 'typeorm'
  */
 export class EnsureUsersAndListingsSchema1700000001000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
+    // UUID generation support (used by DEFAULT gen_random_uuid()).
+    // Safe to run multiple times.
+    await queryRunner.query(`CREATE EXTENSION IF NOT EXISTS pgcrypto;`)
+
+    // Create base tables if they don't exist yet (safe, non-destructive).
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid()
+      );
+    `)
+
+    await queryRunner.query(`
+      CREATE TABLE IF NOT EXISTS listings (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid()
+      );
+    `)
+
     // USERS
     await queryRunner.query(`
       ALTER TABLE IF EXISTS users
-        ADD COLUMN IF NOT EXISTS id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
         ADD COLUMN IF NOT EXISTS email varchar,
         ADD COLUMN IF NOT EXISTS phone varchar,
         ADD COLUMN IF NOT EXISTS password varchar,
@@ -39,7 +55,6 @@ export class EnsureUsersAndListingsSchema1700000001000 implements MigrationInter
     // LISTINGS
     await queryRunner.query(`
       ALTER TABLE IF EXISTS listings
-        ADD COLUMN IF NOT EXISTS id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
         ADD COLUMN IF NOT EXISTS title varchar NOT NULL DEFAULT '',
         ADD COLUMN IF NOT EXISTS description text NOT NULL DEFAULT '',
         ADD COLUMN IF NOT EXISTS images text,

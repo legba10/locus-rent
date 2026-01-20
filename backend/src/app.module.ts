@@ -68,7 +68,11 @@ import { UploadsModule } from './uploads/uploads.module'
           type: 'postgres',
           url: finalUrl,
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
-          synchronize: process.env.NODE_ENV !== 'production',
+          // Никогда не используем synchronize в проде/Neon: схема должна контролироваться миграциями
+          synchronize: false,
+          migrations: [__dirname + '/migrations/*{.ts,.js}'],
+          // На проде автоматически применяем миграции при старте (безопасные и идемпотентные)
+          migrationsRun: process.env.NODE_ENV === 'production',
           logging: process.env.NODE_ENV === 'development',
           ssl: {
             rejectUnauthorized: false, // Neon использует валидные сертификаты

@@ -113,6 +113,12 @@ async function bootstrap() {
       })
     )
 
+    // Healthcheck root (Render/SPA safety): never "Cannot GET /"
+    const httpAdapter = app.getHttpAdapter()
+    // Express adapter instance
+    const server: any = httpAdapter.getInstance()
+    server.get('/', (_req: any, res: any) => res.json({ status: 'ok' }))
+
     // Global prefix
     app.setGlobalPrefix('api')
 

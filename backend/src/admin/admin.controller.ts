@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Param, Patch, Body } from '@nestjs/common'
+import { Controller, Get, UseGuards, Param, Patch, Body, ParseUUIDPipe } from '@nestjs/common'
 import { AdminService } from './admin.service'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { RolesGuard } from './guards/roles.guard'
@@ -21,7 +21,10 @@ export class AdminController {
   }
 
   @Patch('listings/:id/moderate')
-  moderateListing(@Param('id') id: string, @Body() body: { status: string; revisionReason?: string }) {
+  moderateListing(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() body: { status: string; revisionReason?: string }
+  ) {
     return this.adminService.moderateListing(id, body.status, body.revisionReason)
   }
 
@@ -31,7 +34,7 @@ export class AdminController {
   }
 
   @Patch('users/:id/block')
-  blockUser(@Param('id') id: string) {
+  blockUser(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.adminService.blockUser(id)
   }
 

@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   Request,
+  ParseUUIDPipe,
 } from '@nestjs/common'
 import { ListingsService } from './listings.service'
 import { CreateListingDto } from './dto/create-listing.dto'
@@ -41,25 +42,25 @@ export class ListingsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.listingsService.findOne(id)
   }
 
   @Post(':id/duplicate')
   @UseGuards(JwtAuthGuard)
-  duplicate(@Param('id') id: string, @Request() req) {
+  duplicate(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Request() req) {
     return this.listingsService.duplicate(id, req.user.id)
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() updateListingDto: UpdateListingDto) {
+  update(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string, @Body() updateListingDto: UpdateListingDto) {
     return this.listingsService.update(id, updateListingDto)
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.listingsService.remove(id)
   }
 }
