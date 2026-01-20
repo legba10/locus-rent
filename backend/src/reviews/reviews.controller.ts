@@ -7,6 +7,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  ParseUUIDPipe,
 } from '@nestjs/common'
 import { ReviewsService } from './reviews.service'
 import { CreateReviewDto } from './dto/create-review.dto'
@@ -28,18 +29,18 @@ export class ReviewsController {
   }
 
   @Get('listing/:listingId')
-  findByListing(@Param('listingId') listingId: string) {
+  findByListing(@Param('listingId', new ParseUUIDPipe({ version: '4' })) listingId: string) {
     return this.reviewsService.findByListing(listingId)
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.reviewsService.findOne(id)
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.reviewsService.remove(id)
   }
 }

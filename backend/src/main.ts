@@ -118,6 +118,7 @@ async function bootstrap() {
     // Express adapter instance
     const server: any = httpAdapter.getInstance()
     server.get('/', (_req: any, res: any) => res.json({ status: 'ok' }))
+    server.get('/healthcheck', (_req: any, res: any) => res.json({ status: 'ok' }))
 
     // Global prefix
     app.setGlobalPrefix('api')

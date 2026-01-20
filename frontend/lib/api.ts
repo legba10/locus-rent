@@ -5,14 +5,20 @@ import { User } from './types/user'
 import { Listing } from './types/listing'
 import { SmartSearchResults } from './types/recommendation'
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-if (!API_URL) {
-  throw new Error('NEXT_PUBLIC_API_URL is not defined');
+export const API_URL = process.env.NEXT_PUBLIC_API_URL?.trim() || ''
+// Важно: НЕ падаем на старте приложения, если переменная окружения не задана.
+// Иначе SPA "умирает" и клики/навигация перестают работать.
+if (!API_URL && typeof window !== 'undefined') {
+  // eslint-disable-next-line no-console
+  console.error(
+    'NEXT_PUBLIC_API_URL is not defined. API requests will fail until it is configured in the frontend environment.'
+  )
 }
 
 const api = axios.create({
-  baseURL: `${API_URL}/api`,
+  // Если API_URL не задан, используем относительный /api (может быть проксирован на платформе),
+  // но главное — не ломаем runtime фронта.
+  baseURL: API_URL ? `${API_URL}/api` : '/api',
   headers: {
     'Content-Type': 'application/json',
   },

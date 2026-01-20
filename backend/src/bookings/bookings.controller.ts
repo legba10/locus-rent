@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Request,
+  ParseUUIDPipe,
 } from '@nestjs/common'
 import { BookingsService } from './bookings.service'
 import { CreateBookingDto } from './dto/create-booking.dto'
@@ -36,19 +37,22 @@ export class BookingsController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.bookingsService.findOne(id)
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  update(@Param('id') id: string, @Body() updateBookingDto: UpdateBookingDto) {
+  update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() updateBookingDto: UpdateBookingDto
+  ) {
     return this.bookingsService.update(id, updateBookingDto)
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: string) {
+  remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.bookingsService.remove(id)
   }
 }

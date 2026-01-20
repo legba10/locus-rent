@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   Request,
+  ParseUUIDPipe,
 } from '@nestjs/common'
 import { SupportService } from './support.service'
 import { CreateSupportMessageDto } from './dto/create-support-message.dto'
@@ -38,21 +39,24 @@ export class SupportController {
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.supportService.findOne(id)
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  update(@Param('id') id: string, @Body() updateDto: UpdateSupportMessageDto) {
+  update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() updateDto: UpdateSupportMessageDto
+  ) {
     return this.supportService.update(id, updateDto)
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     return this.supportService.remove(id)
   }
 }

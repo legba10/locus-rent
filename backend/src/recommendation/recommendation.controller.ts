@@ -7,6 +7,7 @@ import {
   UseGuards,
   Request,
   Param,
+  ParseUUIDPipe,
 } from '@nestjs/common'
 import { RecommendationEngineService } from './recommendation-engine.service'
 import { SmartNavigatorService } from './smart-navigator.service'
@@ -98,7 +99,7 @@ export class RecommendationController {
   @Post('recommendations/:id/feedback')
   @UseGuards(JwtAuthGuard)
   async markFeedback(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() body: { feedback: 'liked' | 'disliked' },
     @Request() req: any
   ) {
@@ -111,7 +112,7 @@ export class RecommendationController {
    */
   @Get('trust/owner/:ownerId')
   @UseGuards(JwtAuthGuard)
-  async checkOwnerTrust(@Param('ownerId') ownerId: string) {
+  async checkOwnerTrust(@Param('ownerId', new ParseUUIDPipe({ version: '4' })) ownerId: string) {
     return this.trustService.checkOwnerTrust(ownerId)
   }
 }
