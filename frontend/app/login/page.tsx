@@ -61,8 +61,6 @@ function LoginForm() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Header />
-      
       <main className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-6 sm:mb-8">
