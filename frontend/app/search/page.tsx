@@ -2,7 +2,6 @@
 
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import Header from '@/components/Header'
 import ListingCard from '@/components/ListingCard'
 import { ListingCardSkeleton } from '@/components/Skeleton'
 import EmptyState from '@/components/EmptyState'
@@ -77,8 +76,6 @@ function SearchContent() {
 
   return (
     <div className="min-h-screen bg-white w-full overflow-x-hidden">
-      <Header />
-      
       <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 w-full">
         <div className="max-w-7xl mx-auto w-full">
           <Breadcrumbs 

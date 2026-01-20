@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Header from '@/components/Header'
 import Logo from '@/components/Logo'
 import { listingsAPI } from '@/lib/api'
 import { ArrowLeft, Loader2, MapPin, Upload, X } from 'lucide-react'
@@ -83,8 +82,6 @@ export default function NewListingPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
-      
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
           {/* Breadcrumbs */}

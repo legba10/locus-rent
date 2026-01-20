@@ -3,7 +3,6 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import Header from '@/components/Header'
 import Logo from '@/components/Logo'
 import { authAPI } from '@/lib/api'
 import { useAuthStore } from '@/lib/store'

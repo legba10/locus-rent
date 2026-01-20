@@ -1,11 +1,9 @@
 import Link from 'next/link'
 import { Home, Search } from 'lucide-react'
-import Header from '@/components/Header'
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-white">
-      <Header />
       <main className="container mx-auto px-4 py-20">
         <div className="max-w-md mx-auto text-center">
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gray-100 mb-6">

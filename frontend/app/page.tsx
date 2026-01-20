@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import Header from '@/components/Header'
 import SearchBar from '@/components/SearchBar'
 import ListingCard from '@/components/ListingCard'
 import WelcomeAnimation from '@/components/WelcomeAnimation'
@@ -71,8 +70,6 @@ export default function Home() {
       {showWelcome && <WelcomeAnimation onComplete={handleWelcomeComplete} />}
       
       <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/30 w-full overflow-x-hidden">
-        <Header />
-        
         {/* Hero Section - Поиск как главный элемент */}
         <section className="relative bg-gradient-to-br from-blue-50/30 via-white to-blue-50/30 py-8 sm:py-12 md:py-16 px-3 sm:px-4 w-full overflow-x-hidden">
           <div className="container mx-auto max-w-5xl relative z-10 w-full">
@@ -284,31 +281,6 @@ export default function Home() {
           )}
         </section>
 
-        {/* Footer */}
-        <footer className="bg-gray-50 border-t border-gray-200 mt-12 sm:mt-16 md:mt-20">
-          <div className="container mx-auto px-4 py-8 sm:py-10 md:py-12">
-            <div className="text-center">
-              <Logo size="md" showText={true} className="justify-center mb-4" />
-              <p className="text-sm sm:text-base text-gray-600 mb-6 max-w-2xl mx-auto px-2">
-                LOCUS — платформа для аренды жилья без посредников. Минимальная комиссия, прямое общение, полный контроль
-              </p>
-              <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-sm text-gray-600">
-                <Link href="/smart-search" className="hover:text-primary transition-colors cursor-pointer">
-                  Умный поиск
-                </Link>
-                <Link href="/register" className="hover:text-primary transition-colors cursor-pointer">
-                  Разместить объявление
-                </Link>
-                <Link href="/login" className="hover:text-primary transition-colors cursor-pointer">
-                  Войти
-                </Link>
-              </div>
-              <p className="text-gray-500 text-sm mt-6 sm:mt-8">
-                © {new Date().getFullYear()} LOCUS. Все права защищены.
-              </p>
-            </div>
-          </div>
-        </footer>
       </div>
     </>
   )

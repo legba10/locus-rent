@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Header from '@/components/Header'
 import SmartNavigator from '@/components/SmartNavigator'
 import SmartResults from '@/components/SmartResults'
 import SmartMapView from '@/components/SmartMapView'
@@ -16,8 +15,6 @@ export default function SmartSearchPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
-      
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {!results ? (

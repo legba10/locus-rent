@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Header from '@/components/Header'
 import { Shield, MessageSquare, FileText, Users, CheckCircle2, X, Loader2, UserPlus, Mail, Phone, Calendar, MapPin, Eye, Bed, Bath, Users as UsersIcon, Wrench } from 'lucide-react'
 import { adminAPI, supportAPI } from '@/lib/api'
 import { useAuthStore } from '@/lib/store'
@@ -134,8 +133,6 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
-      <Header />
-      
       <main className="container-custom py-4 sm:py-6 md:py-8">
         <div className="mb-6 sm:mb-8">
           <h1 className="heading-1 mb-2">Админ-панель</h1>

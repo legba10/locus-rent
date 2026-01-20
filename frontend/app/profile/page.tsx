@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Header from '@/components/Header'
 import { User as UserIcon, Calendar, Heart, MessageSquare, Bell, Settings, History, Sparkles } from 'lucide-react'
 import { usersAPI, recommendationAPI } from '@/lib/api'
 import { useAuthStore } from '@/lib/store'

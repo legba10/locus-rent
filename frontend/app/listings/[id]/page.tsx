@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
-import Header from '@/components/Header'
 import { listingsAPI, bookingsAPI, reviewsAPI } from '@/lib/api'
 import { useAuthStore } from '@/lib/store'
 import { 
@@ -294,7 +293,6 @@ export default function ListingDetailPage() {
   if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-white">
-        <Header />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center">
             <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
@@ -308,7 +306,6 @@ export default function ListingDetailPage() {
   if (error && !listing) {
     return (
       <div className="min-h-screen bg-white">
-        <Header />
         <div className="container mx-auto px-4 py-20">
           <div className="text-center max-w-md mx-auto">
             <div className="mb-6">
@@ -434,8 +431,6 @@ export default function ListingDetailPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
-      
       <main>
         {/* Breadcrumbs */}
         <div className="container mx-auto px-4 pt-6">

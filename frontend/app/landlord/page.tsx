@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Header from '@/components/Header'
 import { Home, Plus, Calendar, DollarSign, Star, Trash2, Eye } from 'lucide-react'
 import Link from 'next/link'
 import { listingsAPI, bookingsAPI } from '@/lib/api'
@@ -116,8 +115,6 @@ export default function LandlordPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
-      <Header />
-      
       <main className="container-custom py-4 sm:py-6 md:py-8">
         <div className="max-w-6xl mx-auto w-full">
           {/* Header */}

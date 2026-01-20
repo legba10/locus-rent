@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Header from '@/components/Header'
 import { listingsAPI, citiesAPI, uploadsAPI } from '@/lib/api'
 import { normalizeImageSrc, sanitizeImages } from '@/lib/imageUtils'
 import { ArrowLeft, ArrowRight, Loader2, MapPin, Upload, CheckCircle2, FileText, Home, DollarSign, Sparkles, Camera, CheckCircle, AlertCircle } from 'lucide-react'
@@ -435,8 +434,6 @@ export default function NewListingStepperPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50/30 via-white to-blue-50/30">
-      <Header />
-      
       <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 w-full overflow-x-hidden">
         <div className="max-w-4xl mx-auto w-full">
           <Breadcrumbs
