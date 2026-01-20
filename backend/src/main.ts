@@ -7,6 +7,7 @@ import * as path from 'path'
 import { UsersService } from './users/users.service'
 import { UserRole } from './users/entities/user.entity'
 import * as bcrypt from 'bcrypt'
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter'
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap')
@@ -123,6 +124,9 @@ async function bootstrap() {
         transform: true,
       })
     )
+
+    // Глобальный JSON-обработчик ошибок
+    app.useGlobalFilters(new AllExceptionsFilter())
 
     // Автоматическое создание администратора при первом запуске
     try {
