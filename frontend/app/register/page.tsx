@@ -130,7 +130,6 @@ function RegisterForm() {
   if (success) {
     return (
       <div className="min-h-screen bg-white flex flex-col">
-        <Header />
         <main className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
           <div className="text-center max-w-md">
             <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-100 mb-4 sm:mb-6">
@@ -147,7 +146,6 @@ function RegisterForm() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Header />
       
       <main className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
         <div className="w-full max-w-md">

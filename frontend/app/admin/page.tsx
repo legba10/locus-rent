@@ -133,6 +133,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
+  
       <main className="container-custom py-4 sm:py-6 md:py-8">
         <div className="mb-6 sm:mb-8">
           <h1 className="heading-1 mb-2">Админ-панель</h1>

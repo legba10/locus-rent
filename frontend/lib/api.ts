@@ -57,10 +57,13 @@ api.interceptors.response.use(
     // Обработка 401 - неавторизован
     if (error.response?.status === 401) {
       // Не перенаправляем на /login если мы уже на странице логина/регистрации
-      const currentPath = window.location.pathname
-      if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
-        localStorage.removeItem('accessToken')
-        window.location.href = '/login'
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname
+        if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
+          localStorage.removeItem('accessToken')
+          // Используем replace вместо href для избежания добавления в историю браузера
+          window.location.replace('/login')
+        }
       }
     }
     
