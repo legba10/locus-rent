@@ -8,9 +8,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { FilesInterceptor } from '@nestjs/platform-express'
+import type { Request } from 'express'
 import { memoryStorage } from 'multer'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { UploadsService } from './uploads.service'
+import { UploadsService, type UploadedFile } from './uploads.service'
 
 @Controller('uploads')
 export class UploadsController {
@@ -34,8 +35,8 @@ export class UploadsController {
     })
   )
   async uploadImages(
-    @UploadedFiles() files: Express.Multer.File[],
-    @Req() req: any
+    @UploadedFiles() files: UploadedFile[],
+    @Req() req: Request
   ): Promise<{ images: string[] }> {
     if (!files || files.length === 0) {
       throw new BadRequestException('Файлы не переданы')
@@ -43,7 +44,7 @@ export class UploadsController {
 
     const saved = await this.uploadsService.saveListingImages({
       files,
-      userId: req.user.id,
+      userId: (req as Request & { user: { id: string } }).user.id,
     })
 
     const proto = req.headers['x-forwarded-proto'] || req.protocol

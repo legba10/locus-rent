@@ -1,7 +1,19 @@
 import { BadRequestException, Injectable, UnsupportedMediaTypeException } from '@nestjs/common'
+import * as crypto from 'crypto'
 import * as fs from 'fs'
 import * as path from 'path'
 import sharp from 'sharp'
+
+/**
+ * Minimal shape we rely on from Multer's uploaded file object.
+ * We intentionally avoid the global Express namespace for stability in TS builds.
+ */
+export type UploadedFile = {
+  buffer: Buffer
+  mimetype?: string
+  originalname?: string
+  size?: number
+}
 
 export type SavedImage = {
   relativePath: string // e.g. /uploads/listings/<userId>/<file>.webp
@@ -13,7 +25,7 @@ export class UploadsService {
   private readonly maxHeight = 2048
 
   async saveListingImages(params: {
-    files: Express.Multer.File[]
+    files: UploadedFile[]
     userId: string
   }): Promise<SavedImage[]> {
     const { files, userId } = params
