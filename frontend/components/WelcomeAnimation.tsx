@@ -14,7 +14,8 @@ export default function WelcomeAnimation({ onComplete }: WelcomeAnimationProps) 
 
     const hideTimer = setTimeout(() => {
       setIsVisible(false)
-      setTimeout(onComplete, 250)
+      // Вызываем onComplete сразу после скрытия, без задержки
+      onComplete()
     }, 2200)
 
     return () => {
@@ -23,6 +24,7 @@ export default function WelcomeAnimation({ onComplete }: WelcomeAnimationProps) 
     }
   }, [onComplete])
 
+  // КРИТИЧНО: Полностью удаляем из DOM, когда невидим
   if (!isVisible) return null
 
   return (
