@@ -55,16 +55,13 @@ api.interceptors.response.use(
     }
     
     // Обработка 401 - неавторизован
+    // ВАЖНО: не делаем редиректов из слоя API (запрещено через window.location и ломает App Router/hydration).
+    // Страницы/клиентские компоненты сами решают, куда навигировать (через next/navigation).
     if (error.response?.status === 401) {
-      // Не перенаправляем на /login если мы уже на странице логина/регистрации
-      if (typeof window !== 'undefined') {
-        const currentPath = window.location.pathname
-        if (!currentPath.includes('/login') && !currentPath.includes('/register')) {
-          localStorage.removeItem('accessToken')
-          // Используем replace вместо href для избежания добавления в историю браузера
-          window.location.replace('/login')
-        }
-      }
+      try {
+        localStorage.removeItem('accessToken')
+      } catch {}
+      ;(error as any).isAuthError = true
     }
     
     // Улучшенная обработка сетевых ошибок

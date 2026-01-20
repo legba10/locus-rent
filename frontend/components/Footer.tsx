@@ -17,12 +17,12 @@ export default function Footer() {
               Находим лучшие варианты быстро и без лишнего шума.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-gray-400 hover:text-primary transition-colors">
+              <button type="button" className="text-gray-400 hover:text-primary transition-colors" aria-label="Twitter">
                 <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-primary transition-colors">
+              </button>
+              <button type="button" className="text-gray-400 hover:text-primary transition-colors" aria-label="GitHub">
                 <Github className="w-5 h-5" />
-              </a>
+              </button>
             </div>
           </div>
 
@@ -78,12 +78,12 @@ export default function Footer() {
             © {new Date().getFullYear()} LOCUS. Все права защищены.
           </p>
           <div className="flex gap-6 text-sm">
-            <Link href="#" className="text-gray-600 hover:text-primary transition-colors">
+            <button type="button" className="text-gray-600 hover:text-primary transition-colors">
               Политика конфиденциальности
-            </Link>
-            <Link href="#" className="text-gray-600 hover:text-primary transition-colors">
+            </button>
+            <button type="button" className="text-gray-600 hover:text-primary transition-colors">
               Условия использования
-            </Link>
+            </button>
           </div>
         </div>
       </div>
