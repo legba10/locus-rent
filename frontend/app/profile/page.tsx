@@ -96,7 +96,6 @@ export default function ProfilePage() {
   if (!initialized) {
     return (
       <div className="min-h-screen bg-bg">
-        <Header />
         <main className="container mx-auto px-4 py-16">
           <p className="text-center text-text-secondary">Загрузка личного кабинета...</p>
         </main>
@@ -106,8 +105,6 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
-      <Header />
-      
       <main className="container-custom py-4 sm:py-6 md:py-8">
         <div className="max-w-6xl mx-auto w-full">
           <div className="mb-6 sm:mb-8">
