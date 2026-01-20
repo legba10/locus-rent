@@ -8,10 +8,16 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { FilesInterceptor } from '@nestjs/platform-express'
-import type { Request } from 'express'
 import { memoryStorage } from 'multer'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { UploadsService, type UploadedFile } from './uploads.service'
+
+type AuthenticatedRequest = {
+  headers: Record<string, string | string[] | undefined>
+  protocol: string
+  get(name: string): string | undefined
+  user: { id: string }
+}
 
 @Controller('uploads')
 export class UploadsController {
@@ -36,7 +42,7 @@ export class UploadsController {
   )
   async uploadImages(
     @UploadedFiles() files: UploadedFile[],
-    @Req() req: Request
+    @Req() req: AuthenticatedRequest
   ): Promise<{ images: string[] }> {
     if (!files || files.length === 0) {
       throw new BadRequestException('Файлы не переданы')
@@ -44,12 +50,14 @@ export class UploadsController {
 
     const saved = await this.uploadsService.saveListingImages({
       files,
-      userId: (req as Request & { user: { id: string } }).user.id,
+      userId: req.user.id,
     })
 
     const proto = req.headers['x-forwarded-proto'] || req.protocol
     const host = req.headers['x-forwarded-host'] || req.get('host')
-    const origin = `${proto}://${host}`
+    const protoStr = Array.isArray(proto) ? proto[0] : proto
+    const hostStr = Array.isArray(host) ? host[0] : host
+    const origin = `${protoStr}://${hostStr}`
 
     return {
       images: saved.map((s) => `${origin}${s.relativePath}`),
