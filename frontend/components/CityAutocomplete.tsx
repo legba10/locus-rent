@@ -156,19 +156,32 @@ export default function CityAutocomplete({
   // Update dropdown position - фиксируем под инпутом и ограничиваем по viewport
   useEffect(() => {
     if (showSuggestions && inputRef.current && mounted && typeof window !== 'undefined') {
-      const rect = inputRef.current.getBoundingClientRect()
-      const viewportWidth = window.innerWidth
-      const viewportHeight = window.innerHeight
+      const updatePosition = () => {
+        if (!inputRef.current) return
+        const rect = inputRef.current.getBoundingClientRect()
+        const viewportWidth = window.innerWidth
+        const viewportHeight = window.innerHeight
 
-      const left = Math.max(8, Math.min(rect.left, viewportWidth - rect.width - 8))
-      const width = Math.min(rect.width, viewportWidth - 16)
-      const maxHeightPx = Math.floor(viewportHeight * 0.6)
+        const left = Math.max(8, Math.min(rect.left, viewportWidth - rect.width - 8))
+        const width = Math.min(rect.width, viewportWidth - 16)
+        const maxHeightPx = Math.floor(viewportHeight * 0.6)
 
-      // всегда под инпутом, но если не влезает — прижимаем вверх так, чтобы dropdown оставался в пределах экрана
-      const preferredTop = rect.bottom + 4
-      const top = Math.min(preferredTop, Math.max(8, viewportHeight - maxHeightPx - 8))
+        // всегда под инпутом, но если не влезает — прижимаем вверх так, чтобы dropdown оставался в пределах экрана
+        const preferredTop = rect.bottom + 4
+        const top = Math.min(preferredTop, Math.max(8, viewportHeight - maxHeightPx - 8))
 
-      setDropdownPosition({ top, left, width })
+        setDropdownPosition({ top, left, width })
+      }
+
+      updatePosition()
+      // Обновляем позицию при scroll и resize
+      window.addEventListener('scroll', updatePosition, true)
+      window.addEventListener('resize', updatePosition)
+      
+      return () => {
+        window.removeEventListener('scroll', updatePosition, true)
+        window.removeEventListener('resize', updatePosition)
+      }
     } else {
       setDropdownPosition(null)
     }
