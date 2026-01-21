@@ -260,7 +260,14 @@ export default function CityAutocomplete({
             willChange: 'transform',
             pointerEvents: 'auto'
           }}
-          onMouseDown={(e) => e.preventDefault()}
+          onMouseDown={(e) => {
+            // Предотвращаем blur только для элементов внутри dropdown
+            // Но не блокируем клики на Link элементы
+            const target = e.target as HTMLElement
+            if (!target.closest('a[href]')) {
+              e.preventDefault()
+            }
+          }}
         >
           {suggestions.map((city, index) => (
             <button

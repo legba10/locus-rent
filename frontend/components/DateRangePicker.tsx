@@ -115,7 +115,14 @@ export default function DateRangePicker({
   // Close calendar on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node
+      const target = event.target as HTMLElement
+      
+      // КРИТИЧНО: Не блокируем клики на Link элементы Next.js
+      // Проверяем, что это не ссылка или элемент внутри ссылки
+      if (target.closest('a[href]')) {
+        return // Позволяем Next.js обработать клик на ссылку
+      }
+      
       if (
         calendarRef.current && 
         !calendarRef.current.contains(target) &&
@@ -128,11 +135,13 @@ export default function DateRangePicker({
     }
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
+      // Используем 'click' вместо 'mousedown', чтобы не мешать Next.js router
+      // НЕ используем capture phase, чтобы Next.js Link успел обработать клик первым
+      document.addEventListener('click', handleClickOutside)
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('click', handleClickOutside)
     }
   }, [isOpen])
 
