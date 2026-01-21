@@ -155,6 +155,9 @@ export default function CityAutocomplete({
 
   // Update dropdown position - фиксируем под инпутом и ограничиваем по viewport
   useEffect(() => {
+    // 🔴 ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ
+    return
+
     if (showSuggestions && inputRef.current && mounted && typeof window !== 'undefined') {
       const updatePosition = () => {
         if (!inputRef.current) return

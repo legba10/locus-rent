@@ -41,6 +41,9 @@ export default function DateRangePicker({
 
   // Update calendar position (desktop and mobile)
   useEffect(() => {
+    // 🔴 ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ
+    return
+
     if (isOpen && activeField && mounted && typeof window !== 'undefined') {
       const updatePosition = () => {
         const activeRef = activeField === 'checkIn' ? checkInRef.current : checkOutRef.current
@@ -114,6 +117,9 @@ export default function DateRangePicker({
 
   // Close calendar on outside click
   useEffect(() => {
+    // 🔴 ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ
+    return
+
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement
       

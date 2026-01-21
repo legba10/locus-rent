@@ -18,6 +18,9 @@ export default function Header() {
 
   // Calculate user menu position - улучшенная логика для предотвращения обрезания
   useEffect(() => {
+    // 🔴 ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ
+    return
+
     if (isUserMenuOpen && userMenuButtonRef.current && typeof window !== 'undefined') {
       const updatePosition = () => {
         const rect = userMenuButtonRef.current?.getBoundingClientRect()

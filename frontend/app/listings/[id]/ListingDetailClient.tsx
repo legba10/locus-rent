@@ -415,6 +415,9 @@ export default function ListingDetailClient() {
 
   // Keyboard navigation for fullscreen gallery - только после mounted
   useEffect(() => {
+    // 🔴 ВРЕМЕННО ОТКЛЮЧЕНО ДЛЯ ДИАГНОСТИКИ
+    return
+
     if (!mounted || !isFullscreen || !listing || images.length === 0) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
